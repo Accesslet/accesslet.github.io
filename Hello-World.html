@@ -1,11 +1,43 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>Hello-World?</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bypass CORS Example</title>
 </head>
 <body>
-<h1>Hello World!</h1>
-<h6>I am currently busy, I will work on this when I get the time.<br>
- I'm a HUGE fan of front-end web-design, I love designing UI and creating and designing graphics!</h6>
-<img src="https://accesslet.github.io/bytesize-styles.png" height="44px" width="136px" />
+  <div id="userCount">Loading...</div>
+
+  <script>
+    function fetchData(url) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              const lastUserCount = data.last_user_count;
+              document.getElementById('userCount').textContent = `Last User Count: ${lastUserCount}`;
+            } catch (e) {
+              console.error('Error parsing JSON data:', e);
+              document.getElementById('userCount').textContent = 'Error loading data';
+            }
+          } else {
+            console.error(`Error ${xhr.status}: ${xhr.statusText}`);
+            document.getElementById('userCount').textContent = `Error ${xhr.status}`;
+          }
+        }
+      };
+      xhr.onerror = function() {
+        console.error('Request failed');
+        document.getElementById('userCount').textContent = 'Network Error';
+      };
+      xhr.send();
+    }
+
+    const url = 'https://bsky-users.theo.io/api/stats'; // Replace with your actual endpoint
+    fetchData(url);
+  </script>
 </body>
 </html>
