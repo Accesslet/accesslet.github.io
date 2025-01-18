@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Game Loader</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #000; }
+        canvas { display: none; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script>
+        async function loadGame(zipUrl) {
+            const response = await fetch(zipUrl);
+            const blob = await response.blob();
+            const zip = await JSZip.loadAsync(blob);
+            const gameFile = zip.file("ProjectNunOutvws2.html");
+            if (gameFile) {
+                const gameContent = await gameFile.async("string");
+                document.body.innerHTML = gameContent;
+            } else {
+                console.error("Game file not found in zip");
+            }
+        }
+
+        // Load the game from the specified URL
+        loadGame('https://accesslet.github.io/HTML5.zip');
+    </script>
+</body>
+</html>
