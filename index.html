@@ -6,38 +6,27 @@
     <title>HTML5 Game Loader</title>
     <style>
         body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #000; }
-        canvas { border: 1px solid #fff; }
+        canvas { display: none; }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     <script>
-        async function loadGame(zipUrl, canvasId) {
+        async function loadGame(zipUrl) {
             const response = await fetch(zipUrl);
             const blob = await response.blob();
             const zip = await JSZip.loadAsync(blob);
-            const gameFile = Object.keys(zip.files).find(fileName => fileName.endsWith('.html'));
+            const gameFile = zip.file("ProjectNunOutvws2.html");
             if (gameFile) {
-                const gameContent = await zip.files[gameFile].async('string');
+                const gameContent = await gameFile.async("string");
                 document.body.innerHTML = gameContent;
-                const gameCanvas = document.getElementById(canvasId);
-                if (gameCanvas) {
-                    const context = gameCanvas.getContext('2d');
-                    // Initialize your game using the canvas context
-                    initializeGame(context);
-                }
+            } else {
+                console.error("Game file not found in zip");
             }
         }
 
-        // Function to initialize the game (replace with your own game logic)
-        function initializeGame(context) {
-            context.fillStyle = 'white';
-            context.fillRect(50, 50, 100, 100);
-        }
-
         // Load the game from the specified URL
-        loadGame('https://accesslet.github.io/HTML5.zip', 'gameCanvas');
+        loadGame('https://accesslet.github.io/HTML5.zip');
     </script>
 </body>
 </html>
