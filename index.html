@@ -44,6 +44,7 @@
     </style>
 </head>
 <body bgcolor="#DEFDEF">
+    <button onclick="openFullscreen();">Open Video in Fullscreen Mode</button>
     <div id="container">
         <div id="fullscreen-btn">Toggle Fullscreen</div>
     </div>
@@ -101,6 +102,21 @@
         }
 
         window.addEventListener("DOMContentLoaded", loadRuffle);
+    </script>
+    <script>
+        /* Get the element you want displayed in fullscreen */ 
+var elem = document.getElementById("container");
+
+/* Function to open fullscreen mode */
+function openFullscreen() {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { /* Safari */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE11 */
+    elem.msRequestFullscreen();
+  }
+}
     </script>
 </body>
 </html>
