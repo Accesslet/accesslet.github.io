@@ -82,7 +82,7 @@
 
             if (container) {
                 container.appendChild(player);
-                player.load("init2.swf");
+                player.load("init4.swf");
             } else {
                 console.error("Container element not found.");
             }
@@ -91,21 +91,27 @@
         // Load Ruffle dynamically on DOMContentLoaded
         window.addEventListener("DOMContentLoaded", loadRuffle);
     </script>
-    <script>
-function copyToClipboard(dataURL) {
-    fetch(dataURL)
-        .then(res => res.blob())
-        .then(blob => {
-            navigator.clipboard.write([
-                new ClipboardItem({ "image/png": blob })
-            ]).then(() => {
-                alert("Image copied to clipboard! Open Twitter and paste.");
-                window.open("https://twitter.com/intent/tweet?text=Check out this screenshot!");
-            }).catch(err => {
-                console.error("Clipboard error:", err);
-            });
-        });
-}
-    </script>
+<script>
+  // This function will be called by ExternalInterface.
+  // It receives a Base64 string (without the prefix) and builds a data URL.
+  function copyToClipboard(base64String) {
+      const dataURL = "data:image/png;base64," + base64String;
+      // Use fetch to convert the data URL to a Blob.
+      fetch(dataURL)
+          .then(response => response.blob())
+          .then(blob => {
+              const item = new ClipboardItem({ "image/png": blob });
+              return navigator.clipboard.write([item]);
+          })
+          .then(() => {
+              alert("Image copied to clipboard! Please open Twitter and paste.");
+              // Optionally, open Twitter immediately:
+              window.open("https://twitter.com/intent/tweet?text=Check%20out%20this%20screenshot!", "_blank");
+          })
+          .catch(err => {
+              console.error("Clipboard error:", err);
+          });
+  }
+</script>
 </body>
 </html>
