@@ -92,7 +92,7 @@
         window.addEventListener("DOMContentLoaded", loadRuffle);
     </script>
     <script>
-        function copyToClipboard(dataURL) {
+function copyToClipboard(dataURL) {
     navigator.clipboard.write([
         new ClipboardItem({ "image/png": dataURL })
     ]).then(() => {
