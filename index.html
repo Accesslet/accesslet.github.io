@@ -4,17 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Persona test</title>
-    <script>
-        window.RufflePlayer = window.RufflePlayer || {};
+<script src="main.js"></script>
+<script>
     window.addEventListener("DOMContentLoaded", () => {
-        let ruffle = window.RufflePlayer.newest();
+        let ruffle = window.RufflePlayer?.newest();
+        if (!ruffle) {
+            console.error("Ruffle is not loaded properly.");
+            return;
+        }
         let player = ruffle.createPlayer();
         let container = document.getElementById("container");
         container.appendChild(player);
         player.load("init.swf");
     });
 </script>
-    <script src="main.js"></script>
     <style>
         html, body {
             margin: 0;
