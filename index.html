@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ruffle on GitHub Pages</title>
-    <script src="HTMLSVG.js"></script>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
     <script>
         // Apply custom Ruffle configurations
         window.RufflePlayer = window.RufflePlayer || {};
         window.RufflePlayer.config = {
-            publicPath: "https://accesslet.github.io/", // Set custom path
             contextMenu: "off", // Disable right-click menu
             showSwfDownload: false, // Hide SWF download option
             unmuteOverlay: false, // Remove unmute overlay
