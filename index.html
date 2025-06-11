@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Screenshot & Sharing</title>
+    <title>Ruffle Game Screenshot & Sharing</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -328,8 +327,8 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-gamepad"></i> Game Screenshot & Sharing</h1>
-            <p class="subtitle">Capture your favorite moments and share them with the world. Save locally, copy to clipboard, or tweet directly!</p>
+            <h1><i class="fas fa-gamepad"></i> Ruffle Game Capture & Share</h1>
+            <p class="subtitle">Play your game, capture screenshots, and share with the world!</p>
         </header>
         
         <div class="content">
@@ -384,11 +383,11 @@
         <div class="instructions">
             <h2><i class="fas fa-info-circle"></i> How It Works</h2>
             <ol>
-                <li><strong>Capture</strong> - Click the Capture button to take a screenshot of the game area</li>
-                <li><strong>Preview</strong> - Your screenshot will appear in the preview area</li>
-                <li><strong>Save</strong> - Download the screenshot to your device</li>
-                <li><strong>Copy</strong> - Copy the image to your clipboard for easy sharing</li>
-                <li><strong>Tweet</strong> - Share directly to Twitter with your custom message</li>
+                <li><strong>Play</strong> - Interact with the game loaded from Ruffle</li>
+                <li><strong>Capture</strong> - Click Capture to take a screenshot</li>
+                <li><strong>Preview</strong> - See your screenshot in the preview area</li>
+                <li><strong>Save/Copy</strong> - Download or copy to clipboard</li>
+                <li><strong>Tweet</strong> - Share directly to Twitter</li>
             </ol>
         </div>
     </div>
@@ -420,13 +419,14 @@
         // Show notification
         function showNotification(message, isError = false) {
             notificationText.textContent = message;
-            notification.classList.add('show');
             
             if (isError) {
                 notification.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message;
             } else {
                 notification.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
             }
+            
+            notification.classList.add('show');
             
             setTimeout(() => {
                 notification.classList.remove('show');
@@ -466,6 +466,8 @@
                 rufflePlayer.config = config;
                 rufflePlayer.id = "ruffle-player";
                 ruffleContainer.appendChild(rufflePlayer);
+                
+                // Load your game SWF
                 rufflePlayer.load("initfs.spl");
                 
                 showNotification('Game loaded successfully!');
@@ -474,25 +476,30 @@
             document.head.appendChild(script);
         }
         
-        // Capture screenshot
+        // Capture screenshot of Ruffle canvas
         function captureScreenshot() {
             if (!rufflePlayer) {
                 showNotification('Game not loaded yet', true);
                 return;
             }
             
-            // Capture the Ruffle player canvas
-            const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
-            
-            if (!canvas) {
-                showNotification('Game canvas not found', true);
-                return;
+            try {
+                // Access the canvas element inside Ruffle's shadow DOM
+                const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
+                
+                if (!canvas) {
+                    showNotification('Game canvas not found', true);
+                    return;
+                }
+                
+                // Convert canvas to data URL
+                currentScreenshot = canvas.toDataURL('image/png');
+                showScreenshot(currentScreenshot);
+                showNotification('Screenshot captured successfully!');
+            } catch (error) {
+                console.error('Error capturing screenshot:', error);
+                showNotification('Failed to capture screenshot', true);
             }
-            
-            // Convert canvas to data URL
-            currentScreenshot = canvas.toDataURL('image/png');
-            showScreenshot(currentScreenshot);
-            showNotification('Screenshot captured successfully!');
         }
         
         // Display the screenshot
@@ -512,17 +519,22 @@
         function saveScreenshot() {
             if (!currentScreenshot) return;
             
-            const link = document.createElement('a');
-            link.href = currentScreenshot;
-            link.download = `game-screenshot-${new Date().getTime()}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showNotification('Screenshot saved successfully!');
+            try {
+                const link = document.createElement('a');
+                link.href = currentScreenshot;
+                link.download = `game-screenshot-${new Date().getTime()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification('Screenshot saved successfully!');
+            } catch (error) {
+                console.error('Error saving screenshot:', error);
+                showNotification('Failed to save screenshot', true);
+            }
         }
         
-        // Copy to clipboard
+        // Copy screenshot to clipboard
         async function copyToClipboard() {
             if (!currentScreenshot) return;
             
@@ -538,27 +550,30 @@
                     })
                 ]);
                 
-                showNotification('Screenshot copied to clipboard!');
+                showNotification('Screenshot copied to clipboard! You can now paste it anywhere.');
             } catch (err) {
                 console.error('Failed to copy: ', err);
                 showNotification('Failed to copy to clipboard. Try saving instead.', true);
             }
         }
         
-        // Share on Twitter
-        function shareOnTwitter() {
+        // Share on Twitter with image
+        async function shareOnTwitter() {
             if (!currentScreenshot) return;
             
             try {
-                // For demo purposes, we'll just open a Twitter intent without the image
-                // In a real implementation, you would upload the image to a server first
-                const text = encodeURIComponent(tweetText.value);
-                const url = encodeURIComponent('https://yourgamewebsite.com');
+                // First copy the image to clipboard
+                await copyToClipboard();
+                
+                // Create Twitter intent
+                const text = encodeURIComponent(tweetText.value + " (Image copied to clipboard!)");
+                const url = encodeURIComponent(window.location.href);
                 const twitterUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
                 
+                // Open Twitter in a new tab
                 window.open(twitterUrl, '_blank');
                 
-                showNotification('Twitter share opened in new tab');
+                showNotification('Twitter opened! Paste the image from clipboard in your tweet.');
             } catch (err) {
                 console.error('Twitter share failed: ', err);
                 showNotification('Failed to open Twitter', true);
@@ -610,7 +625,7 @@
         document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
         document.addEventListener('msfullscreenchange', updateFullscreenButton);
         
-        // Initialize
+        // Initialize Ruffle and game
         initializeRuffle();
     </script>
 </body>
