@@ -3,21 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persona test</title>
-<script src="main.js"></script>
-<script>
-    window.addEventListener("DOMContentLoaded", () => {
-        let ruffle = window.RufflePlayer?.newest();
-        if (!ruffle) {
-            console.error("Ruffle is not loaded properly.");
-            return;
-        }
-        let player = ruffle.createPlayer();
-        let container = document.getElementById("container");
-        container.appendChild(player);
-        player.load("init.swf");
-    });
-</script>
+    <title>Persona Test</title>
+<!--    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script> -->
+    <script src="main.js"></script>
     <style>
         html, body {
             margin: 0;
@@ -40,5 +28,31 @@
     </style>
 </head>
 <body bgcolor="#DEFDEF">
+    <div id="container"></div>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            if (!window.RufflePlayer) {
+                console.error("Ruffle library not loaded properly.");
+                return;
+            }
+            
+            let ruffle = window.RufflePlayer.newest();
+            if (!ruffle) {
+                console.error("Failed to initialize Ruffle.");
+                return;
+            }
+            
+            let player = ruffle.createPlayer();
+            let container = document.getElementById("container");
+
+            if (container) {
+                container.appendChild(player);
+                player.load("init.swf");
+            } else {
+                console.error("Container element not found.");
+            }
+        });
+    </script>
 </body>
 </html>
