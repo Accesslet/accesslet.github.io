@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Persona test</title>
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+    window.addEventListener("DOMContentLoaded", () => {
+        let ruffle = window.RufflePlayer.newest();
+        let player = ruffle.createPlayer();
+        let container = document.getElementById("container");
+        container.appendChild(player);
+        player.load("init.swf");
+    });
+</script>
     <script src="main.js"></script>
     <style>
         html, body {
@@ -26,17 +36,6 @@
         }
     </style>
 </head>
-<body bgcolor="#FFFFFF">
-        
-<script>
-        window.RufflePlayer = window.RufflePlayer || {};
-    window.addEventListener("DOMContentLoaded", () => {
-        let ruffle = window.RufflePlayer.newest();
-        let player = ruffle.createPlayer();
-        let container = document.getElementById("container");
-        container.appendChild(player);
-        player.load("init.swf");
-    });
-</script>
+<body bgcolor="#DEFDEF">
 </body>
 </html>
