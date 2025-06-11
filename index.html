@@ -28,8 +28,15 @@
 </head>
 <body bgcolor="#FFFFFF">
         
-    <div id="VM">
-        <embed src="init.swf" width="800" height="600">
-    </div>
+<script>
+        window.RufflePlayer = window.RufflePlayer || {};
+    window.addEventListener("DOMContentLoaded", () => {
+        let ruffle = window.RufflePlayer.newest();
+        let player = ruffle.createPlayer();
+        let container = document.getElementById("container");
+        container.appendChild(player);
+        player.load("init.swf");
+    });
+</script>
 </body>
 </html>
