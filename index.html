@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BatComputer OS</title>
+    <title>BlackGate OS - Security Operations</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -76,9 +76,9 @@
             display: flex;
             flex-direction: column;
             background: rgba(10, 10, 25, 0.9);
-            border: 1px solid #00aaff;
-            box-shadow: 0 0 20px rgba(0, 170, 255, 0.5),
-                        inset 0 0 20px rgba(0, 100, 200, 0.3);
+            border: 1px solid #0066cc;
+            box-shadow: 0 0 20px rgba(0, 102, 204, 0.5),
+                        inset 0 0 20px rgba(0, 80, 160, 0.3);
             border-radius: 4px;
             overflow: hidden;
             position: relative;
@@ -86,11 +86,11 @@
             z-index: 2;
         }
         
-        /* Header - BatComputer OS */
+        /* Header - BlackGate OS */
         .header {
             padding: 12px 20px;
             background: linear-gradient(to right, #001122, #002244, #001122);
-            border-bottom: 1px solid #0055aa;
+            border-bottom: 1px solid #004477;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -103,37 +103,36 @@
             gap: 10px;
         }
         
-        .bat-logo {
+        .gate-logo {
             width: 40px;
             height: 40px;
             background: #000;
-            border-radius: 50%;
+            border-radius: 4px;
             border: 2px solid #00eeff;
             position: relative;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
-        .bat-logo::before, .bat-logo::after {
+        .gate-logo::before {
             content: "";
             position: absolute;
-            background: #00eeff;
+            width: 30px;
+            height: 30px;
+            border: 2px solid #00eeff;
+            border-radius: 50%;
             box-shadow: 0 0 10px #00eeff;
         }
         
-        .bat-logo::before {
-            width: 20px;
+        .gate-logo::after {
+            content: "";
+            position: absolute;
+            width: 10px;
             height: 20px;
-            top: 5px;
-            left: 10px;
-            border-radius: 50%;
-        }
-        
-        .bat-logo::after {
-            width: 30px;
-            height: 15px;
-            top: 20px;
-            left: 5px;
-            clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+            background: #00eeff;
+            bottom: 5px;
         }
         
         .system-info {
@@ -160,14 +159,14 @@
         .sidebar {
             width: 200px;
             background: rgba(5, 15, 30, 0.8);
-            border-right: 1px solid #004477;
+            border-right: 1px solid #003366;
             padding: 20px 0;
         }
         
         .menu-title {
             padding: 10px 20px;
             font-size: 18px;
-            border-bottom: 1px solid #0055aa;
+            border-bottom: 1px solid #004477;
             margin-bottom: 15px;
         }
         
@@ -190,7 +189,7 @@
         }
         
         /* Game Container */
-        .game-section {
+        .app-section {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -199,7 +198,7 @@
         
         .panel {
             background: rgba(0, 20, 40, 0.7);
-            border: 1px solid #0055aa;
+            border: 1px solid #004477;
             border-radius: 4px;
             margin-bottom: 20px;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
@@ -208,7 +207,7 @@
         .panel-header {
             padding: 10px 15px;
             background: rgba(0, 40, 80, 0.5);
-            border-bottom: 1px solid #0055aa;
+            border-bottom: 1px solid #004477;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -223,14 +222,14 @@
             padding: 20px;
         }
         
-        .game-container {
+        .app-container {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             background: #000;
             position: relative;
-            border: 2px solid #004477;
+            border: 2px solid #003366;
             overflow: hidden;
         }
         
@@ -262,8 +261,8 @@
             cursor: pointer;
             color: #00eeff;
             font-size: 1.2rem;
-            border: 1px solid #00aaff;
-            box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+            border: 1px solid #0066cc;
+            box-shadow: 0 0 10px rgba(0, 102, 204, 0.5);
             transition: all 0.3s;
         }
         
@@ -275,7 +274,7 @@
         /* Terminal */
         .terminal {
             background: rgba(0, 0, 0, 0.7);
-            border: 1px solid #0055aa;
+            border: 1px solid #004477;
             border-radius: 4px;
             padding: 15px;
             font-family: 'Courier New', monospace;
@@ -299,7 +298,7 @@
         .status-bar {
             padding: 8px 20px;
             background: linear-gradient(to right, #001122, #002244, #001122);
-            border-top: 1px solid #0055aa;
+            border-top: 1px solid #004477;
             display: flex;
             justify-content: space-between;
             font-size: 14px;
@@ -364,7 +363,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            border: 1px solid #00aaff;
+            border: 1px solid #0066cc;
         }
         
         .notification.show {
@@ -381,7 +380,7 @@
                 width: 100%;
                 padding: 10px 0;
                 border-right: none;
-                border-bottom: 1px solid #004477;
+                border-bottom: 1px solid #003366;
             }
             
             .menu-title {
@@ -423,52 +422,52 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <div class="bat-logo"></div>
-                <h1>BATCOMPUTER OS v3.14</h1>
+                <div class="gate-logo"></div>
+                <h1>BLACKGATE OS v4.0</h1>
             </div>
             <div class="system-info">
-                <div>USER: <span class="glitch">BATMAN</span></div>
-                <div>STATUS: <span class="glitch">ACTIVE</span></div>
+                <div>USER: <span class="glitch">ADMIN</span></div>
+                <div>STATUS: <span class="glitch">SECURE</span></div>
                 <div>MODE: <span class="glitch">SURVEILLANCE</span></div>
             </div>
         </div>
         
         <div class="main-content">
             <div class="sidebar">
-                <div class="menu-title">SYSTEM MENU</div>
+                <div class="menu-title">SYSTEM NAVIGATION</div>
                 <div class="menu-items">
-                    <div class="menu-item active" data-game="initfs.spl">
-                        <i class="fas fa-gamepad"></i>GAME STATION
+                    <div class="menu-item active" data-os-nav="initfs.spl">
+                        <i class="fas fa-gamepad"></i>ENTERTAINMENT MODULE
                     </div>
-                    <div class="menu-item" data-game="gotham_map.spl">
-                        <i class="fas fa-map"></i>GOTHAM MAP
+                    <div class="menu-item" data-os-nav="gotham_map.spl">
+                        <i class="fas fa-map"></i>GEO-SPATIAL VIEWER
                     </div>
-                    <div class="menu-item" data-game="surveillance.spl">
-                        <i class="fas fa-video"></i>SURVEILLANCE
+                    <div class="menu-item" data-os-nav="surveillance.spl">
+                        <i class="fas fa-video"></i>SURVEILLANCE FEED
                     </div>
-                    <div class="menu-item" data-game="criminal_db.spl">
-                        <i class="fas fa-database"></i>CRIMINAL DB
+                    <div class="menu-item" data-os-nav="criminal_db.spl">
+                        <i class="fas fa-database"></i>PERSONNEL DATABASE
                     </div>
-                    <div class="menu-item" data-game="system_diag.spl">
-                        <i class="fas fa-microchip"></i>SYSTEM DIAG
+                    <div class="menu-item" data-os-nav="system_diag.spl">
+                        <i class="fas fa-microchip"></i>SYSTEM DIAGNOSTICS
                     </div>
-                    <div class="menu-item" data-game="security.spl">
-                        <i class="fas fa-shield-alt"></i>SECURITY
+                    <div class="menu-item" data-os-nav="security.spl">
+                        <i class="fas fa-shield-alt"></i>SECURITY PROTOCOLS
                     </div>
-                    <div class="menu-item" data-game="settings.spl">
-                        <i class="fas fa-cogs"></i>SETTINGS
+                    <div class="menu-item" data-os-nav="settings.spl">
+                        <i class="fas fa-cogs"></i>SYSTEM SETTINGS
                     </div>
                 </div>
             </div>
             
-            <div class="game-section">
+            <div class="app-section">
                 <div class="panel">
                     <div class="panel-header">
-                        <div class="panel-title">GAME STATION</div>
+                        <div class="panel-title">ENTERTAINMENT MODULE</div>
                         <div>STATUS: <span class="glitch">ONLINE</span></div>
                     </div>
                     <div class="panel-content">
-                        <div class="game-container">
+                        <div class="app-container">
                             <div id="ruffle-container"></div>
                             <div class="control-buttons">
                                 <div class="control-btn" id="screenshot-btn" title="Capture Screenshot">
@@ -492,17 +491,17 @@
                     </div>
                     <div class="panel-content">
                         <div class="terminal">
-                            <div class="terminal-line">Initializing BatComputer OS...</div>
+                            <div class="terminal-line">Initializing BlackGate OS...</div>
                             <div class="terminal-line">Loading cryptographic modules...</div>
-                            <div class="terminal-line">Establishing satellite uplink...</div>
-                            <div class="terminal-line">> Uplink established: WATCHTOWER-7</div>
+                            <div class="terminal-line">Establishing uplink...</div>
+                            <div class="terminal-line">> Uplink established: TOWER-7</div>
                             <div class="terminal-line">> Surveillance network: ONLINE</div>
-                            <div class="terminal-line">> Criminal database: SYNCED</div>
-                            <div class="terminal-line">> Game station: READY</div>
+                            <div class="terminal-line">> Personnel database: SYNCED</div>
+                            <div class="terminal-line">> Entertainment module: READY</div>
                             <div class="terminal-line">> Scanning for anomalies...</div>
                             <div class="terminal-line">> All systems nominal</div>
-                            <div class="terminal-line">> Loading game module...</div>
-                            <div class="terminal-line">> Game assets verified</div>
+                            <div class="terminal-line">> Loading application module...</div>
+                            <div class="terminal-line">> Assets verified</div>
                             <div class="terminal-line">> Rendering engine: ACTIVE</div>
                             <div class="terminal-line">> Security protocols engaged</div>
                             <div class="terminal-line">> Power levels stable</div>
@@ -554,7 +553,7 @@
         
         // State
         let rufflePlayer = null;
-        let currentGame = "initfs.spl";
+        let currentApp = "initfs.spl";
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -574,7 +573,7 @@
         }
         
         // Initialize Ruffle
-        function initializeRuffle(gameFile = currentGame) {
+        function initializeRuffle(appFile = currentApp) {
             // Remove existing player if it exists
             if (rufflePlayer) {
                 ruffleContainer.removeChild(rufflePlayer);
@@ -585,15 +584,15 @@
             if (!window.RufflePlayer) {
                 const script = document.createElement('script');
                 script.src = 'https://unpkg.com/@ruffle-rs/ruffle';
-                script.onload = () => setupRufflePlayer(gameFile);
+                script.onload = () => setupRufflePlayer(appFile);
                 script.onerror = () => showNotification('Failed to load Ruffle', true);
                 document.head.appendChild(script);
             } else {
-                setupRufflePlayer(gameFile);
+                setupRufflePlayer(appFile);
             }
         }
         
-        function setupRufflePlayer(gameFile) {
+        function setupRufflePlayer(appFile) {
             if (!window.RufflePlayer) {
                 showNotification('Ruffle library not loaded', true);
                 return;
@@ -617,7 +616,6 @@
                 "contextMenu": "off",
                 "allowNetworking": "all",
                 "playerVersion": "0",
-                // FIX: Force Canvas2D renderer to prevent black screenshots
                 "preferredRenderer": "canvas"
             };
             
@@ -626,13 +624,13 @@
             rufflePlayer.id = "ruffle-player";
             ruffleContainer.appendChild(rufflePlayer);
             
-            // Load the game SWF
-            rufflePlayer.load(gameFile);
+            // Load the app SWF
+            rufflePlayer.load(appFile);
             
             // Add terminal message
-            addTerminalLine(`> Loading ${gameFile}...`);
+            addTerminalLine(`> Loading ${appFile}...`);
             setTimeout(() => {
-                addTerminalLine(`> ${gameFile} loaded successfully`);
+                addTerminalLine(`> ${appFile} loaded successfully`);
             }, 1000);
         }
         
@@ -649,7 +647,7 @@
         // Capture screenshot - FIXED
         async function captureScreenshot() {
             if (!rufflePlayer) {
-                showNotification('Game not loaded', true);
+                showNotification('Application not loaded', true);
                 return null;
             }
             
@@ -658,11 +656,11 @@
                 const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
                 
                 if (!canvas) {
-                    showNotification('Game canvas not found', true);
+                    showNotification('Application canvas not found', true);
                     return null;
                 }
                 
-                // FIX: Create a temporary canvas to capture the current frame
+                // Create a temporary canvas to capture the current frame
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = canvas.width;
                 tempCanvas.height = canvas.height;
@@ -690,7 +688,7 @@
             try {
                 const link = document.createElement('a');
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                const filename = `batcomputer-screenshot-${timestamp}.png`;
+                const filename = `blackgate-screenshot-${timestamp}.png`;
                 
                 link.href = dataUrl;
                 link.download = filename;
@@ -727,7 +725,7 @@
                 ]);
                 
                 // Open Twitter intent
-                const text = encodeURIComponent("Check this out everyone! From my BatComputer OS 🦇");
+                const text = encodeURIComponent("Check this out from BlackGate OS - Advanced Security Interface");
                 const twitterUrl = `https://twitter.com/intent/tweet?text=${text}`;
                 window.open(twitterUrl, '_blank');
                 
@@ -740,7 +738,7 @@
         
         // Toggle fullscreen
         function toggleFullscreen() {
-            const container = document.querySelector('.game-container');
+            const container = document.querySelector('.app-container');
             
             if (!document.fullscreenElement) {
                 if (container.requestFullscreen) {
@@ -770,8 +768,8 @@
             }
         }
         
-        // Game switching functionality
-        function setupGameSwitching() {
+        // App switching functionality
+        function setupAppSwitching() {
             const menuItems = document.querySelectorAll('.menu-item');
             
             menuItems.forEach(item => {
@@ -780,16 +778,16 @@
                     menuItems.forEach(i => i.classList.remove('active'));
                     this.classList.add('active');
                     
-                    // Get game file from data attribute
-                    const gameFile = this.getAttribute('data-game');
-                    currentGame = gameFile;
+                    // Get app file from data attribute
+                    const appFile = this.getAttribute('data-os-nav');
+                    currentApp = appFile;
                     
                     // Update panel title
                     const panelTitle = document.querySelector('.panel-title');
                     panelTitle.textContent = this.textContent.trim().replace(/\n/g, '');
                     
-                    // Load the selected game
-                    initializeRuffle(gameFile);
+                    // Load the selected app
+                    initializeRuffle(appFile);
                 });
             });
         }
@@ -806,13 +804,831 @@
         
         // Initialize
         initializeRuffle();
-        setupGameSwitching();
+        setupAppSwitching();
         
         // Add terminal animation
         setTimeout(() => {
-            addTerminalLine('> Scanning GCPD frequencies...');
-            addTerminalLine('> Alert: Suspicious activity at ACE Chemicals');
-            addTerminalLine('> Alert: Arkham security breach detected');
+            addTerminalLine('> Scanning network frequencies...');
+            addTerminalLine('> Alert: Suspicious activity detected');
+            addTerminalLine('> Alert: Security perimeter breach');
+            addTerminalLine('> Deploying countermeasures...');
+            addTerminalLine('> Situation contained');
+        }, 2000);
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackGate OS - Security Operations</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: #0c0c18;
+            color: #00eeff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* CRT Monitor Effect */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(0, 30, 60, 0.2) 50%, rgba(0, 0, 0, 0.2) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 4px 100%;
+            z-index: 1;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+        }
+        
+        /* Scanline Animation */
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+        
+        /* Flicker Effect */
+        @keyframes flicker {
+            0% { opacity: 0.95; }
+            5% { opacity: 0.9; }
+            10% { opacity: 0.85; }
+            15% { opacity: 0.92; }
+            20% { opacity: 0.88; }
+            25% { opacity: 0.94; }
+            30% { opacity: 0.98; }
+            35% { opacity: 0.91; }
+            40% { opacity: 0.86; }
+            45% { opacity: 0.93; }
+            50% { opacity: 0.89; }
+            55% { opacity: 0.97; }
+            60% { opacity: 0.87; }
+            65% { opacity: 0.96; }
+            70% { opacity: 0.90; }
+            75% { opacity: 0.92; }
+            80% { opacity: 0.94; }
+            85% { opacity: 0.97; }
+            90% { opacity: 0.99; }
+            95% { opacity: 0.93; }
+            100% { opacity: 0.95; }
+        }
+        
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            min-height: 95vh;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            background: rgba(10, 10, 25, 0.9);
+            border: 1px solid #0066cc;
+            box-shadow: 0 0 20px rgba(0, 102, 204, 0.5),
+                        inset 0 0 20px rgba(0, 80, 160, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            animation: flicker 0.5s infinite;
+            z-index: 2;
+        }
+        
+        /* Header - BlackGate OS */
+        .header {
+            padding: 12px 20px;
+            background: linear-gradient(to right, #001122, #002244, #001122);
+            border-bottom: 1px solid #004477;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-shadow: 0 0 10px #00eeff;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .gate-logo {
+            width: 40px;
+            height: 40px;
+            background: #000;
+            border-radius: 4px;
+            border: 2px solid #00eeff;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .gate-logo::before {
+            content: "";
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid #00eeff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00eeff;
+        }
+        
+        .gate-logo::after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 20px;
+            background: #00eeff;
+            bottom: 5px;
+        }
+        
+        .system-info {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+        
+        .system-info div {
+            padding: 5px 10px;
+            background: rgba(0, 40, 80, 0.5);
+            border: 1px solid #0055aa;
+            border-radius: 3px;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 200px;
+            background: rgba(5, 15, 30, 0.8);
+            border-right: 1px solid #003366;
+            padding: 20px 0;
+        }
+        
+        .menu-title {
+            padding: 10px 20px;
+            font-size: 18px;
+            border-bottom: 1px solid #004477;
+            margin-bottom: 15px;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background: rgba(0, 50, 100, 0.3);
+            border-left: 3px solid #00eeff;
+        }
+        
+        .menu-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Game Container */
+        .app-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .panel {
+            background: rgba(0, 20, 40, 0.7);
+            border: 1px solid #004477;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .panel-header {
+            padding: 10px 15px;
+            background: rgba(0, 40, 80, 0.5);
+            border-bottom: 1px solid #004477;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-size: 18px;
+            text-shadow: 0 0 5px #00eeff;
+        }
+        
+        .panel-content {
+            padding: 20px;
+        }
+        
+        .app-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            position: relative;
+            border: 2px solid #003366;
+            overflow: hidden;
+        }
+        
+        #ruffle-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .control-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 50, 100, 0.7);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: #00eeff;
+            font-size: 1.2rem;
+            border: 1px solid #0066cc;
+            box-shadow: 0 0 10px rgba(0, 102, 204, 0.5);
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 100, 200, 0.8);
+            transform: scale(1.1);
+        }
+        
+        /* Terminal */
+        .terminal {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #004477;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            height: 200px;
+            overflow-y: auto;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            color: #00ffaa;
+        }
+        
+        .terminal-line::before {
+            content: "> ";
+            color: #00eeff;
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            padding: 8px 20px;
+            background: linear-gradient(to right, #001122, #002244, #001122);
+            border-top: 1px solid #004477;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff00;
+            box-shadow: 0 0 5px #00ff00;
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        /* Glitch effect */
+        .glitch {
+            position: relative;
+            text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                         -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                         0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+            animation: glitch 500ms infinite;
+        }
+        
+        @keyframes glitch {
+            0% { text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75), -0.05em -0.025em 0 rgba(0, 255, 0, 0.75), 0.025em 0.05em 0 rgba(0, 0, 255, 0.75); }
+            14% { text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75), -0.05em -0.025em 0 rgba(0, 255, 0, 0.75), 0.025em 0.05em 0 rgba(0, 0, 255, 0.75); }
+            15% { text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75), 0.025em 0.025em 0 rgba(0, 255, 0, 0.75), -0.05em -0.05em 0 rgba(0, 0, 255, 0.75); }
+            49% { text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75), 0.025em 0.025em 0 rgba(0, 255, 0, 0.75), -0.05em -0.05em 0 rgba(0, 0, 255, 0.75); }
+            50% { text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75), 0.05em 0 0 rgba(0, 255, 0, 0.75), 0 -0.05em 0 rgba(0, 0, 255, 0.75); }
+            99% { text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75), 0.05em 0 0 rgba(0, 255, 0, 0.75), 0 -0.05em 0 rgba(0, 0, 255, 0.75); }
+            100% { text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75), -0.025em -0.025em 0 rgba(0, 255, 0, 0.75), -0.025em -0.05em 0 rgba(0, 0, 255, 0.75); }
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 30, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateX(200%);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #0066cc;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        /* Media Queries for Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px 0;
+                border-right: none;
+                border-bottom: 1px solid #003366;
+            }
+            
+            .menu-title {
+                text-align: center;
+            }
+            
+            .menu-items {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .menu-item {
+                padding: 10px 15px;
+                min-width: 150px;
+                text-align: center;
+            }
+            
+            .control-buttons {
+                flex-direction: column;
+                top: 10px;
+                right: 10px;
+            }
+            
+            .system-info {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .status-bar {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="gate-logo"></div>
+                <h1>BLACKGATE OS v4.0</h1>
+            </div>
+            <div class="system-info">
+                <div>USER: <span class="glitch">ADMIN</span></div>
+                <div>STATUS: <span class="glitch">SECURE</span></div>
+                <div>MODE: <span class="glitch">SURVEILLANCE</span></div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="menu-title">SYSTEM NAVIGATION</div>
+                <div class="menu-items">
+                    <div class="menu-item active" data-os-nav="initfs.spl">
+                        <i class="fas fa-gamepad"></i>ENTERTAINMENT MODULE
+                    </div>
+                    <div class="menu-item" data-os-nav="gotham_map.spl">
+                        <i class="fas fa-map"></i>GEO-SPATIAL VIEWER
+                    </div>
+                    <div class="menu-item" data-os-nav="surveillance.spl">
+                        <i class="fas fa-video"></i>SURVEILLANCE FEED
+                    </div>
+                    <div class="menu-item" data-os-nav="criminal_db.spl">
+                        <i class="fas fa-database"></i>PERSONNEL DATABASE
+                    </div>
+                    <div class="menu-item" data-os-nav="system_diag.spl">
+                        <i class="fas fa-microchip"></i>SYSTEM DIAGNOSTICS
+                    </div>
+                    <div class="menu-item" data-os-nav="security.spl">
+                        <i class="fas fa-shield-alt"></i>SECURITY PROTOCOLS
+                    </div>
+                    <div class="menu-item" data-os-nav="settings.spl">
+                        <i class="fas fa-cogs"></i>SYSTEM SETTINGS
+                    </div>
+                </div>
+            </div>
+            
+            <div class="app-section">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">ENTERTAINMENT MODULE</div>
+                        <div>STATUS: <span class="glitch">ONLINE</span></div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="app-container">
+                            <div id="ruffle-container"></div>
+                            <div class="control-buttons">
+                                <div class="control-btn" id="screenshot-btn" title="Capture Screenshot">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <div class="control-btn" id="tweet-btn" title="Share on Twitter">
+                                    <i class="fab fa-twitter"></i>
+                                </div>
+                                <div class="control-btn" id="fullscreen-btn" title="Toggle Fullscreen">
+                                    <i class="fas fa-expand"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">SYSTEM MONITOR</div>
+                        <div>UPTIME: <span class="glitch">47:18:03</span></div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="terminal">
+                            <div class="terminal-line">Initializing BlackGate OS...</div>
+                            <div class="terminal-line">Loading cryptographic modules...</div>
+                            <div class="terminal-line">Establishing uplink...</div>
+                            <div class="terminal-line">> Uplink established: TOWER-7</div>
+                            <div class="terminal-line">> Surveillance network: ONLINE</div>
+                            <div class="terminal-line">> Personnel database: SYNCED</div>
+                            <div class="terminal-line">> Entertainment module: READY</div>
+                            <div class="terminal-line">> Scanning for anomalies...</div>
+                            <div class="terminal-line">> All systems nominal</div>
+                            <div class="terminal-line">> Loading application module...</div>
+                            <div class="terminal-line">> Assets verified</div>
+                            <div class="terminal-line">> Rendering engine: ACTIVE</div>
+                            <div class="terminal-line">> Security protocols engaged</div>
+                            <div class="terminal-line">> Power levels stable</div>
+                            <div class="terminal-line">> Memory allocation optimal</div>
+                            <div class="terminal-line">> Ready for user interaction</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-indicator pulse"></div>
+                <span>SYSTEM: ACTIVE</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-bolt"></i>
+                <span>POWER: 98%</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>SECURITY: MAX</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-network-wired"></i>
+                <span>NETWORK: SECURE</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-clock"></i>
+                <span>23:47:18</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-info-circle"></i>
+        <span id="notification-text">Notification message</span>
+    </div>
+
+    <script>
+        // DOM Elements
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        const ruffleContainer = document.getElementById('ruffle-container');
+        const screenshotBtn = document.getElementById('screenshot-btn');
+        const tweetBtn = document.getElementById('tweet-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        
+        // State
+        let rufflePlayer = null;
+        let currentApp = "initfs.spl";
+        
+        // Show notification
+        function showNotification(message, isError = false) {
+            notificationText.textContent = message;
+            
+            if (isError) {
+                notification.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message;
+            } else {
+                notification.innerHTML = '<i class="fas fa-info-circle"></i> ' + message;
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize Ruffle
+        function initializeRuffle(appFile = currentApp) {
+            // Remove existing player if it exists
+            if (rufflePlayer) {
+                ruffleContainer.removeChild(rufflePlayer);
+                rufflePlayer = null;
+            }
+            
+            // Create Ruffle script if needed
+            if (!window.RufflePlayer) {
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/@ruffle-rs/ruffle';
+                script.onload = () => setupRufflePlayer(appFile);
+                script.onerror = () => showNotification('Failed to load Ruffle', true);
+                document.head.appendChild(script);
+            } else {
+                setupRufflePlayer(appFile);
+            }
+        }
+        
+        function setupRufflePlayer(appFile) {
+            if (!window.RufflePlayer) {
+                showNotification('Ruffle library not loaded', true);
+                return;
+            }
+            
+            const ruffle = window.RufflePlayer.newest();
+            if (!ruffle) {
+                showNotification('Failed to initialize Ruffle', true);
+                return;
+            }
+            
+            // Configure Ruffle with no branding and autoplay
+            const config = {
+                "autoplay": "on",
+                "showRuffleLogo": false,
+                "unmuteOverlay": "hidden",
+                "backgroundColor": "#000000",
+                "logLevel": "error",
+                "showFullscreenButton": false,
+                "warnOnUnsupportedContent": false,
+                "contextMenu": "off",
+                "allowNetworking": "all",
+                "playerVersion": "0",
+                "preferredRenderer": "canvas"
+            };
+            
+            rufflePlayer = ruffle.createPlayer();
+            rufflePlayer.config = config;
+            rufflePlayer.id = "ruffle-player";
+            ruffleContainer.appendChild(rufflePlayer);
+            
+            // Load the app SWF
+            rufflePlayer.load(appFile);
+            
+            // Add terminal message
+            addTerminalLine(`> Loading ${appFile}...`);
+            setTimeout(() => {
+                addTerminalLine(`> ${appFile} loaded successfully`);
+            }, 1000);
+        }
+        
+        // Add terminal line
+        function addTerminalLine(text) {
+            const terminal = document.querySelector('.terminal');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.textContent = text;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // Capture screenshot - FIXED
+        async function captureScreenshot() {
+            if (!rufflePlayer) {
+                showNotification('Application not loaded', true);
+                return null;
+            }
+            
+            try {
+                // Access the canvas element inside Ruffle's shadow DOM
+                const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
+                
+                if (!canvas) {
+                    showNotification('Application canvas not found', true);
+                    return null;
+                }
+                
+                // Create a temporary canvas to capture the current frame
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                
+                const context = tempCanvas.getContext('2d');
+                context.fillStyle = '#000000';
+                context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                context.drawImage(canvas, 0, 0);
+                
+                // Convert canvas to data URL
+                return tempCanvas.toDataURL('image/png');
+            } catch (error) {
+                console.error('Error capturing screenshot:', error);
+                showNotification('Failed to capture screenshot', true);
+                return null;
+            }
+        }
+        
+        // Save screenshot
+        async function saveScreenshot() {
+            const dataUrl = await captureScreenshot();
+            
+            if (!dataUrl) return;
+            
+            try {
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const filename = `blackgate-screenshot-${timestamp}.png`;
+                
+                link.href = dataUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification('Screenshot saved!');
+            } catch (error) {
+                console.error('Error saving screenshot:', error);
+                showNotification('Failed to save screenshot', true);
+            }
+        }
+        
+        // Copy image to clipboard and open Twitter
+        async function shareOnTwitter() {
+            const dataUrl = await captureScreenshot();
+            
+            if (!dataUrl) {
+                showNotification('No screenshot to share', true);
+                return;
+            }
+            
+            try {
+                // Convert data URL to blob
+                const response = await fetch(dataUrl);
+                const blob = await response.blob();
+                
+                // Copy to clipboard
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        [blob.type]: blob
+                    })
+                ]);
+                
+                // Open Twitter intent
+                const text = encodeURIComponent("Check this out from BlackGate OS - Advanced Security Interface");
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${text}`;
+                window.open(twitterUrl, '_blank');
+                
+                showNotification('Image copied! Open Twitter to paste it.');
+            } catch (err) {
+                console.error('Failed to share on Twitter:', err);
+                showNotification('Twitter share failed. Try saving the image first.', true);
+            }
+        }
+        
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            const container = document.querySelector('.app-container');
+            
+            if (!document.fullscreenElement) {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+        
+        // Update fullscreen button icon
+        function updateFullscreenButton() {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+        
+        // App switching functionality
+        function setupAppSwitching() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Update active item
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Get app file from data attribute
+                    const appFile = this.getAttribute('data-os-nav');
+                    currentApp = appFile;
+                    
+                    // Update panel title
+                    const panelTitle = document.querySelector('.panel-title');
+                    panelTitle.textContent = this.textContent.trim().replace(/\n/g, '');
+                    
+                    // Load the selected app
+                    initializeRuffle(appFile);
+                });
+            });
+        }
+        
+        // Event Listeners
+        screenshotBtn.addEventListener('click', saveScreenshot);
+        tweetBtn.addEventListener('click', shareOnTwitter);
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        // Fullscreen change events
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+        document.addEventListener('msfullscreenchange', updateFullscreenButton);
+        
+        // Initialize
+        initializeRuffle();
+        setupAppSwitching();
+        
+        // Add terminal animation
+        setTimeout(() => {
+            addTerminalLine('> Scanning network frequencies...');
+            addTerminalLine('> Alert: Suspicious activity detected');
+            addTerminalLine('> Alert: Security perimeter breach');
             addTerminalLine('> Deploying countermeasures...');
             addTerminalLine('> Situation contained');
         }, 2000);
