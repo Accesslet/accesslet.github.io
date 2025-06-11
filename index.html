@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Persona Test</title>
-<script src="https://unpkg.com/@ruffle-rs/ruffle"></script> 
-<!--    <script src="main.js"></script>  -->
+    
     <style>
         html, body {
             margin: 0;
@@ -31,18 +30,27 @@
     <div id="container"></div>
 
     <script>
-        window.addEventListener("DOMContentLoaded", () => {
+        // Dynamically load the Ruffle script
+        function loadRuffle() {
+            let script = document.createElement("script");
+            script.src = "https://unpkg.com/@ruffle-rs/ruffle";
+            script.onload = initializeRuffle;
+            script.onerror = () => console.error("Failed to load Ruffle from Unpkg.");
+            document.head.appendChild(script);
+        }
+
+        function initializeRuffle() {
             if (!window.RufflePlayer) {
-                console.error("Ruffle library not loaded properly.");
+                console.error("Ruffle library not initialized properly.");
                 return;
             }
-            
+
             let ruffle = window.RufflePlayer.newest();
             if (!ruffle) {
                 console.error("Failed to initialize Ruffle.");
                 return;
             }
-            
+
             let player = ruffle.createPlayer();
             let container = document.getElementById("container");
 
@@ -52,7 +60,10 @@
             } else {
                 console.error("Container element not found.");
             }
-        });
+        }
+
+        // Load Ruffle dynamically on DOMContentLoaded
+        window.addEventListener("DOMContentLoaded", loadRuffle);
     </script>
 </body>
 </html>
