@@ -13,7 +13,7 @@
             height: 100%;
             overflow: hidden;
         }
-        #VM {
+        #container {
             width: 100vw;
             height: 100vh;
             display: flex;
@@ -65,7 +65,7 @@
                 "showShareButton": false,
                 "showDownloadButton": false,
                 "useHardwareAcceleration": false,
-                "preloader": true,
+                "preloader": false,
                 "showLoader": false,
                 "contextMenu": "off",
                 "showWarnings": false, // Suppresses warnings
@@ -82,7 +82,7 @@
 
             if (container) {
                 container.appendChild(player);
-                player.load("init6.swf");
+                player.load("init.spl");
             } else {
                 console.error("Container element not found.");
             }
@@ -91,11 +91,5 @@
         // Load Ruffle dynamically on DOMContentLoaded
         window.addEventListener("DOMContentLoaded", loadRuffle);
     </script>
-<script>
-function externalInterfaceTest(message) {
-    console.log("ExternalInterface received: " + message);
-    alert("ExternalInterface received: " + message);
-}
-</script>
 </body>
 </html>
