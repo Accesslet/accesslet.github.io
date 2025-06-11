@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Persona Test</title>
-    
     <style>
         html, body {
             margin: 0;
@@ -19,15 +18,35 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
-        embed {
+        #fullscreen-btn {
+            position: absolute;
+            top: 70px;
+            left: 10px;
+            z-index: 10;
+            width: 150px;
+            height: 50px;
+            background-color: #FF5733;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            border-radius: 4px;
+        }
+        ruffle-player {
             width: 100%;
             height: 100%;
         }
     </style>
 </head>
 <body bgcolor="#DEFDEF">
-    <div id="container"></div>
+    <div id="container">
+        <div id="fullscreen-btn">Toggle Fullscreen</div>
+    </div>
 
     <script>
         // Dynamically load the Ruffle script
@@ -51,44 +70,36 @@
                 return;
             }
 
-            // Apply configuration to hide UI elements
+            // Configure Ruffle
             let config = {
                 "autoplay": true,
                 "showRuffleLogo": false,
                 "unmuteOverlay": "hidden",
-                "backgroundColor": "#000000",
+                "backgroundColor": "#DEFDEF",
                 "logLevel": "error",
-                "showFullscreenButton": true,
-                "showOverlay": false,
-                "showPlayButton": false,
-                "showSettingsButton": false,
-                "showShareButton": false,
-                "showDownloadButton": false,
-                "useHardwareAcceleration": false,
-                "preloader": false,
-                "showLoader": false,
-                "contextMenu": "off",
-                "showWarnings": false, // Suppresses warnings
-                "showErrors": false, // Suppresses errors
+                "showFullscreenButton": false,
                 "warnOnUnsupportedContent": false,
-                "openUrlMode": "Allow",
-                "allowNetworking": "All"
+                "contextMenu": "off",
+                "allowNetworking": "all"
             };
     
             let player = ruffle.createPlayer();
             player.config = config;
 
             let container = document.getElementById("container");
-
             if (container) {
-                container.appendChild(player);
+                container.insertBefore(player, container.firstChild);
                 player.load("initfs.spl");
+                
+                // Fullscreen button handler
+                document.getElementById("fullscreen-btn").addEventListener("click", () => {
+                    player.fullscreen();
+                });
             } else {
                 console.error("Container element not found.");
             }
         }
 
-        // Load Ruffle dynamically on DOMContentLoaded
         window.addEventListener("DOMContentLoaded", loadRuffle);
     </script>
 </body>
