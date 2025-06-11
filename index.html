@@ -93,13 +93,18 @@
     </script>
     <script>
 function copyToClipboard(dataURL) {
-    navigator.clipboard.write([
-        new ClipboardItem({ "image/png": dataURL })
-    ]).then(() => {
-        alert("Image copied to clipboard! Open Twitter and paste.");
-    }).catch(err => {
-        console.error("Clipboard error:", err);
-    });
+    fetch(dataURL)
+        .then(res => res.blob())
+        .then(blob => {
+            navigator.clipboard.write([
+                new ClipboardItem({ "image/png": blob })
+            ]).then(() => {
+                alert("Image copied to clipboard! Open Twitter and paste.");
+                window.open("https://twitter.com/intent/tweet?text=Check out this screenshot!");
+            }).catch(err => {
+                console.error("Clipboard error:", err);
+            });
+        });
 }
     </script>
 </body>
