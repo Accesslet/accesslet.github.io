@@ -154,40 +154,37 @@
             display: flex;
             flex: 1;
             overflow: hidden;
-            flex-direction: column;
         }
         
         /* Sidebar */
         .sidebar {
-            width: 100%;
+            width: 200px;
             background: rgba(5, 15, 30, 0.8);
-            border-bottom: 1px solid #004477;
-            padding: 10px 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            border-right: 1px solid #004477;
+            padding: 20px 0;
         }
         
         .menu-title {
-            display: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-bottom: 1px solid #0055aa;
+            margin-bottom: 15px;
         }
         
         .menu-item {
-            padding: 10px 15px;
+            padding: 12px 20px;
             cursor: pointer;
             transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-            text-align: center;
-            min-width: 120px;
+            border-left: 3px solid transparent;
         }
         
         .menu-item:hover, .menu-item.active {
             background: rgba(0, 50, 100, 0.3);
-            border-bottom: 3px solid #00eeff;
+            border-left: 3px solid #00eeff;
         }
         
         .menu-item i {
-            margin-right: 5px;
+            margin-right: 10px;
             width: 20px;
             text-align: center;
         }
@@ -197,14 +194,14 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 15px;
+            padding: 20px;
         }
         
         .panel {
             background: rgba(0, 20, 40, 0.7);
             border: 1px solid #0055aa;
             border-radius: 4px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
         }
         
@@ -218,12 +215,12 @@
         }
         
         .panel-title {
-            font-size: 16px;
+            font-size: 18px;
             text-shadow: 0 0 5px #00eeff;
         }
         
         .panel-content {
-            padding: 15px;
+            padding: 20px;
         }
         
         .game-container {
@@ -235,7 +232,6 @@
             position: relative;
             border: 2px solid #004477;
             overflow: hidden;
-            min-height: 300px;
         }
         
         #ruffle-container {
@@ -244,14 +240,18 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 300px;
         }
         
-        .fullscreen-btn {
+        .control-buttons {
             position: absolute;
             top: 10px;
             right: 10px;
             z-index: 10;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
             width: 40px;
             height: 40px;
             background: rgba(0, 50, 100, 0.7);
@@ -267,7 +267,7 @@
             transition: all 0.3s;
         }
         
-        .fullscreen-btn:hover {
+        .control-btn:hover {
             background: rgba(0, 100, 200, 0.8);
             transform: scale(1.1);
         }
@@ -297,14 +297,12 @@
         
         /* Status Bar */
         .status-bar {
-            padding: 8px 15px;
+            padding: 8px 20px;
             background: linear-gradient(to right, #001122, #002244, #001122);
             border-top: 1px solid #0055aa;
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
-            font-size: 12px;
-            gap: 10px;
+            font-size: 14px;
         }
         
         .status-item {
@@ -314,8 +312,8 @@
         }
         
         .status-indicator {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: #00ff00;
             box-shadow: 0 0 5px #00ff00;
@@ -350,67 +348,73 @@
             100% { text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75), -0.025em -0.025em 0 rgba(0, 255, 0, 0.75), -0.025em -0.05em 0 rgba(0, 0, 255, 0.75); }
         }
         
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 30, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateX(200%);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #00aaff;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
         /* Media Queries for Responsive Design */
-        @media (min-width: 768px) {
+        @media (max-width: 768px) {
             .main-content {
-                flex-direction: row;
+                flex-direction: column;
             }
             
             .sidebar {
-                width: 200px;
-                height: auto;
-                flex-direction: column;
-                border-right: 1px solid #004477;
-                border-bottom: none;
-                padding: 20px 0;
+                width: 100%;
+                padding: 10px 0;
+                border-right: none;
+                border-bottom: 1px solid #004477;
             }
             
             .menu-title {
-                display: block;
-                padding: 10px 20px;
-                font-size: 18px;
-                border-bottom: 1px solid #0055aa;
-                margin-bottom: 15px;
+                text-align: center;
+            }
+            
+            .menu-items {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
             }
             
             .menu-item {
-                padding: 12px 20px;
-                text-align: left;
-                min-width: auto;
-                border-bottom: none;
-                border-left: 3px solid transparent;
+                padding: 10px 15px;
+                min-width: 150px;
+                text-align: center;
             }
             
-            .menu-item:hover, .menu-item.active {
-                border-bottom: none;
-                border-left: 3px solid #00eeff;
+            .control-buttons {
+                flex-direction: column;
+                top: 10px;
+                right: 10px;
             }
             
-            .game-section {
-                flex: 1;
-                padding: 20px;
+            .system-info {
+                flex-wrap: wrap;
+                justify-content: center;
             }
             
-            .terminal {
-                height: 300px;
-            }
-            
-            .system-info div {
-                font-size: 14px;
-            }
-            
-            .status-item {
-                font-size: 14px;
-            }
-        }
-        
-        @media (min-width: 992px) {
-            .container {
-                margin: 30px auto;
-            }
-            
-            .panel-title {
-                font-size: 18px;
+            .status-bar {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
             }
         }
     </style>
@@ -432,26 +436,28 @@
         <div class="main-content">
             <div class="sidebar">
                 <div class="menu-title">SYSTEM MENU</div>
-                <div class="menu-item active" data-game="initfs.spl">
-                    <i class="fas fa-gamepad"></i>GAME STATION
-                </div>
-                <div class="menu-item" data-game="gotham_map.spl">
-                    <i class="fas fa-map"></i>GOTHAM MAP
-                </div>
-                <div class="menu-item" data-game="surveillance.spl">
-                    <i class="fas fa-video"></i>SURVEILLANCE
-                </div>
-                <div class="menu-item" data-game="criminal_db.spl">
-                    <i class="fas fa-database"></i>CRIMINAL DB
-                </div>
-                <div class="menu-item" data-game="system_diag.spl">
-                    <i class="fas fa-microchip"></i>SYSTEM DIAG
-                </div>
-                <div class="menu-item" data-game="security.spl">
-                    <i class="fas fa-shield-alt"></i>SECURITY
-                </div>
-                <div class="menu-item" data-game="settings.spl">
-                    <i class="fas fa-cogs"></i>SETTINGS
+                <div class="menu-items">
+                    <div class="menu-item active" data-game="initfs.spl">
+                        <i class="fas fa-gamepad"></i>GAME STATION
+                    </div>
+                    <div class="menu-item" data-game="gotham_map.spl">
+                        <i class="fas fa-map"></i>GOTHAM MAP
+                    </div>
+                    <div class="menu-item" data-game="surveillance.spl">
+                        <i class="fas fa-video"></i>SURVEILLANCE
+                    </div>
+                    <div class="menu-item" data-game="criminal_db.spl">
+                        <i class="fas fa-database"></i>CRIMINAL DB
+                    </div>
+                    <div class="menu-item" data-game="system_diag.spl">
+                        <i class="fas fa-microchip"></i>SYSTEM DIAG
+                    </div>
+                    <div class="menu-item" data-game="security.spl">
+                        <i class="fas fa-shield-alt"></i>SECURITY
+                    </div>
+                    <div class="menu-item" data-game="settings.spl">
+                        <i class="fas fa-cogs"></i>SETTINGS
+                    </div>
                 </div>
             </div>
             
@@ -464,8 +470,16 @@
                     <div class="panel-content">
                         <div class="game-container">
                             <div id="ruffle-container"></div>
-                            <div class="fullscreen-btn" id="fullscreen-btn">
-                                <i class="fas fa-expand"></i>
+                            <div class="control-buttons">
+                                <div class="control-btn" id="screenshot-btn" title="Capture Screenshot">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <div class="control-btn" id="tweet-btn" title="Share on Twitter">
+                                    <i class="fab fa-twitter"></i>
+                                </div>
+                                <div class="control-btn" id="fullscreen-btn" title="Toggle Fullscreen">
+                                    <i class="fas fa-expand"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -524,24 +538,55 @@
         </div>
     </div>
 
+    <div class="notification" id="notification">
+        <i class="fas fa-info-circle"></i>
+        <span id="notification-text">Notification message</span>
+    </div>
+
     <script>
-        // Initialize Ruffle
-        let rufflePlayer = null;
+        // DOM Elements
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        const ruffleContainer = document.getElementById('ruffle-container');
+        const screenshotBtn = document.getElementById('screenshot-btn');
+        const tweetBtn = document.getElementById('tweet-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
         
-        function initializeRuffle(gameFile = "initfs.spl") {
-            // Remove existing player if it exists
-            const container = document.getElementById('ruffle-container');
+        // State
+        let rufflePlayer = null;
+        let currentGame = "initfs.spl";
+        
+        // Show notification
+        function showNotification(message, isError = false) {
+            notificationText.textContent = message;
             
+            if (isError) {
+                notification.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message;
+            } else {
+                notification.innerHTML = '<i class="fas fa-info-circle"></i> ' + message;
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize Ruffle
+        function initializeRuffle(gameFile = currentGame) {
+            // Remove existing player if it exists
             if (rufflePlayer) {
-                container.removeChild(rufflePlayer);
+                ruffleContainer.removeChild(rufflePlayer);
                 rufflePlayer = null;
             }
             
-            // Create new Ruffle script if needed
+            // Create Ruffle script if needed
             if (!window.RufflePlayer) {
                 const script = document.createElement('script');
                 script.src = 'https://unpkg.com/@ruffle-rs/ruffle';
                 script.onload = () => setupRufflePlayer(gameFile);
+                script.onerror = () => showNotification('Failed to load Ruffle', true);
                 document.head.appendChild(script);
             } else {
                 setupRufflePlayer(gameFile);
@@ -550,13 +595,13 @@
         
         function setupRufflePlayer(gameFile) {
             if (!window.RufflePlayer) {
-                console.error('Ruffle library not loaded');
+                showNotification('Ruffle library not loaded', true);
                 return;
             }
             
             const ruffle = window.RufflePlayer.newest();
             if (!ruffle) {
-                console.error('Failed to initialize Ruffle');
+                showNotification('Failed to initialize Ruffle', true);
                 return;
             }
             
@@ -577,29 +622,98 @@
             rufflePlayer = ruffle.createPlayer();
             rufflePlayer.config = config;
             rufflePlayer.id = "ruffle-player";
-            
-            const container = document.getElementById('ruffle-container');
-            container.appendChild(rufflePlayer);
+            ruffleContainer.appendChild(rufflePlayer);
             
             // Load the game SWF
             rufflePlayer.load(gameFile);
             
-            // Update terminal
+            // Add terminal message
+            addTerminalLine(`> Loading ${gameFile}...`);
+            setTimeout(() => {
+                addTerminalLine(`> ${gameFile} loaded successfully`);
+            }, 1000);
+        }
+        
+        // Add terminal line
+        function addTerminalLine(text) {
             const terminal = document.querySelector('.terminal');
             const line = document.createElement('div');
             line.className = 'terminal-line';
-            line.textContent = `> Loading ${gameFile}...`;
+            line.textContent = text;
             terminal.appendChild(line);
             terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // Capture screenshot
+        async function captureScreenshot() {
+            if (!rufflePlayer) {
+                showNotification('Game not loaded', true);
+                return;
+            }
             
-            // Add success message after a delay
-            setTimeout(() => {
-                const successLine = document.createElement('div');
-                successLine.className = 'terminal-line';
-                successLine.textContent = `> ${gameFile} loaded successfully`;
-                terminal.appendChild(successLine);
-                terminal.scrollTop = terminal.scrollHeight;
-            }, 1000);
+            try {
+                // Access the canvas element inside Ruffle's shadow DOM
+                const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
+                
+                if (!canvas) {
+                    showNotification('Game canvas not found', true);
+                    return;
+                }
+                
+                // Convert canvas to data URL
+                const dataUrl = canvas.toDataURL('image/png');
+                
+                // Create download link
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const filename = `batcomputer-screenshot-${timestamp}.png`;
+                
+                link.href = dataUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification('Screenshot saved!');
+                return dataUrl;
+            } catch (error) {
+                console.error('Error capturing screenshot:', error);
+                showNotification('Failed to capture screenshot', true);
+                return null;
+            }
+        }
+        
+        // Copy image to clipboard and open Twitter
+        async function shareOnTwitter() {
+            const dataUrl = await captureScreenshot();
+            
+            if (!dataUrl) {
+                showNotification('No screenshot to share', true);
+                return;
+            }
+            
+            try {
+                // Convert data URL to blob
+                const response = await fetch(dataUrl);
+                const blob = await response.blob();
+                
+                // Copy to clipboard
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        [blob.type]: blob
+                    })
+                ]);
+                
+                // Open Twitter intent
+                const text = encodeURIComponent("Check this out everyone! From my BatComputer OS 🦇");
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${text}`;
+                window.open(twitterUrl, '_blank');
+                
+                showNotification('Image copied! Open Twitter to paste it.');
+            } catch (err) {
+                console.error('Failed to share on Twitter:', err);
+                showNotification('Twitter share failed. Try saving the image first.', true);
+            }
         }
         
         // Toggle fullscreen
@@ -627,7 +741,6 @@
         
         // Update fullscreen button icon
         function updateFullscreenButton() {
-            const fullscreenBtn = document.getElementById('fullscreen-btn');
             if (document.fullscreenElement) {
                 fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
             } else {
@@ -647,6 +760,7 @@
                     
                     // Get game file from data attribute
                     const gameFile = this.getAttribute('data-game');
+                    currentGame = gameFile;
                     
                     // Update panel title
                     const panelTitle = document.querySelector('.panel-title');
@@ -659,7 +773,11 @@
         }
         
         // Event Listeners
-        document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
+        screenshotBtn.addEventListener('click', captureScreenshot);
+        tweetBtn.addEventListener('click', shareOnTwitter);
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        // Fullscreen change events
         document.addEventListener('fullscreenchange', updateFullscreenButton);
         document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
         document.addEventListener('msfullscreenchange', updateFullscreenButton);
@@ -670,23 +788,12 @@
         
         // Add terminal animation
         setTimeout(() => {
-            const terminal = document.querySelector('.terminal');
-            const addLine = (text, delay) => {
-                setTimeout(() => {
-                    const line = document.createElement('div');
-                    line.className = 'terminal-line';
-                    line.textContent = text;
-                    terminal.appendChild(line);
-                    terminal.scrollTop = terminal.scrollHeight;
-                }, delay);
-            };
-            
-            addLine('> Scanning GCPD frequencies...', 2000);
-            addLine('> Alert: Suspicious activity at ACE Chemicals', 4000);
-            addLine('> Alert: Arkham security breach detected', 6000);
-            addLine('> Deploying countermeasures...', 8000);
-            addLine('> Situation contained', 10000);
-        }, 1500);
+            addTerminalLine('> Scanning GCPD frequencies...');
+            addTerminalLine('> Alert: Suspicious activity at ACE Chemicals');
+            addTerminalLine('> Alert: Arkham security breach detected');
+            addTerminalLine('> Deploying countermeasures...');
+            addTerminalLine('> Situation contained');
+        }, 2000);
     </script>
 </body>
 </html>
