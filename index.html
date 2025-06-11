@@ -11,7 +11,7 @@
     <p>If you see the SWF below, Ruffle is working correctly!</p>
     
     <div id="VM"> <!-- Updated container ID -->
-        <embed src="init.vm" width="800" height="600">
+        <embed src="init.spl" width="800" height="600">
     </div>
 
     <script>
@@ -20,7 +20,7 @@
             const ruffle = window.RufflePlayer.newest();
             const container = document.getElementById("VM"); // Updated container reference
             const player = ruffle.createPlayer();
-            player.load("init.vm"); // Ensure file name matches your SWF
+            player.load("init.spl"); // Ensure file name matches your SWF
             container.appendChild(player);
         });
     </script>
