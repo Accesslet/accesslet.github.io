@@ -616,7 +616,9 @@
                 "warnOnUnsupportedContent": false,
                 "contextMenu": "off",
                 "allowNetworking": "all",
-                "playerVersion": "0"
+                "playerVersion": "0",
+                // FIX: Force Canvas2D renderer to prevent black screenshots
+                "preferredRenderer": "canvas"
             };
             
             rufflePlayer = ruffle.createPlayer();
@@ -644,11 +646,11 @@
             terminal.scrollTop = terminal.scrollHeight;
         }
         
-        // Capture screenshot
+        // Capture screenshot - FIXED
         async function captureScreenshot() {
             if (!rufflePlayer) {
                 showNotification('Game not loaded', true);
-                return;
+                return null;
             }
             
             try {
@@ -657,13 +659,35 @@
                 
                 if (!canvas) {
                     showNotification('Game canvas not found', true);
-                    return;
+                    return null;
                 }
                 
-                // Convert canvas to data URL
-                const dataUrl = canvas.toDataURL('image/png');
+                // FIX: Create a temporary canvas to capture the current frame
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
                 
-                // Create download link
+                const context = tempCanvas.getContext('2d');
+                context.fillStyle = '#000000';
+                context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                context.drawImage(canvas, 0, 0);
+                
+                // Convert canvas to data URL
+                return tempCanvas.toDataURL('image/png');
+            } catch (error) {
+                console.error('Error capturing screenshot:', error);
+                showNotification('Failed to capture screenshot', true);
+                return null;
+            }
+        }
+        
+        // Save screenshot
+        async function saveScreenshot() {
+            const dataUrl = await captureScreenshot();
+            
+            if (!dataUrl) return;
+            
+            try {
                 const link = document.createElement('a');
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
                 const filename = `batcomputer-screenshot-${timestamp}.png`;
@@ -675,11 +699,9 @@
                 document.body.removeChild(link);
                 
                 showNotification('Screenshot saved!');
-                return dataUrl;
             } catch (error) {
-                console.error('Error capturing screenshot:', error);
-                showNotification('Failed to capture screenshot', true);
-                return null;
+                console.error('Error saving screenshot:', error);
+                showNotification('Failed to save screenshot', true);
             }
         }
         
@@ -773,7 +795,7 @@
         }
         
         // Event Listeners
-        screenshotBtn.addEventListener('click', captureScreenshot);
+        screenshotBtn.addEventListener('click', saveScreenshot);
         tweetBtn.addEventListener('click', shareOnTwitter);
         fullscreenBtn.addEventListener('click', toggleFullscreen);
         
