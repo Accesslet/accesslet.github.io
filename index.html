@@ -54,6 +54,7 @@
             // Apply configuration to hide UI elements
             let config = {
                 "autoplay": true,
+                "showRuffleLogo": false,
                 "unmuteOverlay": "hidden",
                 "backgroundColor": "#000000",
                 "logLevel": "error",
@@ -81,7 +82,7 @@
 
             if (container) {
                 container.appendChild(player);
-                player.load("init.spl");
+                player.load("init2.swf");
             } else {
                 console.error("Container element not found.");
             }
@@ -89,6 +90,17 @@
 
         // Load Ruffle dynamically on DOMContentLoaded
         window.addEventListener("DOMContentLoaded", loadRuffle);
+    </script>
+    <script>
+        function copyToClipboard(dataURL) {
+    navigator.clipboard.write([
+        new ClipboardItem({ "image/png": dataURL })
+    ]).then(() => {
+        alert("Image copied to clipboard! Open Twitter and paste.");
+    }).catch(err => {
+        console.error("Clipboard error:", err);
+    });
+}
     </script>
 </body>
 </html>
