@@ -4,25 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ruffle on GitHub Pages</title>
-    <script src="HTMLSVG.js"></script>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    <script>
+        // Apply custom Ruffle configurations
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.RufflePlayer.config = {
+            publicPath: "https://accesslet.github.io/", // Set custom path
+            contextMenu: "off", // Disable right-click menu
+            showSwfDownload: false, // Hide SWF download option
+            unmuteOverlay: false, // Remove unmute overlay
+            autoplay: "on", // Ensure autoplay works smoothly
+            logLevel: "error" // Suppress unnecessary logs
+        };
+    </script>
 </head>
 <body>
     <h1>Welcome to My Ruffle Setup</h1>
     <p>If you see the SWF below, Ruffle is working correctly!</p>
     
-    <div id="VM"> <!-- Updated container ID -->
+    <div id="VM">
         <embed src="init.spl" width="800" height="600">
     </div>
-
-    <script>
-        window.RufflePlayer = window.RufflePlayer || {};
-        document.addEventListener("DOMContentLoaded", () => {
-            const ruffle = window.RufflePlayer.newest();
-            const container = document.getElementById("VM"); // Updated container reference
-            const player = ruffle.createPlayer();
-            player.load("init.spl"); // Ensure file name matches your SWF
-            container.appendChild(player);
-        });
-    </script>
 </body>
 </html>
