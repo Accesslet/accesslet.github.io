@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Screenshot & Sharing</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -70,35 +71,25 @@
             padding: 20px;
         }
         
-        .game-placeholder {
+        .game-wrapper {
             height: 400px;
-            background: linear-gradient(45deg, #0f2027, #203a43, #2c5364);
             border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        #ruffle-container {
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-            overflow: hidden;
         }
         
-        .game-placeholder::before {
-            content: "";
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-            animation: rotate 15s linear infinite;
-        }
-        
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .game-placeholder i {
-            font-size: 5rem;
-            color: rgba(255,255,255,0.2);
-            z-index: 2;
+        #ruffle-player {
+            width: 100%;
+            height: 100%;
         }
         
         .controls {
@@ -132,6 +123,13 @@
         
         .btn:active {
             transform: translateY(1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
         .capture-btn {
@@ -289,6 +287,29 @@
             margin-bottom: 10px;
         }
         
+        .fullscreen-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+        
+        .fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
         @media (max-width: 768px) {
             .content {
                 flex-direction: column;
@@ -314,8 +335,11 @@
         <div class="content">
             <div class="game-container">
                 <h2>Game Preview</h2>
-                <div class="game-placeholder">
-                    <i class="fas fa-chess-rook"></i>
+                <div class="game-wrapper">
+                    <div id="ruffle-container"></div>
+                    <div class="fullscreen-btn" id="fullscreen-btn">
+                        <i class="fas fa-expand"></i>
+                    </div>
                 </div>
                 
                 <div class="controls">
@@ -386,34 +410,89 @@
         const tweetText = document.getElementById('tweet-text');
         const notification = document.getElementById('notification');
         const notificationText = document.getElementById('notification-text');
+        const ruffleContainer = document.getElementById('ruffle-container');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
         
         // State
         let currentScreenshot = null;
+        let rufflePlayer = null;
         
         // Show notification
         function showNotification(message, isError = false) {
             notificationText.textContent = message;
             notification.classList.add('show');
             
+            if (isError) {
+                notification.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message;
+            } else {
+                notification.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
+            }
+            
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
         }
         
-        // Simulate screenshot capture
+        // Initialize Ruffle
+        function initializeRuffle() {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/@ruffle-rs/ruffle';
+            script.onload = () => {
+                if (!window.RufflePlayer) {
+                    showNotification('Ruffle library not initialized properly', true);
+                    return;
+                }
+
+                const ruffle = window.RufflePlayer.newest();
+                if (!ruffle) {
+                    showNotification('Failed to initialize Ruffle', true);
+                    return;
+                }
+
+                // Configure Ruffle
+                const config = {
+                    "autoplay": true,
+                    "showRuffleLogo": false,
+                    "unmuteOverlay": "hidden",
+                    "backgroundColor": "#000000",
+                    "logLevel": "error",
+                    "showFullscreenButton": false,
+                    "warnOnUnsupportedContent": false,
+                    "contextMenu": "off",
+                    "allowNetworking": "all"
+                };
+                
+                rufflePlayer = ruffle.createPlayer();
+                rufflePlayer.config = config;
+                rufflePlayer.id = "ruffle-player";
+                ruffleContainer.appendChild(rufflePlayer);
+                rufflePlayer.load("initfs.spl");
+                
+                showNotification('Game loaded successfully!');
+            };
+            script.onerror = () => showNotification('Failed to load Ruffle from CDN', true);
+            document.head.appendChild(script);
+        }
+        
+        // Capture screenshot
         function captureScreenshot() {
-            // In a real implementation, you would use:
-            // html2canvas(document.querySelector('#game-container')).then(canvas => {
-            //   currentScreenshot = canvas.toDataURL('image/png');
-            //   showScreenshot(currentScreenshot);
-            // });
+            if (!rufflePlayer) {
+                showNotification('Game not loaded yet', true);
+                return;
+            }
             
-            // For this demo, we'll simulate with a sample image
-            setTimeout(() => {
-                currentScreenshot = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23122b4e'/%3E%3Ccircle cx='200' cy='150' r='80' fill='%233498db'/%3E%3Crect x='120' y='140' width='160' height='20' fill='white'/%3E%3Ccircle cx='170' cy='120' r='20' fill='white'/%3E%3Ccircle cx='230' cy='120' r='20' fill='white'/%3E%3Ccircle cx='170' cy='120' r='10' fill='%23122b4e'/%3E%3Ccircle cx='230' cy='120' r='10' fill='%23122b4e'/%3E%3Cpath d='M150,200 Q200,230 250,200' stroke='white' stroke-width='5' fill='none'/%3E%3Ctext x='200' y='280' font-family='Arial' font-size='20' fill='white' text-anchor='middle'%3EGame Screenshot%3C/text%3E%3C/svg%3E";
-                showScreenshot(currentScreenshot);
-                showNotification('Screenshot captured successfully!');
-            }, 800);
+            // Capture the Ruffle player canvas
+            const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
+            
+            if (!canvas) {
+                showNotification('Game canvas not found', true);
+                return;
+            }
+            
+            // Convert canvas to data URL
+            currentScreenshot = canvas.toDataURL('image/png');
+            showScreenshot(currentScreenshot);
+            showNotification('Screenshot captured successfully!');
         }
         
         // Display the screenshot
@@ -444,37 +523,78 @@
         }
         
         // Copy to clipboard
-        function copyToClipboard() {
+        async function copyToClipboard() {
             if (!currentScreenshot) return;
             
-            // Convert data URL to blob
-            fetch(currentScreenshot)
-                .then(res => res.blob())
-                .then(blob => {
-                    const item = new ClipboardItem({ "image/png": blob });
-                    navigator.clipboard.write([item])
-                        .then(() => {
-                            showNotification('Screenshot copied to clipboard!');
-                        })
-                        .catch(err => {
-                            showNotification('Failed to copy to clipboard', true);
-                            console.error('Clipboard write error:', err);
-                        });
-                });
+            try {
+                // Convert data URL to blob
+                const response = await fetch(currentScreenshot);
+                const blob = await response.blob();
+                
+                // Copy to clipboard
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        [blob.type]: blob
+                    })
+                ]);
+                
+                showNotification('Screenshot copied to clipboard!');
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                showNotification('Failed to copy to clipboard. Try saving instead.', true);
+            }
         }
         
         // Share on Twitter
         function shareOnTwitter() {
             if (!currentScreenshot) return;
             
-            // In a real implementation, you would upload the image to a server
-            // and get a URL to include in the tweet
+            try {
+                // For demo purposes, we'll just open a Twitter intent without the image
+                // In a real implementation, you would upload the image to a server first
+                const text = encodeURIComponent(tweetText.value);
+                const url = encodeURIComponent('https://yourgamewebsite.com');
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+                
+                window.open(twitterUrl, '_blank');
+                
+                showNotification('Twitter share opened in new tab');
+            } catch (err) {
+                console.error('Twitter share failed: ', err);
+                showNotification('Failed to open Twitter', true);
+            }
+        }
+        
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            const container = document.querySelector('.game-wrapper');
             
-            const text = encodeURIComponent(tweetText.value);
-            const url = encodeURIComponent('https://yourgamewebsite.com');
-            const twitterUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-            
-            window.open(twitterUrl, '_blank');
+            if (!document.fullscreenElement) {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+        
+        // Update fullscreen button icon
+        function updateFullscreenButton() {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
         }
         
         // Event Listeners
@@ -483,9 +603,15 @@
         clipboardBtn.addEventListener('click', copyToClipboard);
         twitterBtn.addEventListener('click', shareOnTwitter);
         shareTweetBtn.addEventListener('click', shareOnTwitter);
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        // Fullscreen change events
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+        document.addEventListener('msfullscreenchange', updateFullscreenButton);
         
         // Initialize
-        showNotification('Welcome! Click Capture to take your first screenshot.', false);
+        initializeRuffle();
     </script>
 </body>
 </html>
