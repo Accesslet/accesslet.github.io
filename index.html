@@ -82,7 +82,7 @@
 
             if (container) {
                 container.appendChild(player);
-                player.load("init4.swf");
+                player.load("init5.swf");
             } else {
                 console.error("Container element not found.");
             }
@@ -92,23 +92,25 @@
         window.addEventListener("DOMContentLoaded", loadRuffle);
     </script>
 <script>
-  // This function will be called by ExternalInterface.
-  // It receives a Base64 string (without the prefix) and builds a data URL.
+  // This function is called by Flash via ExternalInterface.
+  // It receives a Base64 string (without any prefix) as its sole argument.
   function copyToClipboard(base64String) {
-      const dataURL = "data:image/png;base64," + base64String;
-      // Use fetch to convert the data URL to a Blob.
+      // Build a data URL from the received Base64 string.
+      var dataURL = "data:image/png;base64," + base64String;
+      // Convert the data URL to a Blob via fetch.
       fetch(dataURL)
-          .then(response => response.blob())
-          .then(blob => {
-              const item = new ClipboardItem({ "image/png": blob });
+          .then(function(response) { return response.blob(); })
+          .then(function(blob) {
+              // Create a ClipboardItem from the Blob.
+              var item = new ClipboardItem({ "image/png": blob });
               return navigator.clipboard.write([item]);
           })
-          .then(() => {
-              alert("Image copied to clipboard! Please open Twitter and paste.");
-              // Optionally, open Twitter immediately:
+          .then(function() {
+              alert("Image copied to clipboard! Open Twitter and paste.");
+              // Optionally, open Twitter after copying:
               window.open("https://twitter.com/intent/tweet?text=Check%20out%20this%20screenshot!", "_blank");
           })
-          .catch(err => {
+          .catch(function(err) {
               console.error("Clipboard error:", err);
           });
   }
