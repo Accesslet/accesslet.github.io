@@ -3,157 +3,489 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persona Test</title>
+    <title>Game Screenshot & Sharing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        html, body {
+        * {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #DEFDEF;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        #container {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
-        #fullscreen-btn {
-            position: absolute;
-            top: 70px;
-            left: 10px;
-            z-index: 10;
-            width: 150px;
-            height: 50px;
-            background-color: #FF5733;
-            color: white;
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            font-family: Arial, sans-serif;
-            font-size: 16px;
-            border-radius: 4px;
+            padding: 20px;
+            color: white;
         }
-        ruffle-player {
+        
+        .container {
             width: 100%;
-            height: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .content {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .game-container {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 30, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            position: relative;
+            padding: 20px;
+        }
+        
+        .game-placeholder {
+            height: 400px;
+            background: linear-gradient(45deg, #0f2027, #203a43, #2c5364);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-placeholder::before {
+            content: "";
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            animation: rotate 15s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .game-placeholder i {
+            font-size: 5rem;
+            color: rgba(255,255,255,0.2);
+            z-index: 2;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .capture-btn {
+            background: linear-gradient(to right, #3498db, #1abc9c);
+            color: white;
+        }
+        
+        .save-btn {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+            color: white;
+        }
+        
+        .clipboard-btn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .twitter-btn {
+            background: linear-gradient(to right, #1da1f2, #0d8bd9);
+            color: white;
+        }
+        
+        .screenshot-container {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 30, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            padding: 25px;
+        }
+        
+        .screenshot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .screenshot-header h2 {
+            font-size: 1.8rem;
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .screenshot-area {
+            height: 300px;
+            background: rgba(0, 10, 30, 0.5);
+            border-radius: 10px;
+            border: 2px dashed rgba(255,255,255,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .screenshot-area img {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+        }
+        
+        .placeholder-text {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .placeholder-text i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+            color: rgba(255,255,255,0.2);
+        }
+        
+        .tweet-section {
+            margin-top: 20px;
+            background: rgba(0, 10, 30, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .tweet-section h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            background: rgba(0, 0, 20, 0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 15px;
+            color: white;
+            font-size: 1rem;
+            resize: none;
+            margin-bottom: 15px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #1da1f2;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 30, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateX(200%);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 30, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        .instructions h2 {
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, #00c9ff, #92fe9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: 100%;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="container">
-        <div id="fullscreen-btn">Enter Fullscreen</div>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-gamepad"></i> Game Screenshot & Sharing</h1>
+            <p class="subtitle">Capture your favorite moments and share them with the world. Save locally, copy to clipboard, or tweet directly!</p>
+        </header>
+        
+        <div class="content">
+            <div class="game-container">
+                <h2>Game Preview</h2>
+                <div class="game-placeholder">
+                    <i class="fas fa-chess-rook"></i>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn capture-btn" id="capture-btn">
+                        <i class="fas fa-camera"></i> Capture
+                    </button>
+                    <button class="btn save-btn" id="save-btn" disabled>
+                        <i class="fas fa-download"></i> Save
+                    </button>
+                    <button class="btn clipboard-btn" id="clipboard-btn" disabled>
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button class="btn twitter-btn" id="twitter-btn" disabled>
+                        <i class="fab fa-twitter"></i> Tweet
+                    </button>
+                </div>
+            </div>
+            
+            <div class="screenshot-container">
+                <div class="screenshot-header">
+                    <h2>Your Screenshot</h2>
+                </div>
+                
+                <div class="screenshot-area" id="screenshot-area">
+                    <div class="placeholder-text">
+                        <i class="fas fa-image"></i>
+                        <p>Capture a screenshot to display it here</p>
+                    </div>
+                    <img id="screenshot-img" alt="Game screenshot">
+                </div>
+                
+                <div class="tweet-section">
+                    <h3><i class="fab fa-twitter"></i> Share on Twitter</h3>
+                    <textarea id="tweet-text" placeholder="Share your gaming experience...">Just captured an amazing moment in my game! Check this out! 🎮 #gaming #screenshot</textarea>
+                    <button class="btn twitter-btn" id="share-tweet-btn" disabled>
+                        <i class="fab fa-twitter"></i> Tweet with Image
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h2><i class="fas fa-info-circle"></i> How It Works</h2>
+            <ol>
+                <li><strong>Capture</strong> - Click the Capture button to take a screenshot of the game area</li>
+                <li><strong>Preview</strong> - Your screenshot will appear in the preview area</li>
+                <li><strong>Save</strong> - Download the screenshot to your device</li>
+                <li><strong>Copy</strong> - Copy the image to your clipboard for easy sharing</li>
+                <li><strong>Tweet</strong> - Share directly to Twitter with your custom message</li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text">Success message</span>
     </div>
 
     <script>
-        // Dynamically load the Ruffle script
-        function loadRuffle() {
-            let script = document.createElement("script");
-            script.src = "https://unpkg.com/@ruffle-rs/ruffle";
-            script.onload = initializeRuffle;
-            script.onerror = () => console.error("Failed to load Ruffle from Unpkg.");
-            document.head.appendChild(script);
+        // DOM Elements
+        const captureBtn = document.getElementById('capture-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const clipboardBtn = document.getElementById('clipboard-btn');
+        const twitterBtn = document.getElementById('twitter-btn');
+        const shareTweetBtn = document.getElementById('share-tweet-btn');
+        const screenshotImg = document.getElementById('screenshot-img');
+        const screenshotArea = document.getElementById('screenshot-area');
+        const tweetText = document.getElementById('tweet-text');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        
+        // State
+        let currentScreenshot = null;
+        
+        // Show notification
+        function showNotification(message, isError = false) {
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
         }
-
-        function initializeRuffle() {
-            if (!window.RufflePlayer) {
-                console.error("Ruffle library not initialized properly.");
-                return;
-            }
-
-            let ruffle = window.RufflePlayer.newest();
-            if (!ruffle) {
-                console.error("Failed to initialize Ruffle.");
-                return;
-            }
-
-            // Configure Ruffle
-            let config = {
-                "autoplay": true,
-                "showRuffleLogo": false,
-                "unmuteOverlay": "hidden",
-                "backgroundColor": "#DEFDEF",
-                "logLevel": "error",
-                "showFullscreenButton": false,
-                "warnOnUnsupportedContent": false,
-                "contextMenu": "off",
-                "allowNetworking": "all"
-            };
-    
-            let player = ruffle.createPlayer();
-            player.config = config;
-
-            let container = document.getElementById("container");
-            if (container) {
-                container.appendChild(player);
-                player.load("initfs.spl");
-                
-                // Get references to DOM elements
-                const fullscreenButton = document.getElementById('fullscreen-btn');
-                const elem = document.documentElement; // Full document element
-                
-                // Function to toggle fullscreen
-                function toggleFullscreen() {
-                    if (!document.fullscreenElement &&    // Standard
-                        !document.webkitFullscreenElement && // Safari, Chrome
-                        !document.mozFullScreenElement && // Firefox
-                        !document.msFullscreenElement) {  // IE/Edge
-                        
-                        // Enter fullscreen
-                        if (elem.requestFullscreen) {
-                            elem.requestFullscreen();
-                        } else if (elem.webkitRequestFullscreen) { /* Safari */
-                            elem.webkitRequestFullscreen();
-                        } else if (elem.mozRequestFullScreen) { /* Firefox */
-                            elem.mozRequestFullScreen();
-                        } else if (elem.msRequestFullscreen) { /* IE/Edge */
-                            elem.msRequestFullscreen();
-                        }
-                        
-                        fullscreenButton.textContent = "Exit Fullscreen";
-                    } else {
-                        // Exit fullscreen
-                        if (document.exitFullscreen) {
-                            document.exitFullscreen();
-                        } else if (document.webkitExitFullscreen) { /* Safari */
-                            document.webkitExitFullscreen();
-                        } else if (document.mozCancelFullScreen) { /* Firefox */
-                            document.mozCancelFullScreen();
-                        } else if (document.msExitFullscreen) { /* IE/Edge */
-                            document.msExitFullscreen();
-                        }
-                        
-                        fullscreenButton.textContent = "Enter Fullscreen";
-                    }
-                }
-                
-                // Add event listener to button
-                fullscreenButton.addEventListener('click', toggleFullscreen);
-                
-                // Update button text on fullscreen change
-                document.addEventListener('fullscreenchange', updateButtonText);
-                document.addEventListener('webkitfullscreenchange', updateButtonText);
-                document.addEventListener('mozfullscreenchange', updateButtonText);
-                document.addEventListener('MSFullscreenChange', updateButtonText);
-                
-                function updateButtonText() {
-                    if (document.fullscreenElement || 
-                        document.webkitFullscreenElement ||
-                        document.mozFullScreenElement ||
-                        document.msFullscreenElement) {
-                        fullscreenButton.textContent = "Exit Fullscreen";
-                    } else {
-                        fullscreenButton.textContent = "Enter Fullscreen";
-                    }
-                }
-                
-            } else {
-                console.error("Container element not found.");
-            }
+        
+        // Simulate screenshot capture
+        function captureScreenshot() {
+            // In a real implementation, you would use:
+            // html2canvas(document.querySelector('#game-container')).then(canvas => {
+            //   currentScreenshot = canvas.toDataURL('image/png');
+            //   showScreenshot(currentScreenshot);
+            // });
+            
+            // For this demo, we'll simulate with a sample image
+            setTimeout(() => {
+                currentScreenshot = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23122b4e'/%3E%3Ccircle cx='200' cy='150' r='80' fill='%233498db'/%3E%3Crect x='120' y='140' width='160' height='20' fill='white'/%3E%3Ccircle cx='170' cy='120' r='20' fill='white'/%3E%3Ccircle cx='230' cy='120' r='20' fill='white'/%3E%3Ccircle cx='170' cy='120' r='10' fill='%23122b4e'/%3E%3Ccircle cx='230' cy='120' r='10' fill='%23122b4e'/%3E%3Cpath d='M150,200 Q200,230 250,200' stroke='white' stroke-width='5' fill='none'/%3E%3Ctext x='200' y='280' font-family='Arial' font-size='20' fill='white' text-anchor='middle'%3EGame Screenshot%3C/text%3E%3C/svg%3E";
+                showScreenshot(currentScreenshot);
+                showNotification('Screenshot captured successfully!');
+            }, 800);
         }
-
-        window.addEventListener("DOMContentLoaded", loadRuffle);
+        
+        // Display the screenshot
+        function showScreenshot(dataUrl) {
+            screenshotImg.src = dataUrl;
+            screenshotImg.style.display = 'block';
+            document.querySelector('.placeholder-text').style.display = 'none';
+            
+            // Enable buttons
+            saveBtn.disabled = false;
+            clipboardBtn.disabled = false;
+            twitterBtn.disabled = false;
+            shareTweetBtn.disabled = false;
+        }
+        
+        // Save the screenshot
+        function saveScreenshot() {
+            if (!currentScreenshot) return;
+            
+            const link = document.createElement('a');
+            link.href = currentScreenshot;
+            link.download = `game-screenshot-${new Date().getTime()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Screenshot saved successfully!');
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard() {
+            if (!currentScreenshot) return;
+            
+            // Convert data URL to blob
+            fetch(currentScreenshot)
+                .then(res => res.blob())
+                .then(blob => {
+                    const item = new ClipboardItem({ "image/png": blob });
+                    navigator.clipboard.write([item])
+                        .then(() => {
+                            showNotification('Screenshot copied to clipboard!');
+                        })
+                        .catch(err => {
+                            showNotification('Failed to copy to clipboard', true);
+                            console.error('Clipboard write error:', err);
+                        });
+                });
+        }
+        
+        // Share on Twitter
+        function shareOnTwitter() {
+            if (!currentScreenshot) return;
+            
+            // In a real implementation, you would upload the image to a server
+            // and get a URL to include in the tweet
+            
+            const text = encodeURIComponent(tweetText.value);
+            const url = encodeURIComponent('https://yourgamewebsite.com');
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+            
+            window.open(twitterUrl, '_blank');
+        }
+        
+        // Event Listeners
+        captureBtn.addEventListener('click', captureScreenshot);
+        saveBtn.addEventListener('click', saveScreenshot);
+        clipboardBtn.addEventListener('click', copyToClipboard);
+        twitterBtn.addEventListener('click', shareOnTwitter);
+        shareTweetBtn.addEventListener('click', shareOnTwitter);
+        
+        // Initialize
+        showNotification('Welcome! Click Capture to take your first screenshot.', false);
     </script>
 </body>
 </html>
