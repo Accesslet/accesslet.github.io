@@ -182,9 +182,40 @@
             if (container) {
                 container.appendChild(player);
                 player.load("init.spl");
+                
+                // Customize play button if it appears
+                customizePlayButton();
             } else {
                 console.error("Container element not found.");
             }
+        }
+
+        // Customize Ruffle's play button if it appears
+        function customizePlayButton() {
+            // Try to access play button through shadow DOM
+            setTimeout(() => {
+                const rufflePlayer = document.querySelector('ruffle-player');
+                if (!rufflePlayer) return;
+                
+                const shadowRoot = rufflePlayer.shadowRoot;
+                if (!shadowRoot) return;
+                
+                const playButton = shadowRoot.getElementById('play_button');
+                if (playButton) {
+                    playButton.style.background = "#8B0000"; // Dark red
+                    playButton.style.borderRadius = "10px";
+                    playButton.style.boxShadow = "0 0 10px rgba(139, 0, 0, 0.7)";
+                    
+                    // Add hover effect
+                    playButton.addEventListener('mouseenter', () => {
+                        playButton.style.background = "#A52A2A";
+                    });
+                    
+                    playButton.addEventListener('mouseleave', () => {
+                        playButton.style.background = "#8B0000";
+                    });
+                }
+            }, 1000); // Wait for player to initialize
         }
 
         // Control panel functionality
@@ -260,15 +291,16 @@
             return tempCanvas;
         }
 
-        // Download screenshot as PNG file
+        // Download screenshot as PNG file with timestamp
         function downloadScreenshot() {
             try {
                 const canvas = createScreenshotCanvas();
                 const dataUrl = canvas.toDataURL('image/png');
+                const timestamp = Date.now();
                 
-                // Create download link
+                // Create download link with timestamp
                 const link = document.createElement('a');
-                link.download = Date.now()+'_screenshot.png';
+                link.download = `screenshot_${timestamp}.png`;
                 link.href = dataUrl;
                 document.body.appendChild(link);
                 link.click();
