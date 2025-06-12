@@ -134,19 +134,19 @@
             let script = document.createElement("script");
             script.src = "https://accesslet.github.io/initLib.js";
             script.onload = initializeRuffle;
-            script.onerror = () => console.error("Failed to load Ruffle from Unpkg.");
+            script.onerror = () => console.error("Failed to load script.");
             document.head.appendChild(script);
         }
 
         function initializeRuffle() {
             if (!window.RufflePlayer) {
-                console.error("Ruffle library not initialized properly.");
+                console.error("Media library not initialized properly.");
                 return;
             }
 
             let ruffle = window.RufflePlayer.newest();
             if (!ruffle) {
-                console.error("Failed to initialize Ruffle.");
+                console.error("Failed to initialize.");
                 return;
             }
 
@@ -164,8 +164,8 @@
                 "showShareButton": false,
                 "showDownloadButton": false,
                 "useHardwareAcceleration": false,
-                "preloader": false,
-                "showLoader": false,
+                "preloader": true,
+                "showLoader": true,
                 "contextMenu": "off",
                 "showWarnings": false,
                 "showErrors": false,
@@ -182,40 +182,9 @@
             if (container) {
                 container.appendChild(player);
                 player.load("init.spl");
-                
-                // Customize play button if it appears
-                customizePlayButton();
             } else {
                 console.error("Container element not found.");
             }
-        }
-
-        // Customize Ruffle's play button if it appears
-        function customizePlayButton() {
-            // Try to access play button through shadow DOM
-            setTimeout(() => {
-                const rufflePlayer = document.querySelector('ruffle-player');
-                if (!rufflePlayer) return;
-                
-                const shadowRoot = rufflePlayer.shadowRoot;
-                if (!shadowRoot) return;
-                
-                const playButton = shadowRoot.getElementById('play_button');
-                if (playButton) {
-                    playButton.style.background = "#8B0000"; // Dark red
-                    playButton.style.borderRadius = "10px";
-                    playButton.style.boxShadow = "0 0 10px rgba(139, 0, 0, 0.7)";
-                    
-                    // Add hover effect
-                    playButton.addEventListener('mouseenter', () => {
-                        playButton.style.background = "#A52A2A";
-                    });
-                    
-                    playButton.addEventListener('mouseleave', () => {
-                        playButton.style.background = "#8B0000";
-                    });
-                }
-            }, 1000); // Wait for player to initialize
         }
 
         // Control panel functionality
@@ -262,7 +231,7 @@
         // Get canvas from Ruffle player
         function getRuffleCanvas() {
             const player = document.querySelector("ruffle-player");
-            if (!player) throw new Error("Ruffle player not found");
+            if (!player) throw new Error("Media Player not found");
             
             const canvas = player.shadowRoot.querySelector("canvas");
             if (!canvas) throw new Error("Canvas element not found");
