@@ -31,6 +31,7 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            background: #000; /* Ensure black background for SWF */
         }
         
         #controls {
@@ -149,7 +150,7 @@
                 return;
             }
 
-            // Apply configuration to hide UI elements
+            // Apply configuration to hide UI elements and force Canvas2D renderer
             let config = {
                 "autoplay": true,
                 "showRuffleLogo": false,
@@ -158,7 +159,7 @@
                 "logLevel": "error",
                 "showFullscreenButton": false,
                 "showOverlay": false,
-                "showPlayButton": false,
+                "showPlayButton": false, // Hide play button
                 "showSettingsButton": false,
                 "showShareButton": false,
                 "showDownloadButton": false,
@@ -171,7 +172,7 @@
                 "warnOnUnsupportedContent": false,
                 "openUrlMode": "Allow",
                 "allowNetworking": "All",
-                "renderMode": "canvas" // Ensure canvas rendering for screenshots
+                "preferredRenderer": "canvas" // Force Canvas2D renderer to fix screenshots
             };
     
             let player = ruffle.createPlayer();
