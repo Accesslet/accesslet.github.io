@@ -214,10 +214,10 @@
                 }
             });
 
-            // Screenshot capture
-            screenshotButton.addEventListener("click", captureScreenshot);
+            // Screenshot capture - triggers download
+            screenshotButton.addEventListener("click", downloadScreenshot);
 
-            // Twitter sharing
+            // Twitter sharing - copies to clipboard and opens tweet intent
             twitterButton.addEventListener("click", shareOnTwitter);
 
             // Handle fullscreen changes
@@ -227,75 +227,77 @@
             });
         });
 
-        async function captureScreenshot() {
+        // Get canvas from Ruffle player
+        function getRuffleCanvas() {
+            const player = document.querySelector("ruffle-player");
+            if (!player) throw new Error("Ruffle player not found");
+            
+            const canvas = player.shadowRoot.querySelector("canvas");
+            if (!canvas) throw new Error("Canvas element not found");
+            
+            return canvas;
+        }
+
+        // Download screenshot as PNG file
+        function downloadScreenshot() {
             try {
-                const player = document.querySelector("ruffle-player");
-                if (!player) throw new Error("Ruffle player not found");
+                const canvas = getRuffleCanvas();
+                const dataUrl = canvas.toDataURL('image/png');
                 
-                // Access canvas from shadow DOM
-                const canvas = player.shadowRoot.querySelector("canvas");
-                if (!canvas) throw new Error("Canvas element not found");
+                // Create download link
+                const link = document.createElement('a');
+                link.download = 'screenshot.png';
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
                 
-                // Convert to blob and copy to clipboard
-                canvas.toBlob(async blob => {
-                    try {
-                        await navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': blob })
-                        ]);
-                        alert("Screenshot copied to clipboard!");
-                    } catch (err) {
-                        console.error("Failed to copy image: ", err);
-                        alert("Failed to copy screenshot. Please try again.");
-                    }
-                }, 'image/png');
             } catch (err) {
-                console.error("Screenshot error: ", err);
+                console.error("Screenshot download error: ", err);
                 alert("Could not capture screenshot. Make sure you're using HTTPS.");
             }
         }
 
+        // Copy screenshot to clipboard
+        async function copyScreenshotToClipboard() {
+            try {
+                const canvas = getRuffleCanvas();
+                
+                // Convert to blob and copy to clipboard
+                return new Promise((resolve, reject) => {
+                    canvas.toBlob(async blob => {
+                        try {
+                            await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]);
+                            resolve();
+                        } catch (err) {
+                            reject(err);
+                        }
+                    }, 'image/png');
+                });
+            } catch (err) {
+                throw err;
+            }
+        }
+
+        // Share on Twitter with copied screenshot
         async function shareOnTwitter() {
             try {
-                // First capture the screenshot
-                const player = document.querySelector("ruffle-player");
-                if (!player) throw new Error("Ruffle player not found");
+                // Copy screenshot to clipboard
+                await copyScreenshotToClipboard();
                 
-                const canvas = player.shadowRoot.querySelector("canvas");
-                if (!canvas) throw new Error("Canvas element not found");
+                // Open Twitter share window
+                const url = encodeURIComponent(window.location.href);
+                const text = encodeURIComponent("Check this out!");
+                window.open(
+                    `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+                    '_blank'
+                );
                 
-                // Convert to data URL
-                const dataUrl = canvas.toDataURL('image/png');
-                
-                // Create temporary image
-                const img = new Image();
-                img.src = dataUrl;
-                img.onload = () => {
-                    // Create temporary canvas to get exact dimensions
-                    const tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = img.width;
-                    tempCanvas.height = img.height;
-                    const ctx = tempCanvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    
-                    // Convert to blob for Twitter
-                    tempCanvas.toBlob(blob => {
-                        const file = new File([blob], 'screenshot.png', { type: 'image/png' });
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        
-                        // In a real app, you would upload to a server here
-                        // For demo purposes, we'll just use the data URL
-                        const url = encodeURIComponent(window.location.href);
-                        const text = encodeURIComponent("Check this out!");
-                        window.open(
-                            `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
-                            '_blank'
-                        );
-                    }, 'image/png');
-                };
             } catch (err) {
                 console.error("Twitter share error: ", err);
-                alert("Could not share to Twitter. Screenshot capture failed.");
+                alert("Could not copy screenshot to clipboard. Make sure you're using HTTPS and have granted clipboard permissions.");
             }
         }
 
