@@ -100,7 +100,7 @@
             transform: scale(1.1);
         }
         
-        mediaZ-player {
+        mediaF-player {
             width: 100%;
             height: 100%;
         }
@@ -129,31 +129,31 @@
     </div>
 
     <script>
-        // Dynamically load the mediaZ script
-        function loadmediaZ() {
+        // Dynamically load the mediaF script
+        function loadmediaF() {
             let script = document.createElement("script");
             script.src = "https://https://accesslet.github.io/initLib.js";
-            script.onload = initializemediaZ;
-            script.onerror = () => console.error("Failed to load mediaZ.");
+            script.onload = initializemediaF;
+            script.onerror = () => console.error("Failed to load mediaF.");
             document.head.appendChild(script);
         }
 
-        function initializemediaZ() {
-            if (!window.mediaZPlayer) {
-                console.error("mediaZ library not initialized properly.");
+        function initializemediaF() {
+            if (!window.mediaFPlayer) {
+                console.error("mediaF library not initialized properly.");
                 return;
             }
 
-            let mediaZ = window.mediaZPlayer.newest();
-            if (!mediaZ) {
-                console.error("Failed to initialize mediaZ.");
+            let mediaF = window.mediaFPlayer.newest();
+            if (!mediaF) {
+                console.error("Failed to initialize mediaF.");
                 return;
             }
 
             // Apply configuration to hide UI elements and force Canvas2D renderer
             let config = {
                 "autoplay": true,
-                "showmediaZLogo": false,
+                "showmediaFLogo": false,
                 "unmuteOverlay": "hidden",
                 "backgroundColor": "#000000",
                 "logLevel": "error",
@@ -175,7 +175,7 @@
                 "preferredRenderer": "canvas" // Force Canvas2D renderer to fix screenshots
             };
     
-            let player = mediaZ.createPlayer();
+            let player = mediaF.createPlayer();
             player.config = config;
 
             let container = document.getElementById("container");
@@ -190,14 +190,14 @@
             }
         }
 
-        // Customize mediaZ's play button with grayscale
+        // Customize mediaF's play button with grayscale
         function customizePlayButton() {
             // Try to access play button through shadow DOM
             const tryStylePlayButton = () => {
-                const mediaZPlayer = document.querySelector('mediaZ-player');
-                if (!mediaZPlayer) return false;
+                const mediaFPlayer = document.querySelector('mediaF-player');
+                if (!mediaFPlayer) return false;
                 
-                const shadowRoot = mediaZPlayer.shadowRoot;
+                const shadowRoot = mediaFPlayer.shadowRoot;
                 if (!shadowRoot) return false;
                 
                 // Use both ID and class selectors for better compatibility
@@ -278,10 +278,10 @@
             });
         });
 
-        // Get canvas from mediaZ player
-        function getmediaZCanvas() {
-            const player = document.querySelector("mediaZ-player");
-            if (!player) throw new Error("mediaZ player not found");
+        // Get canvas from mediaF player
+        function getmediaFCanvas() {
+            const player = document.querySelector("mediaF-player");
+            if (!player) throw new Error("mediaF player not found");
             
             const canvas = player.shadowRoot.querySelector("canvas");
             if (!canvas) throw new Error("Canvas element not found");
@@ -291,12 +291,12 @@
 
         // Create properly rendered screenshot canvas
         function createScreenshotCanvas() {
-            const mediaZCanvas = getmediaZCanvas();
+            const mediaFCanvas = getmediaFCanvas();
             
             // Create temporary canvas to fix rendering issues
             const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = mediaZCanvas.width;
-            tempCanvas.height = mediaZCanvas.height;
+            tempCanvas.width = mediaFCanvas.width;
+            tempCanvas.height = mediaFCanvas.height;
             
             const context = tempCanvas.getContext('2d');
             
@@ -304,8 +304,8 @@
             context.fillStyle = '#000000';
             context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
             
-            // Draw the mediaZ canvas on top
-            context.drawImage(mediaZCanvas, 0, 0);
+            // Draw the mediaF canvas on top
+            context.drawImage(mediaFCanvas, 0, 0);
             
             return tempCanvas;
         }
@@ -376,8 +376,8 @@
             }
         }
 
-        // Load mediaZ dynamically
-        window.addEventListener("DOMContentLoaded", loadmediaZ);
+        // Load mediaF dynamically
+        window.addEventListener("DOMContentLoaded", loadmediaF);
     </script>
 </body>
 </html>
