@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BatComputer OS</title>
+    <title>PK-SHH-DB OS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -86,7 +86,7 @@
             z-index: 2;
         }
         
-        /* Header - BatComputer OS */
+        /* Header - PK-SHH-DB OS */
         .header {
             padding: 12px 20px;
             background: linear-gradient(to right, #001122, #002244, #001122);
@@ -437,25 +437,25 @@
             <div class="sidebar">
                 <div class="menu-title">SYSTEM MENU</div>
                 <div class="menu-items">
-                    <div class="menu-item active" data-game="initfs.spl">
+                    <div class="menu-item active" data-nav="initfs.spl">
                         <i class="fas fa-gamepad"></i>GAME STATION
                     </div>
-                    <div class="menu-item" data-game="gotham_map.spl">
+                    <div class="menu-item" data-nav="gotham_map.spl">
                         <i class="fas fa-map"></i>GOTHAM MAP
                     </div>
-                    <div class="menu-item" data-game="surveillance.spl">
+                    <div class="menu-item" data-nav="surveillance.spl">
                         <i class="fas fa-video"></i>SURVEILLANCE
                     </div>
-                    <div class="menu-item" data-game="criminal_db.spl">
+                    <div class="menu-item" data-nav="criminal_db.spl">
                         <i class="fas fa-database"></i>CRIMINAL DB
                     </div>
-                    <div class="menu-item" data-game="system_diag.spl">
+                    <div class="menu-item" data-nav="system_diag.spl">
                         <i class="fas fa-microchip"></i>SYSTEM DIAG
                     </div>
-                    <div class="menu-item" data-game="security.spl">
+                    <div class="menu-item" data-nav="security.spl">
                         <i class="fas fa-shield-alt"></i>SECURITY
                     </div>
-                    <div class="menu-item" data-game="settings.spl">
+                    <div class="menu-item" data-nav="settings.spl">
                         <i class="fas fa-cogs"></i>SETTINGS
                     </div>
                 </div>
@@ -492,7 +492,7 @@
                     </div>
                     <div class="panel-content">
                         <div class="terminal">
-                            <div class="terminal-line">Initializing BatComputer OS...</div>
+                            <div class="terminal-line">Initializing PK-SHH-DB OS...</div>
                             <div class="terminal-line">Loading cryptographic modules...</div>
                             <div class="terminal-line">Establishing satellite uplink...</div>
                             <div class="terminal-line">> Uplink established: WATCHTOWER-7</div>
@@ -727,7 +727,7 @@
                 ]);
                 
                 // Open Twitter intent
-                const text = encodeURIComponent("Check this out everyone! From my BatComputer OS 🦇");
+                const text = encodeURIComponent("Check this out everyone! From my PK-SHH-DB OS 🦇");
                 const twitterUrl = `https://twitter.com/intent/tweet?text=${text}`;
                 window.open(twitterUrl, '_blank');
                 
@@ -781,7 +781,7 @@
                     this.classList.add('active');
                     
                     // Get game file from data attribute
-                    const gameFile = this.getAttribute('data-game');
+                    const gameFile = this.getAttribute('data-nav');
                     currentGame = gameFile;
                     
                     // Update panel title
