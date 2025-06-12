@@ -103,7 +103,7 @@
             gap: 10px;
         }
         
-        .bat-logo {
+        .SHH-DB-logo {
             width: 40px;
             height: 40px;
             background: #000;
@@ -113,14 +113,14 @@
             overflow: hidden;
         }
         
-        .bat-logo::before, .bat-logo::after {
+        .SHH-DB-logo::before, .SHH-DB-logo::after {
             content: "";
             position: absolute;
             background: #00eeff;
             box-shadow: 0 0 10px #00eeff;
         }
         
-        .bat-logo::before {
+        .SHH-DB-logo::before {
             width: 20px;
             height: 20px;
             top: 5px;
@@ -128,7 +128,7 @@
             border-radius: 50%;
         }
         
-        .bat-logo::after {
+        .SHH-DB-logo::after {
             width: 30px;
             height: 15px;
             top: 20px;
@@ -423,11 +423,11 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <div class="bat-logo"></div>
-                <h1>BATCOMPUTER OS v3.14</h1>
+                <div class="SHH-DB-logo"></div>
+                <h1>SHH-DB OS v3.14</h1>
             </div>
             <div class="system-info">
-                <div>USER: <span class="glitch">BATMAN</span></div>
+                <div>USER: <span class="glitch">SHH-DB</span></div>
                 <div>STATUS: <span class="glitch">ACTIVE</span></div>
                 <div>MODE: <span class="glitch">SURVEILLANCE</span></div>
             </div>
@@ -440,8 +440,8 @@
                     <div class="menu-item active" data-nav="initfs.spl">
                         <i class="fas fa-gamepad"></i>GAME STATION
                     </div>
-                    <div class="menu-item" data-nav="gotham_map.spl">
-                        <i class="fas fa-map"></i>GOTHAM MAP
+                    <div class="menu-item" data-nav="map.spl">
+                        <i class="fas fa-map"></i>MAP
                     </div>
                     <div class="menu-item" data-nav="surveillance.spl">
                         <i class="fas fa-video"></i>SURVEILLANCE
@@ -690,7 +690,7 @@
             try {
                 const link = document.createElement('a');
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                const filename = `batcomputer-screenshot-${timestamp}.png`;
+                const filename = `SHH-DB-screenshot-${timestamp}.png`;
                 
                 link.href = dataUrl;
                 link.download = filename;
@@ -812,7 +812,7 @@
         setTimeout(() => {
             addTerminalLine('> Scanning GCPD frequencies...');
             addTerminalLine('> Alert: Suspicious activity at ACE Chemicals');
-            addTerminalLine('> Alert: Arkham security breach detected');
+            addTerminalLine('> Alert: ISB security breach detected');
             addTerminalLine('> Deploying countermeasures...');
             addTerminalLine('> Situation contained');
         }, 2000);
