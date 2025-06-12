@@ -31,7 +31,7 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            background: #000; /* Ensure black background for SWF */
+            background: #000;
         }
         
         #controls {
@@ -190,35 +190,52 @@
             }
         }
 
-        // Customize Ruffle's play button if it appears
+        // Customize Ruffle's play button with grayscale
         function customizePlayButton() {
             // Try to access play button through shadow DOM
-            setTimeout(() => {
+            const tryStylePlayButton = () => {
                 const rufflePlayer = document.querySelector('ruffle-player');
-                if (!rufflePlayer) return;
+                if (!rufflePlayer) return false;
                 
                 const shadowRoot = rufflePlayer.shadowRoot;
-                if (!shadowRoot) return;
+                if (!shadowRoot) return false;
                 
-                const playButton = shadowRoot.getElementById('play_button');
+                // Use both ID and class selectors for better compatibility
+                let playButton = shadowRoot.getElementById('play_button') || 
+                                shadowRoot.querySelector('.play_button');
+                
                 if (playButton) {
-                    playButton.style.background = "#8B0000"; // Dark red
-                    playButton.style.borderRadius = "10px";
-                    playButton.style.boxShadow = "0 0 10px rgba(139, 0, 0, 0.7)";
+                    // Apply grayscale filter and grey styling
+                    playButton.style.filter = "grayscale(100%) brightness(70%)";
+                    playButton.style.opacity = "0.8";
+                    playButton.style.cursor = "default";
                     
-                    // Add hover effect
-                    playButton.addEventListener('mouseenter', () => {
-                        playButton.style.background = "#A52A2A";
-                    });
+                    // Apply to SVG inside the button if exists
+                    const svg = playButton.querySelector('svg');
+                    if (svg) {
+                        svg.style.filter = "grayscale(100%)";
+                        svg.style.opacity = "0.7";
+                    }
                     
-                    playButton.addEventListener('mouseleave', () => {
-                        playButton.style.background = "#8B0000";
-                    });
+                    // Remove hover effects
+                    playButton.onmouseenter = null;
+                    playButton.onmouseleave = null;
+                    
+                    return true;
                 }
-            }, 1000); // Wait for player to initialize
+                return false;
+            };
+            
+            // Try immediately
+            if (tryStylePlayButton()) return;
+            
+            // If not found, try again after a delay
+            const interval = setInterval(() => {
+                if (tryStylePlayButton()) {
+                    clearInterval(interval);
+                }
+            }, 300);
         }
-
-        document.querySelector("ruffle-player").shadowRoot.querySelector(".play_button").style.display = "none";
 
         // Control panel functionality
         document.addEventListener("DOMContentLoaded", () => {
