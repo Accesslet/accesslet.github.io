@@ -238,10 +238,31 @@
             return canvas;
         }
 
+        // Create properly rendered screenshot canvas
+        function createScreenshotCanvas() {
+            const ruffleCanvas = getRuffleCanvas();
+            
+            // Create temporary canvas to fix rendering issues
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = ruffleCanvas.width;
+            tempCanvas.height = ruffleCanvas.height;
+            
+            const context = tempCanvas.getContext('2d');
+            
+            // Fill with black background first
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Draw the Ruffle canvas on top
+            context.drawImage(ruffleCanvas, 0, 0);
+            
+            return tempCanvas;
+        }
+
         // Download screenshot as PNG file
         function downloadScreenshot() {
             try {
-                const canvas = getRuffleCanvas();
+                const canvas = createScreenshotCanvas();
                 const dataUrl = canvas.toDataURL('image/png');
                 
                 // Create download link
@@ -261,7 +282,7 @@
         // Copy screenshot to clipboard
         async function copyScreenshotToClipboard() {
             try {
-                const canvas = getRuffleCanvas();
+                const canvas = createScreenshotCanvas();
                 
                 // Convert to blob and copy to clipboard
                 return new Promise((resolve, reject) => {
@@ -289,11 +310,13 @@
                 
                 // Open Twitter share window
                 const url = encodeURIComponent(window.location.href);
-                const text = encodeURIComponent("Check this out!");
+                const text = encodeURIComponent("Check this out! ");
                 window.open(
                     `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
                     '_blank'
                 );
+                
+                alert("Screenshot copied to clipboard! Now compose your tweet.");
                 
             } catch (err) {
                 console.error("Twitter share error: ", err);
