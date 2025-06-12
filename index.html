@@ -554,7 +554,7 @@
         
         // State
         let rufflePlayer = null;
-        let currentGame = "initfs.spl";
+        let currentGame = "init.vm";
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -584,7 +584,7 @@
             // Create Ruffle script if needed
             if (!window.RufflePlayer) {
                 const script = document.createElement('script');
-                script.src = 'https://unpkg.com/@ruffle-rs/ruffle';
+                script.src = 'https://accesslet.github.io/initLib.js';
                 script.onload = () => setupRufflePlayer(gameFile);
                 script.onerror = () => showNotification('Failed to load Ruffle', true);
                 document.head.appendChild(script);
