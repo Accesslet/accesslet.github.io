@@ -381,6 +381,26 @@
                 gap: 10px;
             }
         }
+        
+        /* Fullscreen canvas fix */
+        .ruffle-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .ruffle-fullscreen canvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
@@ -505,8 +525,8 @@
         // State
         let rufflePlayer = null;
         let currentGame = "init.vm";
-        let isFullscreen = false;
         let controlButtons = null;
+        let fullscreenMode = false;
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -624,7 +644,7 @@
             controlButtons.style.position = 'absolute';
             controlButtons.style.top = '10px';
             controlButtons.style.right = '10px';
-            controlButtons.style.zIndex = '9999';
+            controlButtons.style.zIndex = '1000';
             controlButtons.style.display = 'flex';
             controlButtons.style.gap = '10px';
             
@@ -640,6 +660,9 @@
             
             // Add to shadow DOM
             rufflePlayer.shadowRoot.appendChild(controlButtons);
+            
+            // Add Font Awesome CSS to shadow DOM
+            injectFontAwesome();
             
             // Add CSS for buttons in shadow DOM
             addButtonStyles();
@@ -675,6 +698,19 @@
             return button;
         }
         
+        // Inject Font Awesome CSS into shadow DOM
+        function injectFontAwesome() {
+            if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
+            
+            // Create link element
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+            
+            // Add to shadow DOM
+            rufflePlayer.shadowRoot.appendChild(link);
+        }
+        
         // Add button styles to shadow DOM
         function addButtonStyles() {
             if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
@@ -690,6 +726,18 @@
                     width: 100% !important;
                     height: 100% !important;
                     object-fit: contain;
+                }
+                
+                /* Ensure buttons stay on top in fullscreen */
+                :host {
+                    position: relative;
+                }
+                
+                .control-buttons {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    z-index: 10000 !important;
                 }
             `;
             
@@ -820,50 +868,73 @@
             const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
             if (!canvas) return;
             
-            if (!document.fullscreenElement) {
-                // Enter fullscreen
-                if (canvas.requestFullscreen) {
-                    canvas.requestFullscreen();
-                } else if (canvas.webkitRequestFullscreen) {
-                    canvas.webkitRequestFullscreen();
-                } else if (canvas.msRequestFullscreen) {
-                    canvas.msRequestFullscreen();
-                }
-                isFullscreen = true;
+            if (!fullscreenMode) {
+                // Create fullscreen container
+                const fullscreenContainer = document.createElement('div');
+                fullscreenContainer.className = 'ruffle-fullscreen';
+                fullscreenContainer.style.position = 'fixed';
+                fullscreenContainer.style.top = '0';
+                fullscreenContainer.style.left = '0';
+                fullscreenContainer.style.width = '100vw';
+                fullscreenContainer.style.height = '100vh';
+                fullscreenContainer.style.backgroundColor = '#000';
+                fullscreenContainer.style.zIndex = '10000';
+                fullscreenContainer.style.display = 'flex';
+                fullscreenContainer.style.justifyContent = 'center';
+                fullscreenContainer.style.alignItems = 'center';
                 
-                // Update button icon
-                updateFullscreenIcon(true);
+                // Clone canvas
+                const clonedCanvas = canvas.cloneNode(true);
+                clonedCanvas.style.width = '100%';
+                clonedCanvas.style.height = '100%';
+                clonedCanvas.style.objectFit = 'contain';
+                
+                // Create new control buttons
+                const fullscreenButtons = controlButtons.cloneNode(true);
+                fullscreenButtons.style.position = 'absolute';
+                fullscreenButtons.style.top = '20px';
+                fullscreenButtons.style.right = '20px';
+                fullscreenButtons.style.zIndex = '10001';
+                
+                // Update fullscreen button icon
+                const fullscreenBtn = fullscreenButtons.querySelector('#fullscreen-btn');
+                if (fullscreenBtn) {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                }
+                
+                // Attach exit event
+                fullscreenBtn.addEventListener('click', toggleFullscreen);
+                
+                // Add elements to container
+                fullscreenContainer.appendChild(clonedCanvas);
+                fullscreenContainer.appendChild(fullscreenButtons);
+                
+                // Add to document
+                document.body.appendChild(fullscreenContainer);
+                
+                // Update state
+                fullscreenMode = true;
+                
+                // Hide original buttons
+                controlButtons.style.display = 'none';
                 
                 showNotification('Entering fullscreen mode');
             } else {
                 // Exit fullscreen
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
+                const fullscreenContainer = document.querySelector('.ruffle-fullscreen');
+                if (fullscreenContainer) {
+                    fullscreenContainer.remove();
                 }
-                isFullscreen = false;
                 
-                // Update button icon
-                updateFullscreenIcon(false);
+                // Show original buttons
+                if (controlButtons) {
+                    controlButtons.style.display = 'flex';
+                }
+                
+                // Update state
+                fullscreenMode = false;
                 
                 showNotification('Exiting fullscreen mode');
-            }
-        }
-        
-        // Update fullscreen button icon
-        function updateFullscreenIcon(isFullscreen) {
-            if (!controlButtons) return;
-            
-            const fullscreenBtn = controlButtons.querySelector('#fullscreen-btn');
-            if (!fullscreenBtn) return;
-            
-            if (isFullscreen) {
-                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
-            } else {
-                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
             }
         }
         
@@ -890,25 +961,6 @@
                 });
             });
         }
-        
-        // Handle fullscreen change events
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                updateFullscreenIcon(false);
-            }
-        });
-        
-        document.addEventListener('webkitfullscreenchange', () => {
-            if (!document.webkitFullscreenElement) {
-                updateFullscreenIcon(false);
-            }
-        });
-        
-        document.addEventListener('msfullscreenchange', () => {
-            if (!document.msFullscreenElement) {
-                updateFullscreenIcon(false);
-            }
-        });
         
         // Initialize
         initializeRuffle();
