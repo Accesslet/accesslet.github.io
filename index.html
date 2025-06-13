@@ -242,37 +242,6 @@
             align-items: center;
         }
         
-        /* Control buttons container - will be moved to Ruffle's shadow DOM */
-        .control-buttons {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 9999;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .control-btn {
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 50, 100, 0.7);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            color: #00eeff;
-            font-size: 1.2rem;
-            border: 1px solid #00aaff;
-            box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
-            transition: all 0.3s;
-        }
-        
-        .control-btn:hover {
-            background: rgba(0, 100, 200, 0.8);
-            transform: scale(1.1);
-        }
-        
         /* Terminal */
         .terminal {
             background: rgba(0, 0, 0, 0.7);
@@ -412,13 +381,6 @@
                 gap: 10px;
             }
         }
-        
-        /* Fullscreen canvas fix */
-        .ruffle-fullscreen canvas {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: contain;
-        }
     </style>
 </head>
 <body>
@@ -472,18 +434,6 @@
                     <div class="panel-content">
                         <div class="game-container">
                             <div id="ruffle-container"></div>
-                            <!-- Control buttons will be moved to Ruffle's shadow DOM -->
-                            <div class="control-buttons" id="control-buttons">
-                                <div class="control-btn" id="screenshot-btn" title="Capture Screenshot">
-                                    <i class="fas fa-camera"></i>
-                                </div>
-                                <div class="control-btn" id="tweet-btn" title="Share on Twitter">
-                                    <i class="fab fa-twitter"></i>
-                                </div>
-                                <div class="control-btn" id="fullscreen-btn" title="Toggle Fullscreen">
-                                    <i class="fas fa-expand"></i>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -551,13 +501,12 @@
         const notification = document.getElementById('notification');
         const notificationText = document.getElementById('notification-text');
         const ruffleContainer = document.getElementById('ruffle-container');
-        const controlButtons = document.getElementById('control-buttons');
         
         // State
         let rufflePlayer = null;
         let currentGame = "init.vm";
         let isFullscreen = false;
-        let shadowButtons = null;
+        let controlButtons = null;
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -636,11 +585,8 @@
             
             // Wait for canvas to be available in shadow DOM
             waitForCanvas().then(() => {
-                // Add control buttons to shadow DOM
-                addButtonsToShadowDOM();
-                
-                // Add CSS to fix canvas sizing
-                addCanvasStyles();
+                // Create control buttons on top of canvas
+                createControlButtons();
                 
                 setTimeout(() => {
                     addTerminalLine(`> ${gameFile} loaded successfully`);
@@ -663,49 +609,100 @@
             });
         }
         
-        // Add control buttons to shadow DOM
-        function addButtonsToShadowDOM() {
+        // Create control buttons on top of the canvas
+        function createControlButtons() {
             if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
             
-            // Remove any existing buttons in shadow DOM
-            const existingButtons = rufflePlayer.shadowRoot.querySelector('.control-buttons');
-            if (existingButtons) {
-                existingButtons.remove();
+            // Remove any existing buttons
+            if (controlButtons) {
+                controlButtons.remove();
             }
             
-            // Clone the buttons and add to shadow DOM
-            shadowButtons = controlButtons.cloneNode(true);
-            rufflePlayer.shadowRoot.appendChild(shadowButtons);
+            // Create buttons container
+            controlButtons = document.createElement('div');
+            controlButtons.className = 'control-buttons';
+            controlButtons.style.position = 'absolute';
+            controlButtons.style.top = '10px';
+            controlButtons.style.right = '10px';
+            controlButtons.style.zIndex = '9999';
+            controlButtons.style.display = 'flex';
+            controlButtons.style.gap = '10px';
             
-            // Attach event listeners to cloned buttons
-            attachEventListeners(shadowButtons);
+            // Create screenshot button
+            const screenshotBtn = createButton('screenshot-btn', 'fas fa-camera', 'Capture Screenshot');
+            const tweetBtn = createButton('tweet-btn', 'fab fa-twitter', 'Share on Twitter');
+            const fullscreenBtn = createButton('fullscreen-btn', 'fas fa-expand', 'Toggle Fullscreen');
             
-            // Hide original buttons
-            controlButtons.style.display = 'none';
+            // Append buttons to container
+            controlButtons.appendChild(screenshotBtn);
+            controlButtons.appendChild(tweetBtn);
+            controlButtons.appendChild(fullscreenBtn);
+            
+            // Add to shadow DOM
+            rufflePlayer.shadowRoot.appendChild(controlButtons);
+            
+            // Add CSS for buttons in shadow DOM
+            addButtonStyles();
+            
+            // Attach event listeners
+            attachEventListeners();
         }
         
-        // Add CSS to fix canvas sizing in fullscreen
-        function addCanvasStyles() {
+        // Create a single control button
+        function createButton(id, iconClass, title) {
+            const button = document.createElement('div');
+            button.id = id;
+            button.className = 'control-btn';
+            button.title = title;
+            button.style.width = '40px';
+            button.style.height = '40px';
+            button.style.background = 'rgba(0, 50, 100, 0.7)';
+            button.style.borderRadius = '50%';
+            button.style.display = 'flex';
+            button.style.justifyContent = 'center';
+            button.style.alignItems = 'center';
+            button.style.cursor = 'pointer';
+            button.style.color = '#00eeff';
+            button.style.fontSize = '1.2rem';
+            button.style.border = '1px solid #00aaff';
+            button.style.boxShadow = '0 0 10px rgba(0, 170, 255, 0.5)';
+            button.style.transition = 'all 0.3s';
+            
+            const icon = document.createElement('i');
+            icon.className = iconClass;
+            button.appendChild(icon);
+            
+            return button;
+        }
+        
+        // Add button styles to shadow DOM
+        function addButtonStyles() {
             if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
             
             const style = document.createElement('style');
             style.textContent = `
-                .ruffle-fullscreen canvas {
+                .control-btn:hover {
+                    background: rgba(0, 100, 200, 0.8) !important;
+                    transform: scale(1.1);
+                }
+                
+                canvas {
                     width: 100% !important;
                     height: 100% !important;
                     object-fit: contain;
                 }
             `;
+            
             rufflePlayer.shadowRoot.appendChild(style);
         }
         
         // Attach event listeners to buttons
-        function attachEventListeners(buttonContainer) {
-            if (!buttonContainer) return;
+        function attachEventListeners() {
+            if (!controlButtons) return;
             
-            const screenshotBtn = buttonContainer.querySelector('#screenshot-btn');
-            const tweetBtn = buttonContainer.querySelector('#tweet-btn');
-            const fullscreenBtn = buttonContainer.querySelector('#fullscreen-btn');
+            const screenshotBtn = controlButtons.querySelector('#screenshot-btn');
+            const tweetBtn = controlButtons.querySelector('#tweet-btn');
+            const fullscreenBtn = controlButtons.querySelector('#fullscreen-btn');
             
             screenshotBtn.addEventListener('click', saveScreenshot);
             tweetBtn.addEventListener('click', shareOnTwitter);
@@ -824,9 +821,6 @@
             if (!canvas) return;
             
             if (!document.fullscreenElement) {
-                // Add class for fullscreen styling
-                rufflePlayer.classList.add('ruffle-fullscreen');
-                
                 // Enter fullscreen
                 if (canvas.requestFullscreen) {
                     canvas.requestFullscreen();
@@ -835,6 +829,7 @@
                 } else if (canvas.msRequestFullscreen) {
                     canvas.msRequestFullscreen();
                 }
+                isFullscreen = true;
                 
                 // Update button icon
                 updateFullscreenIcon(true);
@@ -849,9 +844,7 @@
                 } else if (document.msExitFullscreen) {
                     document.msExitFullscreen();
                 }
-                
-                // Remove fullscreen class
-                rufflePlayer.classList.remove('ruffle-fullscreen');
+                isFullscreen = false;
                 
                 // Update button icon
                 updateFullscreenIcon(false);
@@ -862,9 +855,9 @@
         
         // Update fullscreen button icon
         function updateFullscreenIcon(isFullscreen) {
-            if (!shadowButtons) return;
+            if (!controlButtons) return;
             
-            const fullscreenBtn = shadowButtons.querySelector('#fullscreen-btn');
+            const fullscreenBtn = controlButtons.querySelector('#fullscreen-btn');
             if (!fullscreenBtn) return;
             
             if (isFullscreen) {
@@ -901,21 +894,18 @@
         // Handle fullscreen change events
         document.addEventListener('fullscreenchange', () => {
             if (!document.fullscreenElement) {
-                rufflePlayer.classList.remove('ruffle-fullscreen');
                 updateFullscreenIcon(false);
             }
         });
         
         document.addEventListener('webkitfullscreenchange', () => {
             if (!document.webkitFullscreenElement) {
-                rufflePlayer.classList.remove('ruffle-fullscreen');
                 updateFullscreenIcon(false);
             }
         });
         
         document.addEventListener('msfullscreenchange', () => {
             if (!document.msFullscreenElement) {
-                rufflePlayer.classList.remove('ruffle-fullscreen');
                 updateFullscreenIcon(false);
             }
         });
