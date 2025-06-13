@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BATCOMPUTER</title>
+    <title>BatComputer Interface</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
     <style>
         :root {
             --batman-dark: #050a14;
@@ -26,18 +25,22 @@
         
         body {
             width: 100%;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
             font-family: 'Roboto Mono', monospace;
             background: var(--batman-dark);
             color: var(--batman-text);
             position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
         
         /* Grid background effect */
         body::before {
             content: "";
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -53,7 +56,7 @@
         /* Scanline effect */
         body::after {
             content: "";
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -63,7 +66,7 @@
                 rgba(0, 0, 0, 0.25) 50%
             );
             background-size: 100% 4px;
-            z-index: 10;
+            z-index: -1;
             pointer-events: none;
             animation: scanline 8s linear infinite;
         }
@@ -77,15 +80,18 @@
             }
         }
         
-        #app-container {
+        #batcomputer-interface {
             width: 100%;
-            height: 100%;
+            max-width: 1400px;
+            height: auto;
+            min-height: 90vh;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
             border: 1px solid var(--batman-accent);
             box-shadow: 0 0 20px rgba(0, 179, 255, 0.3);
+            background: rgba(5, 10, 20, 0.9);
         }
         
         /* Header styling */
@@ -100,6 +106,7 @@
             position: relative;
             z-index: 100;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
         }
         
         .logo {
@@ -129,7 +136,7 @@
         .status-bar {
             display: flex;
             align-items: center;
-            gap: 25px;
+            gap: 15px;
             font-size: 14px;
         }
         
@@ -156,29 +163,51 @@
         #content {
             display: flex;
             flex: 1;
+            flex-direction: column;
             overflow: hidden;
+        }
+        
+        /* Responsive side panel and viewer */
+        .main-content {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                flex-direction: row;
+            }
         }
         
         /* Side panel styling */
         #side-panel {
-            width: 250px;
+            width: 100%;
             background: rgba(12, 29, 58, 0.8);
-            border-right: 1px solid var(--batman-accent);
-            padding: 20px 0;
+            border-bottom: 1px solid var(--batman-accent);
+            padding: 15px 0;
             display: flex;
             flex-direction: column;
-            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.4);
+            flex-shrink: 0;
+        }
+        
+        @media (min-width: 768px) {
+            #side-panel {
+                width: 250px;
+                border-right: 1px solid var(--batman-accent);
+                border-bottom: none;
+            }
         }
         
         .panel-section {
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             padding: 0 15px;
         }
         
         .panel-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 16px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             color: var(--batman-accent);
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -189,15 +218,41 @@
         
         .panel-list {
             list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        @media (min-width: 768px) {
+            .panel-list {
+                display: block;
+                flex-wrap: nowrap;
+                gap: 0;
+            }
         }
         
         .panel-item {
             padding: 8px 10px;
-            margin: 5px 0;
+            margin: 3px 0;
             border-left: 2px solid transparent;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 14px;
+            background: rgba(28, 60, 106, 0.3);
+            border-radius: 4px;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        @media (min-width: 768px) {
+            .panel-item {
+                border-radius: 0;
+                flex: none;
+                min-width: auto;
+                text-align: left;
+                background: transparent;
+            }
         }
         
         .panel-item:hover {
@@ -221,12 +276,19 @@
         }
         
         .viewer-header {
-            padding: 10px 20px;
+            padding: 10px 15px;
             background: rgba(12, 29, 58, 0.6);
             border-bottom: 1px solid var(--batman-accent);
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
+        }
+        
+        @media (min-width: 480px) {
+            .viewer-header {
+                flex-direction: row;
+                align-items: center;
+            }
         }
         
         .viewer-title {
@@ -234,11 +296,28 @@
             font-size: 18px;
             color: var(--batman-accent);
             letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        @media (min-width: 480px) {
+            .viewer-title {
+                margin-bottom: 0;
+            }
         }
         
         .viewer-subtitle {
             font-size: 14px;
             opacity: 0.8;
+        }
+        
+        /* Original container styling - preserved */
+        #app-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            flex: 1;
         }
         
         #container {
@@ -261,7 +340,7 @@
             z-index: 5;
         }
         
-        /* Controls styling */
+        /* Controls styling - preserved with enhancements */
         #controls {
             position: absolute;
             top: 20px;
@@ -336,7 +415,7 @@
         
         /* Terminal styling */
         #terminal {
-            height: 200px;
+            height: 150px;
             background: rgba(5, 10, 20, 0.9);
             border-top: 1px solid var(--batman-accent);
             padding: 15px;
@@ -344,6 +423,7 @@
             font-size: 14px;
             overflow-y: auto;
             box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
         }
         
         .terminal-line {
@@ -380,12 +460,6 @@
             50% { opacity: 0; }
         }
         
-        /* Ruffle player styling */
-        ruffle-player {
-            width: 100%;
-            height: 100%;
-        }
-        
         /* Glow animations */
         .glow {
             animation: glowPulse 3s infinite alternate;
@@ -399,10 +473,77 @@
                 box-shadow: 0 0 20px var(--batman-glow);
             }
         }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .status-bar {
+                display: none;
+            }
+            
+            .logo-text {
+                font-size: 20px;
+            }
+            
+            .panel-title {
+                font-size: 14px;
+            }
+            
+            .panel-item {
+                font-size: 13px;
+                padding: 6px 8px;
+            }
+            
+            .viewer-title {
+                font-size: 16px;
+            }
+            
+            #controls {
+                top: 10px;
+                right: 10px;
+            }
+            
+            #cog-button {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            
+            .control-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            #batcomputer-interface {
+                min-height: 95vh;
+            }
+            
+            #header {
+                height: 50px;
+                padding: 0 10px;
+            }
+            
+            .logo-text {
+                font-size: 18px;
+                letter-spacing: 1px;
+            }
+            
+            #terminal {
+                height: 120px;
+                padding: 10px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="app-container" class="glow">
+    <div id="batcomputer-interface" class="glow">
         <!-- Header -->
         <header id="header">
             <div class="logo">
@@ -427,91 +568,75 @@
         
         <!-- Main Content -->
         <div id="content">
-            <!-- Side Panel -->
-            <aside id="side-panel">
-                <div class="panel-section">
-                    <h3 class="panel-title">Surveillance</h3>
-                    <ul class="panel-list">
-                        <li class="panel-item active">Gotham City Grid</li>
-                        <li class="panel-item">Arkham Asylum</li>
-                        <li class="panel-item">Wayne Enterprises</li>
-                        <li class="panel-item">GCPD Headquarters</li>
-                        <li class="panel-item">Iceberg Lounge</li>
-                    </ul>
-                </div>
-                
-                <div class="panel-section">
-                    <h3 class="panel-title">Criminal Database</h3>
-                    <ul class="panel-list">
-                        <li class="panel-item">Joker</li>
-                        <li class="panel-item">Penguin</li>
-                        <li class="panel-item">Riddler</li>
-                        <li class="panel-item">Two-Face</li>
-                        <li class="panel-item">Bane</li>
-                        <li class="panel-item">Catwoman</li>
-                    </ul>
-                </div>
-                
-                <div class="panel-section">
-                    <h3 class="panel-title">Vehicle Control</h3>
-                    <ul class="panel-list">
-                        <li class="panel-item">Batmobile</li>
-                        <li class="panel-item">Batwing</li>
-                        <li class="panel-item">Batcycle</li>
-                        <li class="panel-item">Batboat</li>
-                    </ul>
-                </div>
-                
-                <div class="panel-section">
-                    <h3 class="panel-title">Utility Belt</h3>
-                    <ul class="panel-list">
-                        <li class="panel-item">Batarangs</li>
-                        <li class="panel-item">Grapple Gun</li>
-                        <li class="panel-item">Smoke Pellets</li>
-                        <li class="panel-item">Explosive Gel</li>
-                        <li class="panel-item">Cryptographer</li>
-                    </ul>
-                </div>
-            </aside>
-            
-            <!-- Main Viewer -->
-            <main id="main-viewer">
-                <div class="viewer-header">
-                    <div>
-                        <h2 class="viewer-title">CRIMINAL SURVEILLANCE SYSTEM</h2>
-                        <div class="viewer-subtitle">Live feed from Gotham City Grid</div>
+            <div class="main-content">
+                <!-- Side Panel -->
+                <aside id="side-panel">
+                    <div class="panel-section">
+                        <h3 class="panel-title">Surveillance</h3>
+                        <ul class="panel-list">
+                            <li class="panel-item active">Gotham Grid</li>
+                            <li class="panel-item">Arkham Asylum</li>
+                            <li class="panel-item">Wayne Tower</li>
+                            <li class="panel-item">GCPD HQ</li>
+                        </ul>
                     </div>
-                    <div class="status-text">Last updated: <span id="current-time">--:--:--</span></div>
-                </div>
-                
-                <div id="container">
-                    <!-- Ruffle player will be inserted here -->
-                </div>
-                
-                <!-- Controls -->
-                <div id="controls">
-                    <button id="cog-button">
-                        <i class="fas fa-cog"></i>
-                    </button>
-                    <div id="button-panel">
-                        <button class="control-btn" id="fullscreen-button" title="Fullscreen">
-                            <i class="fas fa-expand"></i>
-                        </button>
-                        <button class="control-btn" id="screenshot-button" title="Screenshot">
-                            <i class="fas fa-camera"></i>
-                        </button>
-                        <button class="control-btn" id="twitter-button" title="Share on Twitter">
-                            <i class="fab fa-twitter"></i>
-                        </button>
-                        <button class="control-btn" id="analyze-button" title="Analyze">
-                            <i class="fas fa-search"></i>
-                        </button>
-                        <button class="control-btn" id="record-button" title="Record">
-                            <i class="fas fa-record-vinyl"></i>
-                        </button>
+                    
+                    <div class="panel-section">
+                        <h3 class="panel-title">Criminal Database</h3>
+                        <ul class="panel-list">
+                            <li class="panel-item">Joker</li>
+                            <li class="panel-item">Penguin</li>
+                            <li class="panel-item">Riddler</li>
+                            <li class="panel-item">Two-Face</li>
+                        </ul>
                     </div>
-                </div>
-            </main>
+                    
+                    <div class="panel-section">
+                        <h3 class="panel-title">Vehicle Control</h3>
+                        <ul class="panel-list">
+                            <li class="panel-item">Batmobile</li>
+                            <li class="panel-item">Batwing</li>
+                            <li class="panel-item">Batcycle</li>
+                        </ul>
+                    </div>
+                </aside>
+                
+                <!-- Main Viewer -->
+                <main id="main-viewer">
+                    <div class="viewer-header">
+                        <div>
+                            <h2 class="viewer-title">CRIMINAL SURVEILLANCE SYSTEM</h2>
+                            <div class="viewer-subtitle">Live feed from Gotham City Grid</div>
+                        </div>
+                        <div class="status-text">Last updated: <span id="current-time">--:--:--</span></div>
+                    </div>
+                    
+                    <!-- Original app container preserved inside BatComputer -->
+                    <div id="app-container">
+                        <div id="container">
+                            <!-- Ruffle player will be inserted here -->
+                        </div>
+                        
+                        <!-- Controls - preserved -->
+                        <div id="controls">
+                            <button id="cog-button">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <div id="button-panel">
+                                <button class="control-btn" id="fullscreen-button" title="Fullscreen">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                                <button class="control-btn" id="screenshot-button" title="Screenshot">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                                <button class="control-btn" id="twitter-button" title="Share on Twitter">
+                                    <i class="fab fa-twitter"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
         </div>
         
         <!-- Terminal -->
@@ -524,12 +649,7 @@
             <div class="terminal-line">
                 <span class="terminal-prompt">BATCOMPUTER ></span>
                 <span class="terminal-command">criminal.alert --level=3</span>
-                <div class="terminal-output">Alert: Suspicious activity detected in Diamond District. Riddler signature detected.</div>
-            </div>
-            <div class="terminal-line">
-                <span class="terminal-prompt">BATCOMPUTER ></span>
-                <span class="terminal-command">vehicle.status batmobile</span>
-                <div class="terminal-output">Batmobile: Armed and ready. Fuel 98%. Located in Cave.</div>
+                <div class="terminal-output">Alert: Suspicious activity detected in Diamond District.</div>
             </div>
             <div class="terminal-line">
                 <span class="terminal-prompt">BATCOMPUTER ></span>
@@ -615,9 +735,7 @@
             const fullscreenButton = document.getElementById("fullscreen-button");
             const screenshotButton = document.getElementById("screenshot-button");
             const twitterButton = document.getElementById("twitter-button");
-            const analyzeButton = document.getElementById("analyze-button");
-            const recordButton = document.getElementById("record-button");
-            const container = document.getElementById("app-container");
+            const container = document.getElementById("batcomputer-interface");
 
             // Toggle control panel
             cogButton.addEventListener("click", () => {
@@ -643,26 +761,6 @@
 
             // Twitter sharing - copies to clipboard and opens tweet intent
             twitterButton.addEventListener("click", shareOnTwitter);
-            
-            // Analyze button - show alert
-            analyzeButton.addEventListener("click", () => {
-                alert("CRIMINAL ANALYSIS INITIATED\nScanning for known signatures...");
-            });
-            
-            // Record button - toggle recording
-            let isRecording = false;
-            recordButton.addEventListener("click", () => {
-                isRecording = !isRecording;
-                if (isRecording) {
-                    recordButton.style.color = "#ff0000";
-                    recordButton.style.boxShadow = "0 0 15px rgba(255, 0, 0, 0.7)";
-                    alert("SURVEILLANCE RECORDING STARTED");
-                } else {
-                    recordButton.style.color = "";
-                    recordButton.style.boxShadow = "";
-                    alert("RECORDING STOPPED\nFootage saved to Batcave archives");
-                }
-            });
 
             // Handle fullscreen changes
             document.addEventListener("fullscreenchange", () => {
