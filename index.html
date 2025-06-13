@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PK-SHH-DB OS</title>
+    <title>PK-SHH-DB OS - Enhanced Controls</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -242,6 +242,7 @@
             align-items: center;
         }
         
+        /* Control buttons will be moved to Ruffle's shadow DOM */
         .control-buttons {
             position: absolute;
             top: 10px;
@@ -400,12 +401,6 @@
                 text-align: center;
             }
             
-            .control-buttons {
-                flex-direction: column;
-                top: 10px;
-                right: 10px;
-            }
-            
             .system-info {
                 flex-wrap: wrap;
                 justify-content: center;
@@ -424,7 +419,7 @@
         <div class="header">
             <div class="logo">
                 <div class="SHH-DB-logo"></div>
-                <h1>SHH-DB OS v3.14</h1>
+                <h1>PK-SHH-DB OS v3.14</h1>
             </div>
             <div class="system-info">
                 <div>USER: <span class="glitch">SHH-DB</span></div>
@@ -470,7 +465,8 @@
                     <div class="panel-content">
                         <div class="game-container">
                             <div id="ruffle-container"></div>
-                            <div class="control-buttons">
+                            <!-- Control buttons will be moved to Ruffle's shadow DOM -->
+                            <div class="control-buttons" id="control-buttons">
                                 <div class="control-btn" id="screenshot-btn" title="Capture Screenshot">
                                     <i class="fas fa-camera"></i>
                                 </div>
@@ -551,10 +547,12 @@
         const screenshotBtn = document.getElementById('screenshot-btn');
         const tweetBtn = document.getElementById('tweet-btn');
         const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const controlButtons = document.getElementById('control-buttons');
         
         // State
         let rufflePlayer = null;
         let currentGame = "init.vm";
+        let isFullscreen = false;
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -584,9 +582,9 @@
             // Create Ruffle script if needed
             if (!window.RufflePlayer) {
                 const script = document.createElement('script');
-                script.src = 'https://accesslet.github.io/initLib.js';
+                script.src = 'https://unpkg.com/@ruffle-rs/ruffle';
                 script.onload = () => setupRufflePlayer(gameFile);
-                script.onerror = () => showNotification('Failed to load', true);
+                script.onerror = () => showNotification('Failed to load Ruffle library', true);
                 document.head.appendChild(script);
             } else {
                 setupRufflePlayer(gameFile);
@@ -595,13 +593,13 @@
         
         function setupRufflePlayer(gameFile) {
             if (!window.RufflePlayer) {
-                showNotification('Library not loaded', true);
+                showNotification('Ruffle library not loaded', true);
                 return;
             }
             
             const ruffle = window.RufflePlayer.newest();
             if (!ruffle) {
-                showNotification('Failed to initialize', true);
+                showNotification('Failed to initialize Ruffle', true);
                 return;
             }
             
@@ -617,23 +615,117 @@
                 "contextMenu": "off",
                 "allowNetworking": "all",
                 "playerVersion": "0",
-                // FIX: Force Canvas2D renderer to prevent black screenshots
                 "preferredRenderer": "canvas"
             };
             
             rufflePlayer = ruffle.createPlayer();
-            rufflePlayer.config = config;
             rufflePlayer.id = "ruffle-player";
+            rufflePlayer.config = config;
             ruffleContainer.appendChild(rufflePlayer);
             
             // Load the game SWF
             rufflePlayer.load(gameFile);
+            
+            // Move control buttons to Ruffle's shadow DOM
+            moveButtonsToShadowDOM();
             
             // Add terminal message
             addTerminalLine(`> Loading ${gameFile}...`);
             setTimeout(() => {
                 addTerminalLine(`> ${gameFile} loaded successfully`);
             }, 1000);
+        }
+        
+        // Move control buttons to Ruffle's shadow DOM
+        function moveButtonsToShadowDOM() {
+            if (!rufflePlayer) return;
+            
+            // Wait for shadow DOM to be ready
+            const checkShadowDOM = () => {
+                if (rufflePlayer.shadowRoot) {
+                    const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
+                    if (canvas) {
+                        // Clone buttons and add to shadow DOM
+                        const clonedButtons = controlButtons.cloneNode(true);
+                        rufflePlayer.shadowRoot.appendChild(clonedButtons);
+                        
+                        // Set canvas styles for proper sizing
+                        canvas.style.width = '100%';
+                        canvas.style.height = '100%';
+                        canvas.style.objectFit = 'contain';
+                        
+                        // Re-attach event listeners
+                        attachEventListeners(clonedButtons);
+                        
+                        // Add styles to shadow DOM
+                        addStylesToShadowDOM();
+                        
+                        return;
+                    }
+                }
+                setTimeout(checkShadowDOM, 100);
+            };
+            
+            checkShadowDOM();
+        }
+        
+        // Add necessary styles to shadow DOM
+        function addStylesToShadowDOM() {
+            if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                .control-buttons {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    z-index: 9999;
+                    display: flex;
+                    gap: 10px;
+                }
+                
+                .control-btn {
+                    width: 40px;
+                    height: 40px;
+                    background: rgba(0, 50, 100, 0.7);
+                    border-radius: 50%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    cursor: pointer;
+                    color: #00eeff;
+                    font-size: 1.2rem;
+                    border: 1px solid #00aaff;
+                    box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+                    transition: all 0.3s;
+                }
+                
+                .control-btn:hover {
+                    background: rgba(0, 100, 200, 0.8);
+                    transform: scale(1.1);
+                }
+                
+                canvas {
+                    width: 100% !important;
+                    height: 100% !important;
+                    object-fit: contain;
+                }
+            `;
+            
+            rufflePlayer.shadowRoot.appendChild(style);
+        }
+        
+        // Attach event listeners to buttons
+        function attachEventListeners(buttonContainer) {
+            if (!buttonContainer) return;
+            
+            const screenshotBtn = buttonContainer.querySelector('#screenshot-btn');
+            const tweetBtn = buttonContainer.querySelector('#tweet-btn');
+            const fullscreenBtn = buttonContainer.querySelector('#fullscreen-btn');
+            
+            screenshotBtn.addEventListener('click', saveScreenshot);
+            tweetBtn.addEventListener('click', shareOnTwitter);
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
         }
         
         // Add terminal line
@@ -646,7 +738,7 @@
             terminal.scrollTop = terminal.scrollHeight;
         }
         
-        // Capture screenshot - FIXED
+        // Capture screenshot
         async function captureScreenshot() {
             if (!rufflePlayer) {
                 showNotification('Game not loaded', true);
@@ -662,7 +754,7 @@
                     return null;
                 }
                 
-                // FIX: Create a temporary canvas to capture the current frame
+                // Create a temporary canvas to capture the current frame
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = canvas.width;
                 tempCanvas.height = canvas.height;
@@ -705,7 +797,7 @@
             }
         }
         
-        // Copy image to clipboard and open Twitter
+        // Share on Twitter
         async function shareOnTwitter() {
             const dataUrl = await captureScreenshot();
             
@@ -740,17 +832,27 @@
         
         // Toggle fullscreen
         function toggleFullscreen() {
-            const container = rufflePlayer.shadowRoot.querySelector('canvas');
+            if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
+            
+            const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
+            if (!canvas) return;
             
             if (!document.fullscreenElement) {
-                if (container.requestFullscreen) {
-                    container.requestFullscreen();
-                } else if (container.webkitRequestFullscreen) {
-                    container.webkitRequestFullscreen();
-                } else if (container.msRequestFullscreen) {
-                    container.msRequestFullscreen();
+                // Enter fullscreen
+                if (canvas.requestFullscreen) {
+                    canvas.requestFullscreen();
+                } else if (canvas.webkitRequestFullscreen) {
+                    canvas.webkitRequestFullscreen();
+                } else if (canvas.msRequestFullscreen) {
+                    canvas.msRequestFullscreen();
                 }
+                isFullscreen = true;
+                
+                // Ensure canvas fills the screen
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
             } else {
+                // Exit fullscreen
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
                 } else if (document.webkitExitFullscreen) {
@@ -758,11 +860,20 @@
                 } else if (document.msExitFullscreen) {
                     document.msExitFullscreen();
                 }
+                isFullscreen = false;
             }
         }
         
         // Update fullscreen button icon
         function updateFullscreenButton() {
+            if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
+            
+            const buttons = rufflePlayer.shadowRoot.querySelector('.control-buttons');
+            if (!buttons) return;
+            
+            const fullscreenBtn = buttons.querySelector('#fullscreen-btn');
+            if (!fullscreenBtn) return;
+            
             if (document.fullscreenElement) {
                 fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
             } else {
@@ -795,11 +906,6 @@
         }
         
         // Event Listeners
-        screenshotBtn.addEventListener('click', saveScreenshot);
-        tweetBtn.addEventListener('click', shareOnTwitter);
-        fullscreenBtn.addEventListener('click', toggleFullscreen);
-        
-        // Fullscreen change events
         document.addEventListener('fullscreenchange', updateFullscreenButton);
         document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
         document.addEventListener('msfullscreenchange', updateFullscreenButton);
@@ -811,8 +917,8 @@
         // Add terminal animation
         setTimeout(() => {
             addTerminalLine('> Scanning GCPD frequencies...');
-            addTerminalLine('> Alert: Root Security issue');
-            addTerminalLine('> Alert: ISB security status moderate');
+            addTerminalLine('> Alert: Suspicious activity at Arkham Asylum');
+            addTerminalLine('> Alert: Police scanners reporting armed robbery in progress');
             addTerminalLine('> Deploying countermeasures...');
             addTerminalLine('> Situation contained');
         }, 2000);
