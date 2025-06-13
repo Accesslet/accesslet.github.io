@@ -243,36 +243,6 @@
             position: relative;
         }
         
-        .control-buttons {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 9999;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .control-btn {
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 50, 100, 0.7);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            color: #00eeff;
-            font-size: 1.2rem;
-            border: 1px solid #00aaff;
-            box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
-            transition: all 0.3s;
-        }
-        
-        .control-btn:hover {
-            background: rgba(0, 100, 200, 0.8);
-            transform: scale(1.1);
-        }
-        
         /* Terminal */
         .terminal {
             background: rgba(0, 0, 0, 0.7);
@@ -401,12 +371,6 @@
                 text-align: center;
             }
             
-            .control-buttons {
-                flex-direction: column;
-                top: 10px;
-                right: 10px;
-            }
-            
             .system-info {
                 flex-wrap: wrap;
                 justify-content: center;
@@ -419,44 +383,69 @@
             }
         }
         
-        /* Fullscreen styles */
-        #fullscreen-overlay {
+        /* Controls */
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 50, 100, 0.7);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: #00eeff;
+            font-size: 1.2rem;
+            border: 1px solid #00aaff;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 100, 200, 0.8);
+            transform: scale(1.1);
+        }
+        
+        /* Fullscreen mode adjustments */
+        .fullscreen-mode .container {
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            margin: 0;
+            border-radius: 0;
+            border: none;
+        }
+        
+        .fullscreen-mode .game-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000;
-            z-index: 10000;
-            display: none;
-            justify-content: center;
-            align-items: center;
+            z-index: 100;
         }
         
-        #fullscreen-content {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        #fullscreen-ruffle-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        #fullscreen-controls {
-            position: absolute;
+        .fullscreen-mode .controls {
+            position: fixed;
             top: 20px;
             right: 20px;
-            display: flex;
-            gap: 15px;
-            z-index: 10001;
+            z-index: 1001;
+        }
+        
+        .fullscreen-mode .main-content,
+        .fullscreen-mode .sidebar,
+        .fullscreen-mode .header,
+        .fullscreen-mode .status-bar,
+        .fullscreen-mode .panel:not(.game-panel) {
+            display: none;
         }
     </style>
 </head>
@@ -503,7 +492,7 @@
             </div>
             
             <div class="game-section">
-                <div class="panel">
+                <div class="panel game-panel">
                     <div class="panel-header">
                         <div class="panel-title">CONTROL STATION</div>
                         <div>STATUS: <span class="glitch">ONLINE</span></div>
@@ -511,17 +500,7 @@
                     <div class="panel-content">
                         <div class="game-container">
                             <div id="ruffle-container">
-                                <div class="control-buttons">
-                                    <div class="control-btn" id="screenshot-btn" title="Capture Screenshot">
-                                        <i class="fas fa-camera"></i>
-                                    </div>
-                                    <div class="control-btn" id="tweet-btn" title="Share on Twitter">
-                                        <i class="fab fa-twitter"></i>
-                                    </div>
-                                    <div class="control-btn" id="fullscreen-btn" title="Toggle Fullscreen">
-                                        <i class="fas fa-expand"></i>
-                                    </div>
-                                </div>
+                                <!-- Ruffle player will be inserted here -->
                             </div>
                         </div>
                     </div>
@@ -580,21 +559,16 @@
         </div>
     </div>
 
-    <!-- Fullscreen overlay -->
-    <div id="fullscreen-overlay">
-        <div id="fullscreen-content">
-            <div id="fullscreen-ruffle-container"></div>
-            <div id="fullscreen-controls">
-                <div class="control-btn" id="fs-screenshot-btn" title="Capture Screenshot">
-                    <i class="fas fa-camera"></i>
-                </div>
-                <div class="control-btn" id="fs-tweet-btn" title="Share on Twitter">
-                    <i class="fab fa-twitter"></i>
-                </div>
-                <div class="control-btn" id="fs-exit-btn" title="Exit Fullscreen">
-                    <i class="fas fa-compress"></i>
-                </div>
-            </div>
+    <!-- Controls - Moved outside of game container -->
+    <div id="controls">
+        <div class="control-btn" id="screenshot-btn" title="Capture Screenshot">
+            <i class="fas fa-camera"></i>
+        </div>
+        <div class="control-btn" id="tweet-btn" title="Share on Twitter">
+            <i class="fab fa-twitter"></i>
+        </div>
+        <div class="control-btn" id="fullscreen-btn" title="Toggle Fullscreen">
+            <i class="fas fa-expand"></i>
         </div>
     </div>
 
@@ -611,18 +585,13 @@
         const screenshotBtn = document.getElementById('screenshot-btn');
         const tweetBtn = document.getElementById('tweet-btn');
         const fullscreenBtn = document.getElementById('fullscreen-btn');
-        
-        // Fullscreen elements
-        const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-        const fullscreenRuffleContainer = document.getElementById('fullscreen-ruffle-container');
-        const fsScreenshotBtn = document.getElementById('fs-screenshot-btn');
-        const fsTweetBtn = document.getElementById('fs-tweet-btn');
-        const fsExitBtn = document.getElementById('fs-exit-btn');
+        const controls = document.getElementById('controls');
+        const gameContainer = document.querySelector('.game-container');
+        const container = document.querySelector('.container');
         
         // State
         let rufflePlayer = null;
         let currentGame = "init.vm";
-        let originalControls = null;
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -689,9 +658,6 @@
             rufflePlayer.id = "ruffle-player";
             ruffleContainer.appendChild(rufflePlayer);
             
-            // Save reference to control buttons
-            originalControls = document.querySelector('.control-buttons');
-            
             // Load the game SWF
             rufflePlayer.load(gameFile);
             
@@ -713,11 +679,8 @@
         }
         
         // Capture screenshot
-        async function captureScreenshot(isFullscreen = false) {
-            const container = isFullscreen ? fullscreenRuffleContainer : ruffleContainer;
-            let player = container.querySelector('#ruffle-player');
-            
-            if (!player) {
+        async function captureScreenshot() {
+            if (!rufflePlayer) {
                 showNotification('Game not loaded', true);
                 return null;
             }
@@ -725,8 +688,8 @@
             try {
                 // Access the canvas element
                 let canvas = null;
-                if (player.shadowRoot) {
-                    canvas = player.shadowRoot.querySelector('canvas');
+                if (rufflePlayer.shadowRoot) {
+                    canvas = rufflePlayer.shadowRoot.querySelector('canvas');
                 }
                 
                 if (!canvas) {
@@ -754,8 +717,8 @@
         }
         
         // Save screenshot
-        async function saveScreenshot(isFullscreen = false) {
-            const dataUrl = await captureScreenshot(isFullscreen);
+        async function saveScreenshot() {
+            const dataUrl = await captureScreenshot();
             
             if (!dataUrl) return;
             
@@ -778,8 +741,8 @@
         }
         
         // Share on Twitter
-        async function shareOnTwitter(isFullscreen = false) {
-            const dataUrl = await captureScreenshot(isFullscreen);
+        async function shareOnTwitter() {
+            const dataUrl = await captureScreenshot();
             
             if (!dataUrl) {
                 showNotification('No screenshot to share', true);
@@ -812,59 +775,43 @@
         
         // Toggle fullscreen
         function toggleFullscreen() {
-            if (!rufflePlayer) {
-                showNotification('Game not loaded', true);
-                return;
-            }
-            
-            if (!fullscreenOverlay.style.display || fullscreenOverlay.style.display === 'none') {
+            if (!document.fullscreenElement) {
                 // Enter fullscreen mode
-                fullscreenOverlay.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
+                container.classList.add('fullscreen-mode');
+                gameContainer.classList.add('fullscreen-mode');
+                controls.classList.add('fullscreen-mode');
                 
-                // Move the existing Ruffle player to fullscreen container
-                fullscreenRuffleContainer.appendChild(rufflePlayer);
+                document.documentElement.requestFullscreen()
+                    .catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
                 
-                // Move control buttons to fullscreen
-                const controls = document.querySelector('.control-buttons');
-                if (controls) {
-                    controls.style.position = 'fixed';
-                    controls.style.top = '20px';
-                    controls.style.right = '20px';
-                    controls.style.zIndex = '10001';
-                    document.body.appendChild(controls);
-                }
-                
-                // Adjust player size
-                rufflePlayer.style.width = '100%';
-                rufflePlayer.style.height = '100%';
+                // Update button icon
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
                 
                 showNotification('Entering fullscreen mode');
             } else {
                 // Exit fullscreen mode
-                fullscreenOverlay.style.display = 'none';
-                document.body.style.overflow = '';
-                
-                // Move Ruffle player back to normal container
-                ruffleContainer.appendChild(rufflePlayer);
-                
-                // Move controls back to original position
-                const controls = document.querySelector('.control-buttons');
-                if (controls && originalControls) {
-                    controls.style.position = '';
-                    controls.style.top = '';
-                    controls.style.right = '';
-                    controls.style.zIndex = '';
-                    originalControls.appendChild(controls);
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
                 }
+            }
+        }
+        
+        // Handle fullscreen change
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                // Exited fullscreen
+                container.classList.remove('fullscreen-mode');
+                gameContainer.classList.remove('fullscreen-mode');
+                controls.classList.remove('fullscreen-mode');
                 
-                // Reset player size
-                rufflePlayer.style.width = '';
-                rufflePlayer.style.height = '';
+                // Update button icon
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
                 
                 showNotification('Exiting fullscreen mode');
             }
-        }
+        });
         
         // Game switching functionality
         function setupGameSwitching() {
@@ -895,14 +842,9 @@
         setupGameSwitching();
         
         // Event Listeners
-        screenshotBtn.addEventListener('click', () => saveScreenshot(false));
-        tweetBtn.addEventListener('click', () => shareOnTwitter(false));
+        screenshotBtn.addEventListener('click', saveScreenshot);
+        tweetBtn.addEventListener('click', shareOnTwitter);
         fullscreenBtn.addEventListener('click', toggleFullscreen);
-        
-        // Fullscreen controls
-        fsScreenshotBtn.addEventListener('click', () => saveScreenshot(true));
-        fsTweetBtn.addEventListener('click', () => shareOnTwitter(true));
-        fsExitBtn.addEventListener('click', toggleFullscreen);
         
         // Add terminal animation
         setTimeout(() => {
