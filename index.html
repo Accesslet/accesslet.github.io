@@ -466,6 +466,12 @@
         body.fullscreen-mode #controls {
             display: none;
         }
+        
+        /* Game canvas styling */
+        ruffle-player {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -630,9 +636,9 @@
         
         // State
         let rufflePlayer = null;
-        let fullscreenPlayer = null;
         let currentGame = "init.vm";
         let isFullscreen = false;
+        let originalControls = null;
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -699,6 +705,9 @@
             rufflePlayer.id = "ruffle-player";
             ruffleContainer.appendChild(rufflePlayer);
             
+            // Save reference to control buttons
+            originalControls = document.querySelector('.control-buttons');
+            
             // Load the game SWF
             rufflePlayer.load(gameFile);
             
@@ -707,51 +716,6 @@
             setTimeout(() => {
                 addTerminalLine(`> ${gameFile} loaded successfully`);
             }, 1000);
-        }
-        
-        // Initialize Fullscreen Ruffle Player
-        function initializeFullscreenRuffle(gameFile = currentGame) {
-            // Remove existing player if it exists
-            if (fullscreenPlayer) {
-                fullscreenRuffleContainer.removeChild(fullscreenPlayer);
-                fullscreenPlayer = null;
-            }
-            
-            if (!window.RufflePlayer) {
-                showNotification('Ruffle library not loaded', true);
-                return;
-            }
-            
-            const ruffle = window.RufflePlayer.newest();
-            if (!ruffle) {
-                showNotification('Failed to initialize Ruffle player', true);
-                return;
-            }
-            
-            // Configure Ruffle for fullscreen
-            const config = {
-                "autoplay": "on",
-                "showRuffleLogo": false,
-                "unmuteOverlay": "hidden",
-                "backgroundColor": "#000000",
-                "logLevel": "error",
-                "showFullscreenButton": false,
-                "warnOnUnsupportedContent": false,
-                "contextMenu": "off",
-                "allowNetworking": "all",
-                "playerVersion": "0",
-                "preferredRenderer": "canvas"
-            };
-            
-            fullscreenPlayer = ruffle.createPlayer();
-            fullscreenPlayer.config = config;
-            fullscreenPlayer.id = "fullscreen-ruffle-player";
-            fullscreenPlayer.style.width = "100%";
-            fullscreenPlayer.style.height = "100%";
-            fullscreenRuffleContainer.appendChild(fullscreenPlayer);
-            
-            // Load the game SWF
-            fullscreenPlayer.load(gameFile);
         }
         
         // Add terminal line
@@ -766,7 +730,8 @@
         
         // Capture screenshot
         async function captureScreenshot(isFullscreen = false) {
-            const player = isFullscreen ? fullscreenPlayer : rufflePlayer;
+            const container = isFullscreen ? fullscreenRuffleContainer : ruffleContainer;
+            let player = container.querySelector('#ruffle-player');
             
             if (!player) {
                 showNotification('Game not loaded', true);
@@ -873,8 +838,15 @@
                 document.body.classList.add('fullscreen-mode');
                 fullscreenOverlay.style.display = 'flex';
                 
-                // Initialize the fullscreen Ruffle player
-                initializeFullscreenRuffle(currentGame);
+                // Move the existing Ruffle player to fullscreen container
+                fullscreenRuffleContainer.appendChild(rufflePlayer);
+                
+                // Resize player to fit fullscreen
+                rufflePlayer.style.width = '100%';
+                rufflePlayer.style.height = '100%';
+                
+                // Update button icon
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
                 
                 showNotification('Entering fullscreen mode');
                 isFullscreen = true;
@@ -882,6 +854,17 @@
                 // Exit fullscreen mode
                 document.body.classList.remove('fullscreen-mode');
                 fullscreenOverlay.style.display = 'none';
+                
+                // Move Ruffle player back to normal container
+                ruffleContainer.appendChild(rufflePlayer);
+                
+                // Reset player size
+                rufflePlayer.style.width = '';
+                rufflePlayer.style.height = '';
+                
+                // Update button icon
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                
                 showNotification('Exiting fullscreen mode');
                 isFullscreen = false;
             }
