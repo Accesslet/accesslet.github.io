@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PK-SHH-DB OS</title>
+    <title>PK-SHH-DB OS v3.14 - Fixed Controls</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -240,6 +240,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
         
         .control-buttons {
@@ -424,7 +425,7 @@
         <div class="header">
             <div class="logo">
                 <div class="SHH-DB-logo"></div>
-                <h1>SHH-DB OS v3.14</h1>
+                <h1>PK-SHH-DB OS v3.14</h1>
             </div>
             <div class="system-info">
                 <div>USER: <span class="glitch">SHH-DB</span></div>
@@ -471,16 +472,16 @@
                         <div class="game-container">
                             <div id="ruffle-container">
                                 <div class="control-buttons">
-                                <div class="control-btn" id="screenshot-btn" title="Capture Screenshot">
-                                    <i class="fas fa-camera"></i>
+                                    <div class="control-btn" id="screenshot-btn" title="Capture Screenshot">
+                                        <i class="fas fa-camera"></i>
+                                    </div>
+                                    <div class="control-btn" id="tweet-btn" title="Share on Twitter">
+                                        <i class="fab fa-twitter"></i>
+                                    </div>
+                                    <div class="control-btn" id="fullscreen-btn" title="Toggle Fullscreen">
+                                        <i class="fas fa-expand"></i>
+                                    </div>
                                 </div>
-                                <div class="control-btn" id="tweet-btn" title="Share on Twitter">
-                                    <i class="fab fa-twitter"></i>
-                                </div>
-                                <div class="control-btn" id="fullscreen-btn" title="Toggle Fullscreen">
-                                    <i class="fas fa-expand"></i>
-                                </div>
-                            </div>
                             </div>
                         </div>
                     </div>
@@ -556,6 +557,7 @@
         // State
         let rufflePlayer = null;
         let currentGame = "init.vm";
+        let isFullscreen = false;
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -739,23 +741,36 @@
             }
         }
         
-        // Toggle fullscreen
+        // Toggle fullscreen - FIXED
         function toggleFullscreen() {
-            //const container = rufflePlayer.shadowRoot.querySelector('canvas');
+            if (!rufflePlayer || !rufflePlayer.shadowRoot) {
+                showNotification('Game not loaded', true);
+                return;
+            }
             
-            const container = document.querySelector('#ruffle-container');
-
-
+            const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
+            if (!canvas) {
+                showNotification('Canvas not found', true);
+                return;
+            }
             
-            if (!document.fullscreenElement) {
-                if (container.requestFullscreen) {
-                    container.requestFullscreen();
-                } else if (container.webkitRequestFullscreen) {
-                    container.webkitRequestFullscreen();
-                } else if (container.msRequestFullscreen) {
-                    container.msRequestFullscreen();
+            if (!isFullscreen) {
+                // Enter fullscreen
+                if (canvas.requestFullscreen) {
+                    canvas.requestFullscreen();
+                } else if (canvas.webkitRequestFullscreen) {
+                    canvas.webkitRequestFullscreen();
+                } else if (canvas.msRequestFullscreen) {
+                    canvas.msRequestFullscreen();
                 }
+                isFullscreen = true;
+                
+                // Update button icon immediately
+                updateFullscreenButton();
+                
+                showNotification('Entering fullscreen mode');
             } else {
+                // Exit fullscreen
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
                 } else if (document.webkitExitFullscreen) {
@@ -763,12 +778,18 @@
                 } else if (document.msExitFullscreen) {
                     document.msExitFullscreen();
                 }
+                isFullscreen = false;
+                
+                // Update button icon immediately
+                updateFullscreenButton();
+                
+                showNotification('Exiting fullscreen mode');
             }
         }
         
-        // Update fullscreen button icon
+        // Update fullscreen button icon - FIXED
         function updateFullscreenButton() {
-            if (document.fullscreenElement) {
+            if (isFullscreen) {
                 fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
             } else {
                 fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
@@ -805,9 +826,20 @@
         fullscreenBtn.addEventListener('click', toggleFullscreen);
         
         // Fullscreen change events
-        document.addEventListener('fullscreenchange', updateFullscreenButton);
-        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
-        document.addEventListener('msfullscreenchange', updateFullscreenButton);
+        document.addEventListener('fullscreenchange', () => {
+            isFullscreen = !!document.fullscreenElement;
+            updateFullscreenButton();
+        });
+        
+        document.addEventListener('webkitfullscreenchange', () => {
+            isFullscreen = !!document.webkitFullscreenElement;
+            updateFullscreenButton();
+        });
+        
+        document.addEventListener('msfullscreenchange', () => {
+            isFullscreen = !!document.msFullscreenElement;
+            updateFullscreenButton();
+        });
         
         // Initialize
         initializeRuffle();
