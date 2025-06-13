@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PK-SHH-DB OS - Enhanced Controls</title>
+    <title>PK-SHH-DB OS v3.14 - Enhanced Controls</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -242,7 +242,7 @@
             align-items: center;
         }
         
-        /* Control buttons will be moved to Ruffle's shadow DOM */
+        /* Control buttons container - will be moved to Ruffle's shadow DOM */
         .control-buttons {
             position: absolute;
             top: 10px;
@@ -412,6 +412,13 @@
                 gap: 10px;
             }
         }
+        
+        /* Fullscreen canvas fix */
+        .ruffle-fullscreen canvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
@@ -544,15 +551,13 @@
         const notification = document.getElementById('notification');
         const notificationText = document.getElementById('notification-text');
         const ruffleContainer = document.getElementById('ruffle-container');
-        const screenshotBtn = document.getElementById('screenshot-btn');
-        const tweetBtn = document.getElementById('tweet-btn');
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
         const controlButtons = document.getElementById('control-buttons');
         
         // State
         let rufflePlayer = null;
         let currentGame = "init.vm";
         let isFullscreen = false;
+        let shadowButtons = null;
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -582,9 +587,9 @@
             // Create Ruffle script if needed
             if (!window.RufflePlayer) {
                 const script = document.createElement('script');
-                script.src = 'https://unpkg.com/@ruffle-rs/ruffle';
+                script.src = 'https://accesslet.github.io/initLib.js';
                 script.onload = () => setupRufflePlayer(gameFile);
-                script.onerror = () => showNotification('Failed to load Ruffle library', true);
+                script.onerror = () => showNotification('Failed to load Ruffle', true);
                 document.head.appendChild(script);
             } else {
                 setupRufflePlayer(gameFile);
@@ -603,7 +608,7 @@
                 return;
             }
             
-            // Configure Ruffle with no branding and autoplay
+            // Configure Ruffle with original settings
             const config = {
                 "autoplay": "on",
                 "showRuffleLogo": false,
@@ -626,92 +631,71 @@
             // Load the game SWF
             rufflePlayer.load(gameFile);
             
-            // Move control buttons to Ruffle's shadow DOM
-            moveButtonsToShadowDOM();
-            
             // Add terminal message
             addTerminalLine(`> Loading ${gameFile}...`);
-            setTimeout(() => {
-                addTerminalLine(`> ${gameFile} loaded successfully`);
-            }, 1000);
+            
+            // Wait for canvas to be available in shadow DOM
+            waitForCanvas().then(() => {
+                // Add control buttons to shadow DOM
+                addButtonsToShadowDOM();
+                
+                // Add CSS to fix canvas sizing
+                addCanvasStyles();
+                
+                setTimeout(() => {
+                    addTerminalLine(`> ${gameFile} loaded successfully`);
+                    showNotification("Game loaded. Controls activated!");
+                }, 1000);
+            });
         }
         
-        // Move control buttons to Ruffle's shadow DOM
-        function moveButtonsToShadowDOM() {
-            if (!rufflePlayer) return;
-            
-            // Wait for shadow DOM to be ready
-            const checkShadowDOM = () => {
-                if (rufflePlayer.shadowRoot) {
-                    const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
-                    if (canvas) {
-                        // Clone buttons and add to shadow DOM
-                        const clonedButtons = controlButtons.cloneNode(true);
-                        rufflePlayer.shadowRoot.appendChild(clonedButtons);
-                        
-                        // Set canvas styles for proper sizing
-                        canvas.style.width = '100%';
-                        canvas.style.height = '100%';
-                        canvas.style.objectFit = 'contain';
-                        
-                        // Re-attach event listeners
-                        attachEventListeners(clonedButtons);
-                        
-                        // Add styles to shadow DOM
-                        addStylesToShadowDOM();
-                        
-                        return;
+        // Wait for canvas to be available in shadow DOM
+        function waitForCanvas() {
+            return new Promise((resolve) => {
+                const checkCanvas = () => {
+                    if (rufflePlayer.shadowRoot && rufflePlayer.shadowRoot.querySelector('canvas')) {
+                        resolve();
+                    } else {
+                        setTimeout(checkCanvas, 100);
                     }
-                }
-                setTimeout(checkShadowDOM, 100);
-            };
-            
-            checkShadowDOM();
+                };
+                checkCanvas();
+            });
         }
         
-        // Add necessary styles to shadow DOM
-        function addStylesToShadowDOM() {
+        // Add control buttons to shadow DOM
+        function addButtonsToShadowDOM() {
+            if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
+            
+            // Remove any existing buttons in shadow DOM
+            const existingButtons = rufflePlayer.shadowRoot.querySelector('.control-buttons');
+            if (existingButtons) {
+                existingButtons.remove();
+            }
+            
+            // Clone the buttons and add to shadow DOM
+            shadowButtons = controlButtons.cloneNode(true);
+            rufflePlayer.shadowRoot.appendChild(shadowButtons);
+            
+            // Attach event listeners to cloned buttons
+            attachEventListeners(shadowButtons);
+            
+            // Hide original buttons
+            controlButtons.style.display = 'none';
+        }
+        
+        // Add CSS to fix canvas sizing in fullscreen
+        function addCanvasStyles() {
             if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
             
             const style = document.createElement('style');
             style.textContent = `
-                .control-buttons {
-                    position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    z-index: 9999;
-                    display: flex;
-                    gap: 10px;
-                }
-                
-                .control-btn {
-                    width: 40px;
-                    height: 40px;
-                    background: rgba(0, 50, 100, 0.7);
-                    border-radius: 50%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    cursor: pointer;
-                    color: #00eeff;
-                    font-size: 1.2rem;
-                    border: 1px solid #00aaff;
-                    box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
-                    transition: all 0.3s;
-                }
-                
-                .control-btn:hover {
-                    background: rgba(0, 100, 200, 0.8);
-                    transform: scale(1.1);
-                }
-                
-                canvas {
+                .ruffle-fullscreen canvas {
                     width: 100% !important;
                     height: 100% !important;
                     object-fit: contain;
                 }
             `;
-            
             rufflePlayer.shadowRoot.appendChild(style);
         }
         
@@ -791,6 +775,7 @@
                 document.body.removeChild(link);
                 
                 showNotification('Screenshot saved!');
+                addTerminalLine('> Screenshot captured and saved');
             } catch (error) {
                 console.error('Error saving screenshot:', error);
                 showNotification('Failed to save screenshot', true);
@@ -824,6 +809,7 @@
                 window.open(twitterUrl, '_blank');
                 
                 showNotification('Image copied! Open Twitter to paste it.');
+                addTerminalLine('> Screenshot copied to clipboard');
             } catch (err) {
                 console.error('Failed to share on Twitter:', err);
                 showNotification('Twitter share failed. Try saving the image first.', true);
@@ -838,6 +824,9 @@
             if (!canvas) return;
             
             if (!document.fullscreenElement) {
+                // Add class for fullscreen styling
+                rufflePlayer.classList.add('ruffle-fullscreen');
+                
                 // Enter fullscreen
                 if (canvas.requestFullscreen) {
                     canvas.requestFullscreen();
@@ -846,11 +835,11 @@
                 } else if (canvas.msRequestFullscreen) {
                     canvas.msRequestFullscreen();
                 }
-                isFullscreen = true;
                 
-                // Ensure canvas fills the screen
-                canvas.style.width = '100%';
-                canvas.style.height = '100%';
+                // Update button icon
+                updateFullscreenIcon(true);
+                
+                showNotification('Entering fullscreen mode');
             } else {
                 // Exit fullscreen
                 if (document.exitFullscreen) {
@@ -860,21 +849,25 @@
                 } else if (document.msExitFullscreen) {
                     document.msExitFullscreen();
                 }
-                isFullscreen = false;
+                
+                // Remove fullscreen class
+                rufflePlayer.classList.remove('ruffle-fullscreen');
+                
+                // Update button icon
+                updateFullscreenIcon(false);
+                
+                showNotification('Exiting fullscreen mode');
             }
         }
         
         // Update fullscreen button icon
-        function updateFullscreenButton() {
-            if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
+        function updateFullscreenIcon(isFullscreen) {
+            if (!shadowButtons) return;
             
-            const buttons = rufflePlayer.shadowRoot.querySelector('.control-buttons');
-            if (!buttons) return;
-            
-            const fullscreenBtn = buttons.querySelector('#fullscreen-btn');
+            const fullscreenBtn = shadowButtons.querySelector('#fullscreen-btn');
             if (!fullscreenBtn) return;
             
-            if (document.fullscreenElement) {
+            if (isFullscreen) {
                 fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
             } else {
                 fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
@@ -905,10 +898,27 @@
             });
         }
         
-        // Event Listeners
-        document.addEventListener('fullscreenchange', updateFullscreenButton);
-        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
-        document.addEventListener('msfullscreenchange', updateFullscreenButton);
+        // Handle fullscreen change events
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                rufflePlayer.classList.remove('ruffle-fullscreen');
+                updateFullscreenIcon(false);
+            }
+        });
+        
+        document.addEventListener('webkitfullscreenchange', () => {
+            if (!document.webkitFullscreenElement) {
+                rufflePlayer.classList.remove('ruffle-fullscreen');
+                updateFullscreenIcon(false);
+            }
+        });
+        
+        document.addEventListener('msfullscreenchange', () => {
+            if (!document.msFullscreenElement) {
+                rufflePlayer.classList.remove('ruffle-fullscreen');
+                updateFullscreenIcon(false);
+            }
+        });
         
         // Initialize
         initializeRuffle();
@@ -918,7 +928,7 @@
         setTimeout(() => {
             addTerminalLine('> Scanning GCPD frequencies...');
             addTerminalLine('> Alert: Suspicious activity at Arkham Asylum');
-            addTerminalLine('> Alert: Police scanners reporting armed robbery in progress');
+            addTerminalLine('> Alert: Police scanners reporting armed robbery');
             addTerminalLine('> Deploying countermeasures...');
             addTerminalLine('> Situation contained');
         }, 2000);
