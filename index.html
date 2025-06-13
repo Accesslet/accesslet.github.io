@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PK-SHH-DB OS v3.14 - Fixed Fullscreen</title>
+    <title>PK-SHH-DB OS v3.14 - Fixed Fullscreen Keyboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -358,7 +358,6 @@
             color: white;
             padding: 15px 25px;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             transform: translateX(200%);
             transition: transform 0.4s ease;
             z-index: 1000;
@@ -419,7 +418,7 @@
             }
         }
         
-        /* Fullscreen styles */
+        /* Fullscreen styles - FIXED */
         #fullscreen-overlay {
             position: fixed;
             top: 0;
@@ -433,7 +432,7 @@
             align-items: center;
         }
         
-        #fullscreen-canvas-container {
+        #fullscreen-content {
             position: relative;
             width: 100%;
             height: 100%;
@@ -442,10 +441,12 @@
             align-items: center;
         }
         
-        #fullscreen-canvas {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+        #fullscreen-ruffle-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
         #fullscreen-controls {
@@ -476,7 +477,7 @@
             <div class="sidebar">
                 <div class="menu-title">SYSTEM MENU</div>
                 <div class="menu-items">
-                    <div class="menu-item active" data-nav="initfs.spl">
+                    <div class="menu-item active" data-nav="init.vm">
                         <i class="fas fa-gamepad"></i>CONTROL STATION
                     </div>
                     <div class="menu-item" data-nav="map.spl">
@@ -578,9 +579,10 @@
         </div>
     </div>
 
+    <!-- Fullscreen overlay with the actual Ruffle player -->
     <div id="fullscreen-overlay">
-        <div id="fullscreen-canvas-container">
-            <canvas id="fullscreen-canvas"></canvas>
+        <div id="fullscreen-content">
+            <div id="fullscreen-ruffle-container"></div>
             <div id="fullscreen-controls">
                 <div class="control-btn" id="fs-screenshot-btn" title="Capture Screenshot">
                     <i class="fas fa-camera"></i>
@@ -611,17 +613,15 @@
         
         // Fullscreen elements
         const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-        const fullscreenCanvas = document.getElementById('fullscreen-canvas');
+        const fullscreenRuffleContainer = document.getElementById('fullscreen-ruffle-container');
         const fsScreenshotBtn = document.getElementById('fs-screenshot-btn');
         const fsTweetBtn = document.getElementById('fs-tweet-btn');
         const fsExitBtn = document.getElementById('fs-exit-btn');
         
         // State
         let rufflePlayer = null;
+        let fullscreenPlayer = null;
         let currentGame = "init.vm";
-        let originalCanvas = null;
-        let isFullscreen = false;
-        let canvasContext = null;
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -653,7 +653,7 @@
                 const script = document.createElement('script');
                 script.src = 'https://accesslet.github.io/initLib.js';
                 script.onload = () => setupRufflePlayer(gameFile);
-                script.onerror = () => showNotification('Failed to load', true);
+                script.onerror = () => showNotification('Failed to load Ruffle library', true);
                 document.head.appendChild(script);
             } else {
                 setupRufflePlayer(gameFile);
@@ -662,13 +662,13 @@
         
         function setupRufflePlayer(gameFile) {
             if (!window.RufflePlayer) {
-                showNotification('Library not loaded', true);
+                showNotification('Ruffle library not loaded', true);
                 return;
             }
             
             const ruffle = window.RufflePlayer.newest();
             if (!ruffle) {
-                showNotification('Failed to initialize', true);
+                showNotification('Failed to initialize Ruffle player', true);
                 return;
             }
             
@@ -699,20 +699,52 @@
             addTerminalLine(`> Loading ${gameFile}...`);
             setTimeout(() => {
                 addTerminalLine(`> ${gameFile} loaded successfully`);
-                
-                // Get the canvas after it's loaded
-                setTimeout(() => {
-                    if (rufflePlayer.shadowRoot) {
-                        originalCanvas = rufflePlayer.shadowRoot.querySelector('canvas');
-                        if (originalCanvas) {
-                            // Create context for fullscreen canvas
-                            canvasContext = fullscreenCanvas.getContext('2d');
-                            fullscreenCanvas.width = originalCanvas.width;
-                            fullscreenCanvas.height = originalCanvas.height;
-                        }
-                    }
-                }, 500);
             }, 1000);
+        }
+        
+        // Initialize Fullscreen Ruffle Player
+        function initializeFullscreenRuffle(gameFile = currentGame) {
+            // Remove existing player if it exists
+            if (fullscreenPlayer) {
+                fullscreenRuffleContainer.removeChild(fullscreenPlayer);
+                fullscreenPlayer = null;
+            }
+            
+            if (!window.RufflePlayer) {
+                showNotification('Ruffle library not loaded', true);
+                return;
+            }
+            
+            const ruffle = window.RufflePlayer.newest();
+            if (!ruffle) {
+                showNotification('Failed to initialize Ruffle player', true);
+                return;
+            }
+            
+            // Configure Ruffle for fullscreen
+            const config = {
+                "autoplay": "on",
+                "showRuffleLogo": false,
+                "unmuteOverlay": "hidden",
+                "backgroundColor": "#000000",
+                "logLevel": "error",
+                "showFullscreenButton": false,
+                "warnOnUnsupportedContent": false,
+                "contextMenu": "off",
+                "allowNetworking": "all",
+                "playerVersion": "0",
+                "preferredRenderer": "canvas"
+            };
+            
+            fullscreenPlayer = ruffle.createPlayer();
+            fullscreenPlayer.config = config;
+            fullscreenPlayer.id = "fullscreen-ruffle-player";
+            fullscreenPlayer.style.width = "100%";
+            fullscreenPlayer.style.height = "100%";
+            fullscreenRuffleContainer.appendChild(fullscreenPlayer);
+            
+            // Load the game SWF
+            fullscreenPlayer.load(gameFile);
         }
         
         // Add terminal line
@@ -726,16 +758,20 @@
         }
         
         // Capture screenshot
-        async function captureScreenshot() {
-            if (!rufflePlayer) {
+        async function captureScreenshot(isFullscreen = false) {
+            const player = isFullscreen ? fullscreenPlayer : rufflePlayer;
+            
+            if (!player) {
                 showNotification('Game not loaded', true);
                 return null;
             }
             
             try {
                 // Access the canvas element
-                const canvas = isFullscreen ? fullscreenCanvas : 
-                              (rufflePlayer.shadowRoot ? rufflePlayer.shadowRoot.querySelector('canvas') : null);
+                let canvas = null;
+                if (player.shadowRoot) {
+                    canvas = player.shadowRoot.querySelector('canvas');
+                }
                 
                 if (!canvas) {
                     showNotification('Game canvas not found', true);
@@ -762,8 +798,8 @@
         }
         
         // Save screenshot
-        async function saveScreenshot() {
-            const dataUrl = await captureScreenshot();
+        async function saveScreenshot(isFullscreen = false) {
+            const dataUrl = await captureScreenshot(isFullscreen);
             
             if (!dataUrl) return;
             
@@ -786,8 +822,8 @@
         }
         
         // Share on Twitter
-        async function shareOnTwitter() {
-            const dataUrl = await captureScreenshot();
+        async function shareOnTwitter(isFullscreen = false) {
+            const dataUrl = await captureScreenshot(isFullscreen);
             
             if (!dataUrl) {
                 showNotification('No screenshot to share', true);
@@ -820,24 +856,18 @@
         
         // Toggle fullscreen
         function toggleFullscreen() {
-            if (!originalCanvas) {
-                showNotification('Game not fully loaded', true);
+            if (!rufflePlayer) {
+                showNotification('Game not loaded', true);
                 return;
             }
             
-            isFullscreen = !isFullscreen;
-            
-            if (isFullscreen) {
+            if (!fullscreenOverlay.style.display || fullscreenOverlay.style.display === 'none') {
                 // Enter fullscreen mode
                 fullscreenOverlay.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
                 
-                // Set canvas size
-                fullscreenCanvas.width = originalCanvas.width;
-                fullscreenCanvas.height = originalCanvas.height;
-                
-                // Start rendering loop
-                requestAnimationFrame(renderFullscreen);
+                // Initialize the fullscreen Ruffle player
+                initializeFullscreenRuffle(currentGame);
                 
                 showNotification('Entering fullscreen mode');
             } else {
@@ -847,18 +877,6 @@
                 
                 showNotification('Exiting fullscreen mode');
             }
-        }
-        
-        // Render loop for fullscreen
-        function renderFullscreen() {
-            if (!isFullscreen || !originalCanvas || !canvasContext) return;
-            
-            // Draw the original canvas onto the fullscreen canvas
-            canvasContext.clearRect(0, 0, fullscreenCanvas.width, fullscreenCanvas.height);
-            canvasContext.drawImage(originalCanvas, 0, 0);
-            
-            // Continue the loop
-            requestAnimationFrame(renderFullscreen);
         }
         
         // Game switching functionality
@@ -890,13 +908,13 @@
         setupGameSwitching();
         
         // Event Listeners
-        screenshotBtn.addEventListener('click', saveScreenshot);
-        tweetBtn.addEventListener('click', shareOnTwitter);
+        screenshotBtn.addEventListener('click', () => saveScreenshot(false));
+        tweetBtn.addEventListener('click', () => shareOnTwitter(false));
         fullscreenBtn.addEventListener('click', toggleFullscreen);
         
         // Fullscreen controls
-        fsScreenshotBtn.addEventListener('click', saveScreenshot);
-        fsTweetBtn.addEventListener('click', shareOnTwitter);
+        fsScreenshotBtn.addEventListener('click', () => saveScreenshot(true));
+        fsTweetBtn.addEventListener('click', () => shareOnTwitter(true));
         fsExitBtn.addEventListener('click', toggleFullscreen);
         
         // Add terminal animation
