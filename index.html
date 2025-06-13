@@ -741,7 +741,11 @@
         
         // Toggle fullscreen
         function toggleFullscreen() {
-            const container = rufflePlayer.shadowRoot.querySelector('canvas');
+            //const container = rufflePlayer.shadowRoot.querySelector('canvas');
+            
+            const container = rufflePlayer.querySelector('ruffle-contaier');
+
+
             
             if (!document.fullscreenElement) {
                 if (container.requestFullscreen) {
