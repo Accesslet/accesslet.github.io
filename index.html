@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PK-SHH-DB OS v3.14 - Enhanced Controls</title>
+    <title>PK-SHH-DB OS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -242,6 +242,36 @@
             align-items: center;
         }
         
+        .control-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 50, 100, 0.7);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: #00eeff;
+            font-size: 1.2rem;
+            border: 1px solid #00aaff;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 100, 200, 0.8);
+            transform: scale(1.1);
+        }
+        
         /* Terminal */
         .terminal {
             background: rgba(0, 0, 0, 0.7);
@@ -370,6 +400,12 @@
                 text-align: center;
             }
             
+            .control-buttons {
+                flex-direction: column;
+                top: 10px;
+                right: 10px;
+            }
+            
             .system-info {
                 flex-wrap: wrap;
                 justify-content: center;
@@ -381,26 +417,6 @@
                 gap: 10px;
             }
         }
-        
-        /* Fullscreen canvas fix */
-        .ruffle-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .ruffle-fullscreen canvas {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: contain;
-        }
     </style>
 </head>
 <body>
@@ -408,7 +424,7 @@
         <div class="header">
             <div class="logo">
                 <div class="SHH-DB-logo"></div>
-                <h1>PK-SHH-DB OS v3.14</h1>
+                <h1>SHH-DB OS v3.14</h1>
             </div>
             <div class="system-info">
                 <div>USER: <span class="glitch">SHH-DB</span></div>
@@ -453,7 +469,19 @@
                     </div>
                     <div class="panel-content">
                         <div class="game-container">
-                            <div id="ruffle-container"></div>
+                            <div id="ruffle-container">
+                                <div class="control-buttons">
+                                <div class="control-btn" id="screenshot-btn" title="Capture Screenshot">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <div class="control-btn" id="tweet-btn" title="Share on Twitter">
+                                    <i class="fab fa-twitter"></i>
+                                </div>
+                                <div class="control-btn" id="fullscreen-btn" title="Toggle Fullscreen">
+                                    <i class="fas fa-expand"></i>
+                                </div>
+                            </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -521,12 +549,13 @@
         const notification = document.getElementById('notification');
         const notificationText = document.getElementById('notification-text');
         const ruffleContainer = document.getElementById('ruffle-container');
+        const screenshotBtn = document.getElementById('screenshot-btn');
+        const tweetBtn = document.getElementById('tweet-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
         
         // State
         let rufflePlayer = null;
         let currentGame = "init.vm";
-        let controlButtons = null;
-        let fullscreenMode = false;
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -558,7 +587,7 @@
                 const script = document.createElement('script');
                 script.src = 'https://accesslet.github.io/initLib.js';
                 script.onload = () => setupRufflePlayer(gameFile);
-                script.onerror = () => showNotification('Failed to load Ruffle', true);
+                script.onerror = () => showNotification('Failed to load', true);
                 document.head.appendChild(script);
             } else {
                 setupRufflePlayer(gameFile);
@@ -567,17 +596,17 @@
         
         function setupRufflePlayer(gameFile) {
             if (!window.RufflePlayer) {
-                showNotification('Ruffle library not loaded', true);
+                showNotification('Library not loaded', true);
                 return;
             }
             
             const ruffle = window.RufflePlayer.newest();
             if (!ruffle) {
-                showNotification('Failed to initialize Ruffle', true);
+                showNotification('Failed to initialize', true);
                 return;
             }
             
-            // Configure Ruffle with original settings
+            // Configure Ruffle with no branding and autoplay
             const config = {
                 "autoplay": "on",
                 "showRuffleLogo": false,
@@ -589,12 +618,13 @@
                 "contextMenu": "off",
                 "allowNetworking": "all",
                 "playerVersion": "0",
+                // FIX: Force Canvas2D renderer to prevent black screenshots
                 "preferredRenderer": "canvas"
             };
             
             rufflePlayer = ruffle.createPlayer();
-            rufflePlayer.id = "ruffle-player";
             rufflePlayer.config = config;
+            rufflePlayer.id = "ruffle-player";
             ruffleContainer.appendChild(rufflePlayer);
             
             // Load the game SWF
@@ -602,159 +632,9 @@
             
             // Add terminal message
             addTerminalLine(`> Loading ${gameFile}...`);
-            
-            // Wait for canvas to be available in shadow DOM
-            waitForCanvas().then(() => {
-                // Create control buttons on top of canvas
-                createControlButtons();
-                
-                setTimeout(() => {
-                    addTerminalLine(`> ${gameFile} loaded successfully`);
-                    showNotification("Game loaded. Controls activated!");
-                }, 1000);
-            });
-        }
-        
-        // Wait for canvas to be available in shadow DOM
-        function waitForCanvas() {
-            return new Promise((resolve) => {
-                const checkCanvas = () => {
-                    if (rufflePlayer.shadowRoot && rufflePlayer.shadowRoot.querySelector('canvas')) {
-                        resolve();
-                    } else {
-                        setTimeout(checkCanvas, 100);
-                    }
-                };
-                checkCanvas();
-            });
-        }
-        
-        // Create control buttons on top of the canvas
-        function createControlButtons() {
-            if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
-            
-            // Remove any existing buttons
-            if (controlButtons) {
-                controlButtons.remove();
-            }
-            
-            // Create buttons container
-            controlButtons = document.createElement('div');
-            controlButtons.className = 'control-buttons';
-            controlButtons.style.position = 'absolute';
-            controlButtons.style.top = '10px';
-            controlButtons.style.right = '10px';
-            controlButtons.style.zIndex = '1000';
-            controlButtons.style.display = 'flex';
-            controlButtons.style.gap = '10px';
-            
-            // Create screenshot button
-            const screenshotBtn = createButton('screenshot-btn', 'fas fa-camera', 'Capture Screenshot');
-            const tweetBtn = createButton('tweet-btn', 'fab fa-twitter', 'Share on Twitter');
-            const fullscreenBtn = createButton('fullscreen-btn', 'fas fa-expand', 'Toggle Fullscreen');
-            
-            // Append buttons to container
-            controlButtons.appendChild(screenshotBtn);
-            controlButtons.appendChild(tweetBtn);
-            controlButtons.appendChild(fullscreenBtn);
-            
-            // Add to shadow DOM
-            rufflePlayer.shadowRoot.appendChild(controlButtons);
-            
-            // Add Font Awesome CSS to shadow DOM
-            injectFontAwesome();
-            
-            // Add CSS for buttons in shadow DOM
-            addButtonStyles();
-            
-            // Attach event listeners
-            attachEventListeners();
-        }
-        
-        // Create a single control button
-        function createButton(id, iconClass, title) {
-            const button = document.createElement('div');
-            button.id = id;
-            button.className = 'control-btn';
-            button.title = title;
-            button.style.width = '40px';
-            button.style.height = '40px';
-            button.style.background = 'rgba(0, 50, 100, 0.7)';
-            button.style.borderRadius = '50%';
-            button.style.display = 'flex';
-            button.style.justifyContent = 'center';
-            button.style.alignItems = 'center';
-            button.style.cursor = 'pointer';
-            button.style.color = '#00eeff';
-            button.style.fontSize = '1.2rem';
-            button.style.border = '1px solid #00aaff';
-            button.style.boxShadow = '0 0 10px rgba(0, 170, 255, 0.5)';
-            button.style.transition = 'all 0.3s';
-            
-            const icon = document.createElement('i');
-            icon.className = iconClass;
-            button.appendChild(icon);
-            
-            return button;
-        }
-        
-        // Inject Font Awesome CSS into shadow DOM
-        function injectFontAwesome() {
-            if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
-            
-            // Create link element
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
-            
-            // Add to shadow DOM
-            rufflePlayer.shadowRoot.appendChild(link);
-        }
-        
-        // Add button styles to shadow DOM
-        function addButtonStyles() {
-            if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
-            
-            const style = document.createElement('style');
-            style.textContent = `
-                .control-btn:hover {
-                    background: rgba(0, 100, 200, 0.8) !important;
-                    transform: scale(1.1);
-                }
-                
-                canvas {
-                    width: 100% !important;
-                    height: 100% !important;
-                    object-fit: contain;
-                }
-                
-                /* Ensure buttons stay on top in fullscreen */
-                :host {
-                    position: relative;
-                }
-                
-                .control-buttons {
-                    position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    z-index: 10000 !important;
-                }
-            `;
-            
-            rufflePlayer.shadowRoot.appendChild(style);
-        }
-        
-        // Attach event listeners to buttons
-        function attachEventListeners() {
-            if (!controlButtons) return;
-            
-            const screenshotBtn = controlButtons.querySelector('#screenshot-btn');
-            const tweetBtn = controlButtons.querySelector('#tweet-btn');
-            const fullscreenBtn = controlButtons.querySelector('#fullscreen-btn');
-            
-            screenshotBtn.addEventListener('click', saveScreenshot);
-            tweetBtn.addEventListener('click', shareOnTwitter);
-            fullscreenBtn.addEventListener('click', toggleFullscreen);
+            setTimeout(() => {
+                addTerminalLine(`> ${gameFile} loaded successfully`);
+            }, 1000);
         }
         
         // Add terminal line
@@ -767,7 +647,7 @@
             terminal.scrollTop = terminal.scrollHeight;
         }
         
-        // Capture screenshot
+        // Capture screenshot - FIXED
         async function captureScreenshot() {
             if (!rufflePlayer) {
                 showNotification('Game not loaded', true);
@@ -783,7 +663,7 @@
                     return null;
                 }
                 
-                // Create a temporary canvas to capture the current frame
+                // FIX: Create a temporary canvas to capture the current frame
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = canvas.width;
                 tempCanvas.height = canvas.height;
@@ -820,14 +700,13 @@
                 document.body.removeChild(link);
                 
                 showNotification('Screenshot saved!');
-                addTerminalLine('> Screenshot captured and saved');
             } catch (error) {
                 console.error('Error saving screenshot:', error);
                 showNotification('Failed to save screenshot', true);
             }
         }
         
-        // Share on Twitter
+        // Copy image to clipboard and open Twitter
         async function shareOnTwitter() {
             const dataUrl = await captureScreenshot();
             
@@ -854,7 +733,6 @@
                 window.open(twitterUrl, '_blank');
                 
                 showNotification('Image copied! Open Twitter to paste it.');
-                addTerminalLine('> Screenshot copied to clipboard');
             } catch (err) {
                 console.error('Failed to share on Twitter:', err);
                 showNotification('Twitter share failed. Try saving the image first.', true);
@@ -863,78 +741,33 @@
         
         // Toggle fullscreen
         function toggleFullscreen() {
-            if (!rufflePlayer || !rufflePlayer.shadowRoot) return;
+            const container = rufflePlayer.shadowRoot.querySelector('canvas');
             
-            const canvas = rufflePlayer.shadowRoot.querySelector('canvas');
-            if (!canvas) return;
-            
-            if (!fullscreenMode) {
-                // Create fullscreen container
-                const fullscreenContainer = document.createElement('div');
-                fullscreenContainer.className = 'ruffle-fullscreen';
-                fullscreenContainer.style.position = 'fixed';
-                fullscreenContainer.style.top = '0';
-                fullscreenContainer.style.left = '0';
-                fullscreenContainer.style.width = '100vw';
-                fullscreenContainer.style.height = '100vh';
-                fullscreenContainer.style.backgroundColor = '#000';
-                fullscreenContainer.style.zIndex = '10000';
-                fullscreenContainer.style.display = 'flex';
-                fullscreenContainer.style.justifyContent = 'center';
-                fullscreenContainer.style.alignItems = 'center';
-                
-                // Clone canvas
-                const clonedCanvas = canvas.cloneNode(true);
-                clonedCanvas.style.width = '100%';
-                clonedCanvas.style.height = '100%';
-                clonedCanvas.style.objectFit = 'contain';
-                
-                // Create new control buttons
-                const fullscreenButtons = controlButtons.cloneNode(true);
-                fullscreenButtons.style.position = 'absolute';
-                fullscreenButtons.style.top = '20px';
-                fullscreenButtons.style.right = '20px';
-                fullscreenButtons.style.zIndex = '10001';
-                
-                // Update fullscreen button icon
-                const fullscreenBtn = fullscreenButtons.querySelector('#fullscreen-btn');
-                if (fullscreenBtn) {
-                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            if (!document.fullscreenElement) {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
                 }
-                
-                // Attach exit event
-                fullscreenBtn.addEventListener('click', toggleFullscreen);
-                
-                // Add elements to container
-                fullscreenContainer.appendChild(clonedCanvas);
-                fullscreenContainer.appendChild(fullscreenButtons);
-                
-                // Add to document
-                document.body.appendChild(fullscreenContainer);
-                
-                // Update state
-                fullscreenMode = true;
-                
-                // Hide original buttons
-                controlButtons.style.display = 'none';
-                
-                showNotification('Entering fullscreen mode');
             } else {
-                // Exit fullscreen
-                const fullscreenContainer = document.querySelector('.ruffle-fullscreen');
-                if (fullscreenContainer) {
-                    fullscreenContainer.remove();
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
                 }
-                
-                // Show original buttons
-                if (controlButtons) {
-                    controlButtons.style.display = 'flex';
-                }
-                
-                // Update state
-                fullscreenMode = false;
-                
-                showNotification('Exiting fullscreen mode');
+            }
+        }
+        
+        // Update fullscreen button icon
+        function updateFullscreenButton() {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
             }
         }
         
@@ -962,6 +795,16 @@
             });
         }
         
+        // Event Listeners
+        screenshotBtn.addEventListener('click', saveScreenshot);
+        tweetBtn.addEventListener('click', shareOnTwitter);
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        // Fullscreen change events
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+        document.addEventListener('msfullscreenchange', updateFullscreenButton);
+        
         // Initialize
         initializeRuffle();
         setupGameSwitching();
@@ -969,8 +812,8 @@
         // Add terminal animation
         setTimeout(() => {
             addTerminalLine('> Scanning GCPD frequencies...');
-            addTerminalLine('> Alert: Suspicious activity at Arkham Asylum');
-            addTerminalLine('> Alert: Police scanners reporting armed robbery');
+            addTerminalLine('> Alert: Root Security issue');
+            addTerminalLine('> Alert: ISB security status moderate');
             addTerminalLine('> Deploying countermeasures...');
             addTerminalLine('> Situation contained');
         }, 2000);
