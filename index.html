@@ -722,6 +722,9 @@
             let container = document.getElementById("container");
             if (container) {
                 container.appendChild(player);
+                player.style.width = '100%';
+                player.style.height = '100%';
+                player.style.minHeight = '300px';
                 //player.load("init.vm");
                 player.load("map.spl");
             } else {
@@ -780,19 +783,6 @@
             
             return canvas;
         }
-            const player = document.querySelector("ruffle-player");
-            player.style.width = '100%';
-            player.style.height = '100%';
-            player.style.minHeight = '300px'; // Set minimum height
-    
-        window.addEventListener('resize', () = {
-            const player = document.querySelector('ruffle-player');
-            if (player) {
-                player.style.width = '100%';
-                player.style.height = '100%';
-                 player.style.minHeight = '300px'; // Set minimum height
-            }
-
         
 
         // Create properly rendered screenshot canvas - PRESERVED EXACTLY AS IN ORIGINAL
