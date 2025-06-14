@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>BatComputer Interface</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,15 +14,15 @@
             --batman-accent: #00b3ff;
             --batman-glow: rgba(0, 179, 255, 0.7);
             --batman-text: #e0f7ff;
-            --batman-grid: rgba(0, 179, 255, 0.15);
+            --batman-grid: rgba(0, 179, 255, 0.15)
         }
-        
+
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            box-sizing: border-box
         }
-        
+
         body {
             width: 100%;
             min-height: 100vh;
@@ -34,10 +34,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 20px
         }
-        
-        /* Grid background effect */
+
         body::before {
             content: "";
             position: fixed;
@@ -45,15 +44,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: 
-                linear-gradient(var(--batman-grid) 1px, transparent 1px),
-                linear-gradient(90deg, var(--batman-grid) 1px, transparent 1px);
+            background-image: linear-gradient(var(--batman-grid) 1px, transparent 1px), linear-gradient(90deg, var(--batman-grid) 1px, transparent 1px);
             background-size: 20px 20px;
             z-index: -1;
-            opacity: 0.6;
+            opacity: .6
         }
-        
-        /* Scanline effect */
+
         body::after {
             content: "";
             position: fixed;
@@ -61,25 +57,22 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(
-                rgba(18, 16, 16, 0) 50%, 
-                rgba(0, 0, 0, 0.25) 50%
-            );
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, .25) 50%);
             background-size: 100% 4px;
             z-index: -1;
             pointer-events: none;
-            animation: scanline 8s linear infinite;
+            animation: scanline 8s linear infinite
         }
-        
+
         @keyframes scanline {
             0% {
-                background-position: 0 0;
+                background-position: 0 0
             }
             100% {
-                background-position: 0 100%;
+                background-position: 0 100%
             }
         }
-        
+
         #batcomputer-interface {
             width: 100%;
             max-width: 1400px;
@@ -90,14 +83,13 @@
             position: relative;
             overflow: hidden;
             border: 1px solid var(--batman-accent);
-            box-shadow: 0 0 20px rgba(0, 179, 255, 0.3);
-            background: rgba(5, 10, 20, 0.9);
+            box-shadow: 0 0 20px rgba(0, 179, 255, .3);
+            background: rgba(5, 10, 20, .9)
         }
-        
-        /* Header styling */
+
         #header {
             height: 60px;
-            background: rgba(5, 10, 20, 0.85);
+            background: rgba(5, 10, 20, .85);
             border-bottom: 1px solid var(--batman-accent);
             display: flex;
             justify-content: space-between;
@@ -105,24 +97,24 @@
             padding: 0 20px;
             position: relative;
             z-index: 100;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+            flex-shrink: 0
         }
-        
+
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 12px
         }
-        
+
         .logo-icon {
             color: var(--batman-accent);
             font-size: 28px;
-            text-shadow: 0 0 10px var(--batman-glow);
+            text-shadow: 0 0 10px var(--batman-glow)
         }
-        
+
         .logo-text {
-            font-family: 'Orbitron', sans-serif;
+            font-family: Orbitron, sans-serif;
             font-weight: 900;
             font-size: 24px;
             letter-spacing: 3px;
@@ -130,82 +122,58 @@
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(0, 179, 255, 0.5);
+            text-shadow: 0 0 10px rgba(0, 179, 255, .5)
         }
-        
+
         .status-bar {
             display: flex;
             align-items: center;
             gap: 15px;
-            font-size: 14px;
+            font-size: 14px
         }
-        
+
         .status-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 8px
         }
-        
+
         .status-indicator {
             width: 10px;
             height: 10px;
             border-radius: 50%;
             background: #0f0;
-            box-shadow: 0 0 8px #0f0;
+            box-shadow: 0 0 8px #0f0
         }
-        
+
         .status-text {
             color: var(--batman-text);
-            text-shadow: 0 0 5px var(--batman-glow);
+            text-shadow: 0 0 5px var(--batman-glow)
         }
-        
-        /* Main content area */
+
         #content {
             display: flex;
             flex: 1;
             flex-direction: column;
-            overflow: hidden;
+            overflow: hidden
         }
-        
-        /* Responsive side panel and viewer */
-        .main-content {
+
+        #top-panel {
             display: flex;
-            flex: 1;
             flex-direction: column;
-        }
-        
-        @media (min-width: 768px) {
-            .main-content {
-                flex-direction: row;
-            }
-        }
-        
-        /* Side panel styling */
-        #side-panel {
-            width: 100%;
-            background: rgba(12, 29, 58, 0.8);
+            background: rgba(12, 29, 58, .8);
             border-bottom: 1px solid var(--batman-accent);
             padding: 15px 0;
-            display: flex;
-            flex-direction: column;
             flex-shrink: 0;
         }
-        
-        @media (min-width: 768px) {
-            #side-panel {
-                width: 250px;
-                border-right: 1px solid var(--batman-accent);
-                border-bottom: none;
-            }
-        }
-        
+
         .panel-section {
             margin-bottom: 15px;
             padding: 0 15px;
         }
-        
+
         .panel-title {
-            font-family: 'Orbitron', sans-serif;
+            font-family: Orbitron, sans-serif;
             font-size: 16px;
             margin-bottom: 12px;
             color: var(--batman-accent);
@@ -213,104 +181,84 @@
             letter-spacing: 1px;
             border-bottom: 1px solid var(--batman-accent);
             padding-bottom: 5px;
-            text-shadow: 0 0 5px var(--batman-glow);
+            text-shadow: 0 0 5px var(--batman-glow)
         }
-        
+
         .panel-list {
             list-style: none;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 8px
         }
-        
-        @media (min-width: 768px) {
-            .panel-list {
-                display: block;
-                flex-wrap: nowrap;
-                gap: 0;
-            }
-        }
-        
+
         .panel-item {
             padding: 8px 10px;
             margin: 3px 0;
             border-left: 2px solid transparent;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all .3s ease;
             font-size: 14px;
-            background: rgba(28, 60, 106, 0.3);
+            background: rgba(28, 60, 106, .3);
             border-radius: 4px;
             flex: 1;
             min-width: 120px;
-            text-align: center;
+            text-align: center
         }
-        
-        @media (min-width: 768px) {
-            .panel-item {
-                border-radius: 0;
-                flex: none;
-                min-width: auto;
-                text-align: left;
-                background: transparent;
-            }
-        }
-        
+
         .panel-item:hover {
-            background: rgba(28, 60, 106, 0.4);
-            border-left: 2px solid var(--batman-accent);
+            background: rgba(28, 60, 106, .4);
+            border-left: 2px solid var(--batman-accent)
         }
-        
+
         .panel-item.active {
-            background: rgba(28, 60, 106, 0.7);
+            background: rgba(28, 60, 106, .7);
             border-left: 2px solid var(--batman-accent);
-            color: var(--batman-accent);
+            color: var(--batman-accent)
         }
-        
-        /* Main viewer area */
+
         #main-viewer {
             flex: 1;
             display: flex;
             flex-direction: column;
             position: relative;
-            background: rgba(5, 10, 20, 0.7);
+            background: rgba(5, 10, 20, .7)
         }
-        
+
         .viewer-header {
             padding: 10px 15px;
-            background: rgba(12, 29, 58, 0.6);
+            background: rgba(12, 29, 58, .6);
             border-bottom: 1px solid var(--batman-accent);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: space-between
         }
-        
-        @media (min-width: 480px) {
+
+        @media (min-width:480px) {
             .viewer-header {
                 flex-direction: row;
-                align-items: center;
+                align-items: center
             }
         }
-        
+
         .viewer-title {
-            font-family: 'Orbitron', sans-serif;
+            font-family: Orbitron, sans-serif;
             font-size: 18px;
             color: var(--batman-accent);
             letter-spacing: 1px;
-            margin-bottom: 5px;
+            margin-bottom: 5px
         }
-        
-        @media (min-width: 480px) {
+
+        @media (min-width:480px) {
             .viewer-title {
-                margin-bottom: 0;
+                margin-bottom: 0
             }
         }
-        
+
         .viewer-subtitle {
             font-size: 14px;
-            opacity: 0.8;
+            opacity: .8
         }
-        
-        /* Original container styling - preserved */
+
         #app-container {
             width: 100%;
             height: 100%;
@@ -321,11 +269,11 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            flex: 1;
+            flex: 1
         }
-        
+
         #container {
-            height:100%;
+            height: 100%;
             width: 100%;
             min-width: 192px;
             min-height: 108px;
@@ -334,21 +282,20 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            background: #FFF;
-            position: relative;
+            background: #fff;
+            position: relative
         }
-        
+
         #container::before {
             content: "BATCOMPUTER OS v2.5.7";
             position: absolute;
             bottom: 10px;
             right: 15px;
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.3);
-            z-index: 5;
+            color: rgba(255, 255, 255, .3);
+            z-index: 5
         }
-        
-        /* Controls styling - preserved with enhancements */
+
         #controls {
             position: absolute;
             top: 20px;
@@ -356,103 +303,108 @@
             z-index: 100;
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            align-items: flex-end
         }
-        
+
         #cog-button {
             width: 45px;
             height: 45px;
-            background: rgba(12, 29, 58, 0.9);
+            background: rgba(12, 29, 58, .9);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all .3s ease;
             color: var(--batman-accent);
             font-size: 20px;
             border: 1px solid var(--batman-accent);
-            box-shadow: 0 0 10px rgba(0, 179, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 179, 255, .3)
         }
-        
+
         #cog-button:hover {
-            background: rgba(28, 60, 106, 0.9);
+            background: rgba(28, 60, 106, .9);
             transform: rotate(90deg);
-            box-shadow: 0 0 15px var(--batman-glow);
+            box-shadow: 0 0 15px var(--batman-glow)
         }
-        
+
         #button-panel {
             display: none;
-            background: rgba(12, 29, 58, 0.9);
+            background: rgba(12, 29, 58, .9);
             border-radius: 8px;
             padding: 10px;
             margin-top: 10px;
             border: 1px solid var(--batman-accent);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 15px rgba(0, 0, 0, .7)
         }
-        
+
         #button-panel.active {
             display: flex;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn .3s ease
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-10px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
         }
-        
+
         .control-btn {
             width: 40px;
             height: 40px;
             margin: 0 5px;
             border-radius: 8px;
-            background: rgba(28, 60, 106, 0.7);
+            background: rgba(28, 60, 106, .7);
             border: 1px solid var(--batman-accent);
             color: var(--batman-accent);
             font-size: 18px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+            transition: all .2s ease;
+            box-shadow: 0 0 8px rgba(0, 0, 0, .5)
         }
-        
+
         .control-btn:hover {
-            background: rgba(0, 179, 255, 0.3);
+            background: rgba(0, 179, 255, .3);
             transform: scale(1.1);
-            box-shadow: 0 0 12px var(--batman-glow);
+            box-shadow: 0 0 12px var(--batman-glow)
         }
-        
-        /* Terminal styling */
+
         #terminal {
             height: 150px;
-            background: rgba(5, 10, 20, 0.9);
+            background: rgba(5, 10, 20, .9);
             border-top: 1px solid var(--batman-accent);
             padding: 15px;
             font-family: 'Roboto Mono', monospace;
             font-size: 14px;
             overflow-y: auto;
-            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5);
-            flex-shrink: 0;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, .5);
+            flex-shrink: 0
         }
-        
+
         .terminal-line {
             margin-bottom: 8px;
-            line-height: 1.4;
+            line-height: 1.4
         }
-        
+
         .terminal-prompt {
             color: var(--batman-accent);
-            margin-right: 8px;
+            margin-right: 8px
         }
-        
+
         .terminal-command {
-            color: var(--batman-text);
+            color: var(--batman-text)
         }
-        
+
         .terminal-output {
             color: #8aa2d3;
-            padding-left: 20px;
+            padding-left: 20px
         }
-        
+
         .terminal-cursor {
             display: inline-block;
             width: 8px;
@@ -460,99 +412,89 @@
             background: var(--batman-accent);
             vertical-align: middle;
             margin-left: 4px;
-            animation: blink 1s infinite;
+            animation: blink 1s infinite
         }
-        
+
         @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
+            0%, 100% {
+                opacity: 1
+            }
+            50% {
+                opacity: 0
+            }
         }
-        
-        /* Glow animations */
+
         .glow {
-            animation: glowPulse 3s infinite alternate;
+            animation: glowPulse 3s infinite alternate
         }
-        
+
         @keyframes glowPulse {
             from {
-                box-shadow: 0 0 5px var(--batman-glow);
+                box-shadow: 0 0 5px var(--batman-glow)
             }
             to {
-                box-shadow: 0 0 20px var(--batman-glow);
+                box-shadow: 0 0 20px var(--batman-glow)
             }
         }
-        
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
+
+        @media (max-width:768px) {
             .status-bar {
-                display: none;
+                display: none
             }
-            
             .logo-text {
-                font-size: 20px;
+                font-size: 20px
             }
-            
             .panel-title {
-                font-size: 14px;
+                font-size: 14px
             }
-            
             .panel-item {
                 font-size: 13px;
-                padding: 6px 8px;
+                padding: 6px 8px
             }
-            
             .viewer-title {
-                font-size: 16px;
+                font-size: 16px
             }
-            
             #controls {
                 top: 10px;
-                right: 10px;
+                right: 10px
             }
-            
             #cog-button {
                 width: 40px;
                 height: 40px;
-                font-size: 18px;
+                font-size: 18px
             }
-            
             .control-btn {
                 width: 36px;
                 height: 36px;
-                font-size: 16px;
+                font-size: 16px
             }
         }
-        
-        @media (max-width: 480px) {
+
+        @media (max-width:480px) {
             body {
-                padding: 10px;
+                padding: 10px
             }
-            
             #batcomputer-interface {
-                min-height: 95vh;
+                min-height: 95vh
             }
-            
             #header {
                 height: 50px;
-                padding: 0 10px;
+                padding: 0 10px
             }
-            
             .logo-text {
                 font-size: 18px;
-                letter-spacing: 1px;
+                letter-spacing: 1px
             }
-            
             #terminal {
                 height: 120px;
                 padding: 10px;
-                font-size: 12px;
+                font-size: 12px
             }
         }
     </style>
 </head>
 <body>
-    <div id="batcomputer-interface" class="glow">
-        <!-- Header -->
+    <div class="glow" id="batcomputer-interface">
         <header id="header">
             <div class="logo">
                 <i class="fas fa-bat logo-icon"></i>
@@ -564,103 +506,80 @@
                     <span class="status-text">SYSTEM: ONLINE</span>
                 </div>
                 <div class="status-item">
-                    <div class="status-indicator" style="background: #0f0; box-shadow: 0 0 8px #0f0;"></div>
+                    <div class="status-indicator" style="background:#0f0;box-shadow:0 0 8px #0f0"></div>
                     <span class="status-text">GOTHAM: SECURE</span>
                 </div>
                 <div class="status-item">
-                    <div class="status-indicator" style="background: #ff0; box-shadow: 0 0 8px #ff0;"></div>
+                    <div class="status-indicator" style="background:#ff0;box-shadow:0 0 8px #ff0"></div>
                     <span class="status-text">ALERT LEVEL: 3</span>
                 </div>
             </div>
         </header>
-        
-        <!-- Main Content -->
         <div id="content">
-            <div class="main-content">
-                <!-- Side Panel -->
-                <aside id="side-panel">
-                    <div class="panel-section">
-                        <h3 class="panel-title">Surveillance</h3>
-                        <ul class="panel-list">
-                            <li class="panel-item active">Gotham Grid</li>
-                            <li class="panel-item">Arkham Asylum</li>
-                            <li class="panel-item">Wayne Tower</li>
-                            <li class="panel-item">GCPD HQ</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="panel-section">
-                        <h3 class="panel-title">Criminal Database</h3>
-                        <ul class="panel-list">
-                            <li class="panel-item">Joker</li>
-                            <li class="panel-item">Penguin</li>
-                            <li class="panel-item">Riddler</li>
-                            <li class="panel-item">Two-Face</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="panel-section">
-                        <h3 class="panel-title">Vehicle Control</h3>
-                        <ul class="panel-list">
-                            <li class="panel-item">Batmobile</li>
-                            <li class="panel-item">Batwing</li>
-                            <li class="panel-item">Batcycle</li>
-                        </ul>
-                    </div>
-                </aside>
-                
-                <!-- Main Viewer -->
-                <main id="main-viewer">
-                    <div class="viewer-header">
-                        <div>
-                            <h2 class="viewer-title">CRIMINAL SURVEILLANCE SYSTEM</h2>
-                            <div class="viewer-subtitle">Live feed from Gotham City Grid</div>
-                        </div>
-                        <div class="status-text">Last updated: <span id="current-time">--:--:--</span></div>
-                    </div>
-                    
-                    <!-- Original app container preserved inside BatComputer -->
-                    <div id="app-container">
-                        <div id="container">
-                            <!-- Ruffle player will be inserted here -->
-                        </div>
-                        
-                        <!-- Controls - preserved -->
-                        <div id="controls">
-                            <button id="cog-button">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <div id="button-panel">
-                                <button class="control-btn" id="fullscreen-button" title="Fullscreen">
-                                    <i class="fas fa-expand"></i>
-                                </button>
-                                <button class="control-btn" id="screenshot-button" title="Screenshot">
-                                    <i class="fas fa-camera"></i>
-                                </button>
-                                <button class="control-btn" id="twitter-button" title="Share on Twitter">
-                                    <i class="fab fa-twitter"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </main>
+            <!-- Moved side-panel above the main viewer -->
+            <div id="top-panel">
+                <div class="panel-section">
+                    <h3 class="panel-title">Surveillance</h3>
+                    <ul class="panel-list">
+                        <li class="panel-item active">Gotham Grid</li>
+                        <li class="panel-item">Arkham Asylum</li>
+                        <li class="panel-item">Wayne Tower</li>
+                        <li class="panel-item">GCPD HQ</li>
+                    </ul>
+                </div>
+                <div class="panel-section">
+                    <h3 class="panel-title">Criminal Database</h3>
+                    <ul class="panel-list">
+                        <li class="panel-item">Joker</li>
+                        <li class="panel-item">Penguin</li>
+                        <li class="panel-item">Riddler</li>
+                        <li class="panel-item">Two-Face</li>
+                    </ul>
+                </div>
+                <div class="panel-section">
+                    <h3 class="panel-title">Vehicle Control</h3>
+                    <ul class="panel-list">
+                        <li class="panel-item">Batmobile</li>
+                        <li class="panel-item">Batwing</li>
+                        <li class="panel-item">Batcycle</li>
+                    </ul>
+                </div>
             </div>
+            
+            <main id="main-viewer">
+                <div class="viewer-header">
+                    <div>
+                        <h2 class="viewer-title">CRIMINAL SURVEILLANCE SYSTEM</h2>
+                        <div class="viewer-subtitle">Live feed from Gotham City Grid</div>
+                    </div>
+                    <div class="status-text">Last updated: <span id="current-time">--:--:--</span></div>
+                </div>
+                <div id="app-container">
+                    <div id="container"></div>
+                    <div id="controls">
+                        <button id="cog-button"><i class="fas fa-cog"></i></button>
+                        <div id="button-panel">
+                            <button id="fullscreen-button" class="control-btn" title="Fullscreen"><i class="fas fa-expand"></i></button> 
+                            <button id="screenshot-button" class="control-btn" title="Screenshot"><i class="fas fa-camera"></i></button> 
+                            <button id="twitter-button" class="control-btn" title="Share on Twitter"><i class="fa-twitter fab"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
-        
-        <!-- Terminal -->
         <div id="terminal">
             <div class="terminal-line">
-                <span class="terminal-prompt">BATCOMPUTER ></span>
+                <span class="terminal-prompt">BATCOMPUTER ></span> 
                 <span class="terminal-command">system.status</span>
                 <div class="terminal-output">All systems operational. Surveillance network active.</div>
             </div>
             <div class="terminal-line">
-                <span class="terminal-prompt">BATCOMPUTER ></span>
+                <span class="terminal-prompt">BATCOMPUTER ></span> 
                 <span class="terminal-command">criminal.alert --level=3</span>
                 <div class="terminal-output">Alert: Suspicious activity detected in Diamond District.</div>
             </div>
             <div class="terminal-line">
-                <span class="terminal-prompt">BATCOMPUTER ></span>
+                <span class="terminal-prompt">BATCOMPUTER ></span> 
                 <span class="terminal-command">surveillance.feed --location=gotham_grid</span>
                 <div class="terminal-output">Displaying live feed from Gotham City Grid<span class="terminal-cursor"></span></div>
             </div>
