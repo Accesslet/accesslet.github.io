@@ -598,8 +598,8 @@
                     SURVEILLANCE
                 </div>
                 <div class="menu-items">
-                    <div class="menu-item active" data-file="gotham_grid.swf">
-                        <i class="fas fa-map"></i> Gotham Grid
+                    <div class="menu-item active" data-file="map.spl">
+                        <i class="fas fa-map"></i> Gotham map
                     </div>
                     <div class="menu-item" data-file="arkham_asylum.swf">
                         <i class="fas fa-building"></i> Arkham Asylum
@@ -785,7 +785,8 @@
             if (container) {
                 container.appendChild(player);
                 // Load the default file
-                player.load("gotham_grid.swf");
+                //player.load("gotham_grid.swf");
+                player.load("map.spl");
             } else {
                 console.error("Container element not found.");
             }
