@@ -774,12 +774,25 @@
         function getRuffleCanvas() {
             const player = document.querySelector("ruffle-player");
             if (!player) throw new Error("Media Player not found");
-            
+
             const canvas = player.shadowRoot.querySelector("canvas");
             if (!canvas) throw new Error("Canvas element not found");
             
             return canvas;
         }
+            player.style.width = '100%';
+            player.style.height = '100%';
+            player.style.minHeight = 'fit-content'; // Set minimum height
+    /*
+        window.addEventListener('resize', () = {
+            const player = document.querySelector('ruffle-player');
+            if (player) {
+                player.style.width = '100%';
+                player.style.height = '100%';
+                 player.style.minHeight = 'fit-content'; // Set minimum height
+            }
+
+        */
 
         // Create properly rendered screenshot canvas - PRESERVED EXACTLY AS IN ORIGINAL
         function createScreenshotCanvas() {
