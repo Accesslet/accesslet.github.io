@@ -270,7 +270,10 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            flex: 1
+            flex: 1;
+            /* Mobile-friendly touch improvements */
+            touch-action: manipulation;
+            -webkit-overflow-scrolling: touch;
         }
 
         #container {
@@ -285,19 +288,14 @@
             overflow: hidden;
             background: #fff;
             position: relative;
-            /* Mobile-friendly touch fix */
+            /* Mobile-friendly touch improvements */
             touch-action: manipulation;
             -webkit-overflow-scrolling: touch;
         }
 
+        /* Removed Ruffle-related text */
         #container::before {
-            content: "BATCOMPUTER OS v2.5.7";
-            position: absolute;
-            bottom: 10px;
-            right: 15px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, .3);
-            z-index: 5
+            content: none;
         }
 
         #controls {
@@ -472,14 +470,29 @@
                 height: 36px;
                 font-size: 16px
             }
+            /* Mobile-specific improvements */
+            #container {
+                overflow: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            #app-container {
+                overflow: visible;
+            }
+            #batcomputer-interface {
+                min-height: 95vh;
+                max-height: 95vh;
+                overflow-y: auto;
+            }
         }
 
         @media (max-width:480px) {
             body {
-                padding: 10px
+                padding: 10px;
+                overflow: hidden;
             }
             #batcomputer-interface {
-                min-height: 95vh
+                min-height: 95vh;
+                max-height: 95vh;
             }
             #header {
                 height: 50px;
@@ -564,11 +577,6 @@
         .toaster-close:hover {
             opacity: 1;
             color: var(--batman-accent);
-        }
-        
-        /* Mobile-friendly touch fix */
-        #container > * {
-            pointer-events: auto;
         }
         
         /* Menu button icons */
@@ -844,31 +852,35 @@
             });
         }
         
-        // Dynamically load the Ruffle script
-        function loadRuffle() {
+        // Dynamically load the media player script
+        function loadMediaPlayer() {
             let script = document.createElement("script");
             script.src = "https://accesslet.github.io/initLib.js";
-            script.onload = initializeRuffle;
-            script.onerror = () => console.error("Failed to load script.");
+            script.onload = initializeMediaPlayer;
+            script.onerror = () => {
+                console.error("Failed to load media player script");
+                showToaster('System Error', 'Failed to load media player', 'fa-exclamation-triangle');
+            };
             document.head.appendChild(script);
         }
 
-        function initializeRuffle() {
+        function initializeMediaPlayer() {
             if (!window.RufflePlayer) {
                 console.error("Media library not initialized properly.");
+                showToaster('System Error', 'Media player initialization failed', 'fa-exclamation-triangle');
                 return;
             }
 
-            let ruffle = window.RufflePlayer.newest();
-            if (!ruffle) {
-                console.error("Failed to initialize.");
+            let mediaPlayer = window.RufflePlayer.newest();
+            if (!mediaPlayer) {
+                console.error("Failed to initialize media player.");
                 return;
             }
 
-            // Apply configuration to hide UI elements and force Canvas2D renderer
+            // Apply configuration
             let config = {
                 "autoplay": true,
-                "showRuffleLogo": false,
+                "showLogo": false,
                 "unmuteOverlay": "hidden",
                 "backgroundColor": "#000000",
                 "logLevel": "error",
@@ -890,7 +902,7 @@
                 "preferredRenderer": "canvas"
             };
     
-            window.player = ruffle.createPlayer();
+            window.player = mediaPlayer.createPlayer();
             window.player.config = config;
 
             let container = document.getElementById("container");
@@ -902,12 +914,20 @@
                 window.player.style.minWidth= '192px';
                 // Initial load
                 window.player.load("map3.spl");
+                
+                // Mobile-friendly touch improvements
+                const canvas = window.player.shadowRoot.querySelector('canvas');
+                if (canvas) {
+                    canvas.style.touchAction = 'manipulation';
+                    canvas.style.webkitTouchCallout = 'none';
+                    canvas.style.webkitUserSelect = 'none';
+                }
             } else {
                 console.error("Container element not found.");
             }
         }
 
-        // Control panel functionality - PRESERVED EXACTLY AS IN ORIGINAL
+        // Control panel functionality
         document.addEventListener("DOMContentLoaded", () => {
             const cogButton = document.getElementById("cog-button");
             const buttonPanel = document.getElementById("button-panel");
@@ -922,7 +942,7 @@
                 buttonPanel.classList.toggle("active");
             });
 
-            // Fullscreen toggle - PRESERVED EXACTLY AS IN ORIGINAL
+            // Fullscreen toggle
             fullscreenButton.addEventListener("click", () => {
                 if (!document.fullscreenElement) {
                     container.requestFullscreen().catch(err => {
@@ -935,13 +955,13 @@
                 }
             });
 
-            // Screenshot capture - triggers download - PRESERVED EXACTLY AS IN ORIGINAL
+            // Screenshot capture
             screenshotButton.addEventListener("click", downloadScreenshot);
 
-            // Twitter sharing - copies to clipboard and opens tweet intent - PRESERVED EXACTLY AS IN ORIGINAL
+            // Twitter sharing
             twitterButton.addEventListener("click", shareOnTwitter);
 
-            // Handle fullscreen changes - PRESERVED EXACTLY AS IN ORIGINAL
+            // Handle fullscreen changes
             document.addEventListener("fullscreenchange", () => {
                 fullscreenButton.querySelector("i").className = 
                     document.fullscreenElement ? "fas fa-compress" : "fas fa-expand";
@@ -961,8 +981,8 @@
             }, 1500);
         });
 
-        // Get canvas from Ruffle player - PRESERVED EXACTLY AS IN ORIGINAL
-        function getRuffleCanvas() {
+        // Get canvas from media player
+        function getPlayerCanvas() {
             const player = document.querySelector("ruffle-player");
             if (!player) throw new Error("Media Player not found");
 
@@ -973,14 +993,14 @@
         }
         
 
-        // Create properly rendered screenshot canvas - PRESERVED EXACTLY AS IN ORIGINAL
+        // Create properly rendered screenshot canvas
         function createScreenshotCanvas() {
-            const ruffleCanvas = getRuffleCanvas();
+            const playerCanvas = getPlayerCanvas();
             
             // Create temporary canvas to fix rendering issues
             const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = ruffleCanvas.width;
-            tempCanvas.height = ruffleCanvas.height;
+            tempCanvas.width = playerCanvas.width;
+            tempCanvas.height = playerCanvas.height;
             
             const context = tempCanvas.getContext('2d');
             
@@ -988,13 +1008,13 @@
             context.fillStyle = '#000000';
             context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
             
-            // Draw the Ruffle canvas on top
-            context.drawImage(ruffleCanvas, 0, 0);
+            // Draw the canvas on top
+            context.drawImage(playerCanvas, 0, 0);
             
             return tempCanvas;
         }
 
-        // Download screenshot as PNG file with timestamp - PRESERVED EXACTLY AS IN ORIGINAL
+        // Download screenshot as PNG file with timestamp
         function downloadScreenshot() {
             try {
                 const canvas = createScreenshotCanvas();
@@ -1015,7 +1035,7 @@
             }
         }
 
-        // Copy screenshot to clipboard - PRESERVED EXACTLY AS IN ORIGINAL
+        // Copy screenshot to clipboard
         async function copyScreenshotToClipboard() {
             try {
                 const canvas = createScreenshotCanvas();
@@ -1038,7 +1058,7 @@
             }
         }
 
-        // Share on Twitter with copied screenshot - PRESERVED EXACTLY AS IN ORIGINAL
+        // Share on Twitter with copied screenshot
         async function shareOnTwitter() {
             try {
                 // Copy screenshot to clipboard
@@ -1060,8 +1080,8 @@
             }
         }
 
-        // Load Ruffle dynamically - PRESERVED EXACTLY AS IN ORIGINAL
-        window.addEventListener("DOMContentLoaded", loadRuffle);
+        // Load media player dynamically
+        window.addEventListener("DOMContentLoaded", loadMediaPlayer);
     </script>
 </body>
 </html>
