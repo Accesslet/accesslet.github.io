@@ -2,1066 +2,453 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>BatComputer Interface</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Media Hub</title>
     <style>
-        /* Original CSS preserved exactly */
-        :root {
-            --batman-dark: #050a14;
-            --batman-primary: #0c1d3a;
-            --batman-secondary: #1c3c6a;
-            --batman-accent: #00b3ff;
-            --batman-glow: rgba(0, 179, 255, 0.7);
-            --batman-text: #e0f7ff;
-            --batman-grid: rgba(0, 179, 255, 0.15)
-        }
-
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box
+            box-sizing: border-box;
         }
-
+        
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
         body {
-            width: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: var(--light);
+            line-height: 1.6;
             min-height: 100vh;
-            overflow: scroll;
-            font-family: 'Roboto Mono', monospace;
-            background: var(--batman-dark);
-            color: var(--batman-text);
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px
+            padding-bottom: 40px;
         }
-
-        body::before {
-            content: "";
-            position: fixed;
+        
+        header {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: linear-gradient(var(--batman-grid) 1px, transparent 1px), linear-gradient(90deg, var(--batman-grid) 1px, transparent 1px);
-            background-size: 20px 20px;
-            z-index: -1;
-            opacity: .6
-        }
-
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, .25) 50%);
-            background-size: 100% 4px;
-            z-index: -1;
-            pointer-events: none;
-            animation: scanline 8s linear infinite
-        }
-
-        @keyframes scanline {
-            0% {
-                background-position: 0 0
-            }
-            100% {
-                background-position: 0 100%
-            }
-        }
-
-        #batcomputer-interface {
-            width: 100%;
-            max-width: 1400px;
-            height: auto;
-            min-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid var(--batman-accent);
-            box-shadow: 0 0 20px rgba(0, 179, 255, .3);
-            background: rgba(5, 10, 20, .9)
-        }
-
-        #header {
-            height: 60px;
-            background: rgba(5, 10, 20, .85);
-            border-bottom: 1px solid var(--batman-accent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            position: relative;
             z-index: 100;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
-            flex-shrink: 0
         }
-
+        
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px
-        }
-
-        .logo-icon {
-            color: var(--batman-accent);
-            font-size: 28px;
-            text-shadow: 0 0 10px var(--batman-glow)
-        }
-
-        .logo-text {
-            font-family: Orbitron, sans-serif;
-            font-weight: 900;
-            font-size: 24px;
-            letter-spacing: 3px;
-            background: linear-gradient(to right, #8aa2d3, var(--batman-accent));
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(0, 179, 255, .5)
+            color: transparent;
+            margin-bottom: 10px;
         }
-
-        .status-bar {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 14px
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
         }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 8px
+        
+        .player-section {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #0f0;
-            box-shadow: 0 0 8px #0f0
-        }
-
-        .status-text {
-            color: var(--batman-text);
-            text-shadow: 0 0 5px var(--batman-glow)
-        }
-
-        #content {
-            display: flex;
-            flex: 1;
-            flex-direction: column;
-            overflow: hidden
-        }
-
-        #top-panel {
-            display: flex;
-            flex-direction: column;
-            background: rgba(12, 29, 58, .8);
-            border-bottom: 1px solid var(--batman-accent);
-            padding: 15px 0;
-            flex-shrink: 0;
-        }
-
-        .panel-section {
-            margin-bottom: 15px;
-            padding: 0 15px;
-        }
-
-        .panel-title {
-            font-family: Orbitron, sans-serif;
-            font-size: 16px;
-            margin-bottom: 12px;
-            color: var(--batman-accent);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid var(--batman-accent);
-            padding-bottom: 5px;
-            text-shadow: 0 0 5px var(--batman-glow)
-        }
-
-        .panel-list {
-            list-style: none;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px
-        }
-
-        .panel-item {
-            padding: 8px 10px;
-            margin: 3px 0;
-            border-left: 2px solid transparent;
-            cursor: pointer;
-            transition: all .3s ease;
-            font-size: 14px;
-            background: rgba(28, 60, 106, .3);
-            border-radius: 4px;
-            flex: 1;
-            min-width: 120px;
-            text-align: center
-        }
-
-        .panel-item:hover {
-            background: rgba(28, 60, 106, .4);
-            border-left: 2px solid var(--batman-accent)
-        }
-
-        .panel-item.active {
-            background: rgba(28, 60, 106, .7);
-            border-left: 2px solid var(--batman-accent);
-            color: var(--batman-accent)
-        }
-
-        #main-viewer {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+        
+        .player-wrapper {
             position: relative;
-            background: rgba(5, 10, 20, .7)
-        }
-
-        .viewer-header {
-            padding: 10px 15px;
-            background: rgba(12, 29, 58, .6);
-            border-bottom: 1px solid var(--batman-accent);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between
-        }
-
-        @media (min-width:480px) {
-            .viewer-header {
-                flex-direction: row;
-                align-items: center
-            }
-        }
-
-        .viewer-title {
-            font-family: Orbitron, sans-serif;
-            font-size: 18px;
-            color: var(--batman-accent);
-            letter-spacing: 1px;
-            margin-bottom: 5px
-        }
-
-        @media (min-width:480px) {
-            .viewer-title {
-                margin-bottom: 0
-            }
-        }
-
-        .viewer-subtitle {
-            font-size: 14px;
-            opacity: .8
-        }
-
-        #app-container {
-            width: 100%;
-            height: 100%;
-            min-width: 192px;
-            min-height: 108px;
-            max-width: 1920px;
-            max-height: 1080px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            flex: 1
-        }
-
-        #container {
-            height: 100%;
-            width: 100%;
-            min-width: 192px;
-            min-height: 108px;
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
             overflow: hidden;
-            background: #fff;
-            position: relative;
-            /* Mobile-friendly touch fix */
-            touch-action: manipulation;
-            -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            background: #000;
+            border: 2px solid rgba(255,255,255,0.1);
         }
-
-        #container::before {
-            content: "BATCOMPUTER OS v2.5.7";
+        
+        .player-container {
             position: absolute;
-            bottom: 10px;
-            right: 15px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, .3);
-            z-index: 5
-        }
-
-        #controls {
-            position: absolute;
-            top: 40px;
-            right: 10px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end
-        }
-
-        #cog-button {
-            width: 45px;
-            height: 45px;
-            background: rgba(12, 29, 58, .9);
-            border-radius: 50%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            transition: all .3s ease;
-            color: var(--batman-accent);
-            font-size: 20px;
-            border: 1px solid var(--batman-accent);
-            box-shadow: 0 0 10px rgba(0, 179, 255, .3)
-        }
-
-        #cog-button:hover {
-            background: rgba(28, 60, 106, .9);
-            transform: rotate(90deg);
-            box-shadow: 0 0 15px var(--batman-glow)
-        }
-
-        #button-panel {
-            display: none;
-            background: rgba(12, 29, 58, .9);
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-            border: 1px solid var(--batman-accent);
-            box-shadow: 0 0 15px rgba(0, 0, 0, .7)
-        }
-
-        #button-panel.active {
-            display: flex;
-            animation: fadeIn .3s ease
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px)
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0)
-            }
-        }
-
-        .control-btn {
-            width: 40px;
-            height: 40px;
-            margin: 0 5px;
-            border-radius: 8px;
-            background: rgba(28, 60, 106, .7);
-            border: 1px solid var(--batman-accent);
-            color: var(--batman-accent);
-            font-size: 18px;
-            cursor: pointer;
-            transition: all .2s ease;
-            box-shadow: 0 0 8px rgba(0, 0, 0, .5)
-        }
-
-        .control-btn:hover {
-            background: rgba(0, 179, 255, .3);
-            transform: scale(1.1);
-            box-shadow: 0 0 12px var(--batman-glow)
-        }
-
-        #terminal {
-            height: 150px;
-            background: rgba(5, 10, 20, .9);
-            border-top: 1px solid var(--batman-accent);
-            padding: 15px;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 14px;
-            overflow-y: auto;
-            box-shadow: 0 -5px 15px rgba(0, 0, 0, .5);
-            flex-shrink: 0
-        }
-
-        .terminal-line {
-            margin-bottom: 8px;
-            line-height: 1.4
-        }
-
-        .terminal-prompt {
-            color: var(--batman-accent);
-            margin-right: 8px
-        }
-
-        .terminal-command {
-            color: var(--batman-text)
-        }
-
-        .terminal-output {
-            color: #8aa2d3;
-            padding-left: 20px
-        }
-
-        .terminal-cursor {
-            display: inline-block;
-            width: 8px;
-            height: 16px;
-            background: var(--batman-accent);
-            vertical-align: middle;
-            margin-left: 4px;
-            animation: blink 1s infinite
-        }
-
-        @keyframes blink {
-            0%, 100% {
-                opacity: 1
-            }
-            50% {
-                opacity: 0
-            }
-        }
-
-        .glow {
-            animation: glowPulse 3s infinite alternate
-        }
-
-        @keyframes glowPulse {
-            from {
-                box-shadow: 0 0 5px var(--batman-glow)
-            }
-            to {
-                box-shadow: 0 0 20px var(--batman-glow)
-            }
-        }
-
-        @media (max-width:768px) {
-            .status-bar {
-                display: none
-            }
-            .logo-text {
-                font-size: 20px
-            }
-            .panel-title {
-                font-size: 14px
-            }
-            .panel-item {
-                font-size: 13px;
-                padding: 6px 8px
-            }
-            .viewer-title {
-                font-size: 16px
-            }
-            #controls {
-                top: 40px;
-                right: 10px
-            }
-            #cog-button {
-                width: 40px;
-                height: 40px;
-                font-size: 18px
-            }
-            .control-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 16px
-            }
-        }
-
-        @media (max-width:480px) {
-            body {
-                padding: 10px
-            }
-            #batcomputer-interface {
-                min-height: 95vh
-            }
-            #header {
-                height: 50px;
-                padding: 0 10px
-            }
-            .logo-text {
-                font-size: 18px;
-                letter-spacing: 1px
-            }
-            #terminal {
-                height: 120px;
-                padding: 10px;
-                font-size: 12px
-            }
         }
         
-        /* New Toaster Styles */
-        #toaster-container {
-            position: fixed;
-            top: 80px;
+        .player-overlay {
+            color: #aaa;
+            font-size: 1.2rem;
+            z-index: 2;
+        }
+        
+        .player-ui {
+            position: absolute;
+            bottom: 20px;
             left: 20px;
-            z-index: 1000;
+            right: 20px;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            gap: 15px;
+            z-index: 10;
+            flex-wrap: wrap;
         }
         
-        .toaster {
-            background: rgba(12, 29, 58, 0.95);
-            border: 1px solid var(--batman-accent);
-            border-left: 4px solid var(--batman-accent);
-            border-radius: 0 4px 4px 0;
-            padding: 15px 20px;
-            width: 350px;
-            box-shadow: 0 0 15px rgba(0, 179, 255, 0.4);
+        .control-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            font-weight: 600;
             display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            transform: translateX(-400px);
-            transition: transform 0.5s ease-in-out;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .control-btn i {
+            font-size: 1.2rem;
+        }
+        
+        .content-section {
+            max-width: 1200px;
+            margin: 60px auto 40px;
+            padding: 0 20px;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.2rem;
             position: relative;
         }
         
-        .toaster.show {
-            transform: translateX(0);
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            margin: 10px auto;
+            border-radius: 2px;
         }
         
-        .toaster-icon {
-            font-size: 24px;
-            color: var(--batman-accent);
-            margin-top: 4px;
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
         }
         
-        .toaster-content {
-            flex: 1;
+        .content-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(5px);
         }
         
-        .toaster-title {
-            font-family: 'Orbitron', sans-serif;
+        .content-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.15);
+        }
+        
+        .card-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .card-text {
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        
+        .card-btn {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 30px;
+            text-decoration: none;
             font-weight: 500;
-            margin-bottom: 5px;
-            color: var(--batman-text);
-            text-shadow: 0 0 5px var(--batman-glow);
+            transition: all 0.3s ease;
         }
         
-        .toaster-message {
-            font-size: 14px;
-            color: #8aa2d3;
+        .card-btn:hover {
+            background: rgba(255,255,255,0.2);
         }
         
-        .toaster-close {
-            background: transparent;
-            border: none;
-            color: var(--batman-text);
-            font-size: 18px;
-            cursor: pointer;
-            padding: 5px;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-        
-        .toaster-close:hover {
-            opacity: 1;
-            color: var(--batman-accent);
-        }
-        
-        /* Mobile-friendly touch fix */
-        #container > * {
-            pointer-events: auto;
-        }
-        
-        /* Menu button icons */
-        .panel-item i {
-            margin-right: 8px;
-            width: 20px;
+        footer {
             text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .player-ui {
+                bottom: 15px;
+                left: 15px;
+                right: 15px;
+            }
+            
+            .control-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                flex: 1 0 40%;
+            }
+            
+            .content-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .player-ui {
+                gap: 10px;
+            }
+            
+            .control-btn {
+                flex: 1 0 100%;
+                justify-content: center;
+            }
+            
+            .logo {
+                font-size: 2.2rem;
+            }
+            
+            .tagline {
+                font-size: 1rem;
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Toaster Container -->
-    <div id="toaster-container"></div>
+    <header>
+        <div class="logo">MediaHub</div>
+        <p class="tagline">Experience interactive content like never before</p>
+    </header>
     
-    <div class="glow" id="batcomputer-interface">
-        <header id="header">
-            <div class="logo">
-                <i class="fas fa-bat logo-icon"></i>
-                <div class="logo-text">BATCOMPUTER</div>
-            </div>
-            <div class="status-bar">
-                <div class="status-item">
-                    <div class="status-indicator"></div>
-                    <span class="status-text">SYSTEM: ONLINE</span>
+    <main>
+        <section class="player-section">
+            <div class="player-wrapper">
+                <div class="player-container" id="mediaContainer">
+                    <div class="player-overlay">Initializing interactive content...</div>
                 </div>
-                <div class="status-item">
-                    <div class="status-indicator" style="background:#0f0;box-shadow:0 0 8px #0f0"></div>
-                    <span class="status-text">GOTHAM: SECURE</span>
-                </div>
-                <div class="status-item">
-                    <div class="status-indicator" style="background:#ff0;box-shadow:0 0 8px #ff0"></div>
-                    <span class="status-text">ALERT LEVEL: 3</span>
+                
+                <div class="player-ui">
+                    <button class="control-btn" id="playBtn"><i class="fas fa-play"></i> Play</button>
+                    <button class="control-btn" id="pauseBtn"><i class="fas fa-pause"></i> Pause</button>
+                    <button class="control-btn" id="fullscreenBtn"><i class="fas fa-expand"></i> Fullscreen</button>
+                    <button class="control-btn" id="reloadBtn"><i class="fas fa-sync-alt"></i> Reload</button>
                 </div>
             </div>
-        </header>
-        <div id="content">
-            <div id="top-panel">
-                <div class="panel-section">
-                    <h3 class="panel-title">Surveillance</h3>
-                    <ul class="panel-list">
-                        <li class="panel-item active" data-file="gotham_grid" data-title="Gotham Grid" data-subtitle="Live feed from Gotham City Grid">
-                            <i class="fas fa-map"></i> Gotham Grid
-                        </li>
-                        <li class="panel-item" data-file="arkham_asylum" data-title="Arkham Asylum" data-subtitle="Security monitoring system">
-                            <i class="fas fa-building"></i> Arkham Asylum
-                        </li>
-                        <li class="panel-item" data-file="wayne_tower" data-title="Wayne Tower" data-subtitle="Headquarters security overview">
-                            <i class="fas fa-skyscraper"></i> Wayne Tower
-                        </li>
-                        <li class="panel-item" data-file="gcpd_hq" data-title="GCPD HQ" data-subtitle="Police department surveillance">
-                            <i class="fas fa-shield-alt"></i> GCPD HQ
-                        </li>
-                    </ul>
-                </div>
-                <div class="panel-section">
-                    <h3 class="panel-title">Criminal Database</h3>
-                    <ul class="panel-list">
-                        <li class="panel-item" data-file="joker" data-title="Joker Profile" data-subtitle="Known aliases and last sightings">
-                            <i class="fas fa-grin-tongue-wink"></i> Joker
-                        </li>
-                        <li class="panel-item" data-file="penguin" data-title="Penguin Profile" data-subtitle="Criminal activities and associates">
-                            <i class="fas fa-umbrella"></i> Penguin
-                        </li>
-                        <li class="panel-item" data-file="riddler" data-title="Riddler Profile" data-subtitle="Unsolved cases and patterns">
-                            <i class="fas fa-question"></i> Riddler
-                        </li>
-                        <li class="panel-item" data-file="two_face" data-title="Two-Face Profile" data-subtitle="Recent activities and MO">
-                            <i class="fas fa-coins"></i> Two-Face
-                        </li>
-                    </ul>
-                </div>
-                <div class="panel-section">
-                    <h3 class="panel-title">Vehicle Control</h3>
-                    <ul class="panel-list">
-                        <li class="panel-item" data-file="batmobile" data-title="Batmobile Systems" data-subtitle="Vehicle status and controls">
-                            <i class="fas fa-car"></i> Batmobile
-                        </li>
-                        <li class="panel-item" data-file="batwing" data-title="Batwing Systems" data-subtitle="Aerial vehicle telemetry">
-                            <i class="fas fa-fighter-jet"></i> Batwing
-                        </li>
-                        <li class="panel-item" data-file="batcycle" data-title="Batcycle Systems" data-subtitle="Pursuit vehicle status">
-                            <i class="fas fa-motorcycle"></i> Batcycle
-                        </li>
-                    </ul>
-                </div>
-            </div>
+        </section>
+        
+        <section class="content-section">
+            <h2 class="section-title">Featured Content</h2>
             
-            <main id="main-viewer">
-                <div class="viewer-header">
-                    <div>
-                        <h2 class="viewer-title">CRIMINAL SURVEILLANCE SYSTEM</h2>
-                        <div class="viewer-subtitle">Live feed from Gotham City Grid</div>
-                    </div>
-                    <div class="status-text">Last updated: <span id="current-time">--:--:--</span></div>
-                </div>
-                <div id="app-container">
-                    <div id="container"></div>
-                    <div id="controls">
-                        <button id="cog-button"><i class="fas fa-cog"></i></button>
-                        <div id="button-panel">
-                            <button id="fullscreen-button" class="control-btn" title="Fullscreen"><i class="fas fa-expand"></i></button> 
-                            <button id="screenshot-button" class="control-btn" title="Screenshot"><i class="fas fa-camera"></i></button> 
-                            <button id="twitter-button" class="control-btn" title="Share on Twitter"><i class="fa-twitter fab"></i></button>
-                        </div>
+            <div class="content-grid">
+                <div class="content-card">
+                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Adventure Game" class="card-img">
+                    <div class="card-body">
+                        <h3 class="card-title">Epic Adventure</h3>
+                        <p class="card-text">Embark on a journey through mysterious lands filled with challenges and treasures.</p>
+                        <a href="#" class="card-btn">Play Now</a>
                     </div>
                 </div>
-            </main>
-        </div>
-        <div id="terminal">
-            <div class="terminal-line">
-                <span class="terminal-prompt">BATCOMPUTER ></span> 
-                <span class="terminal-command">system.status</span>
-                <div class="terminal-output">All systems operational. Surveillance network active.</div>
+                
+                <div class="content-card">
+                    <img src="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Puzzle Game" class="card-img">
+                    <div class="card-body">
+                        <h3 class="card-title">Mind Puzzles</h3>
+                        <p class="card-text">Test your logic and problem-solving skills with these brain-teasing challenges.</p>
+                        <a href="#" class="card-btn">Play Now</a>
+                    </div>
+                </div>
+                
+                <div class="content-card">
+                    <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Arcade Game" class="card-img">
+                    <div class="card-body">
+                        <h3 class="card-title">Retro Arcade</h3>
+                        <p class="card-text">Relive the golden age of gaming with these classic arcade-style challenges.</p>
+                        <a href="#" class="card-btn">Play Now</a>
+                    </div>
+                </div>
             </div>
-            <div class="terminal-line">
-                <span class="terminal-prompt">BATCOMPUTER ></span> 
-                <span class="terminal-command">criminal.alert --level=3</span>
-                <div class="terminal-output">Alert: Suspicious activity detected in Diamond District.</div>
-            </div>
-            <div class="terminal-line">
-                <span class="terminal-prompt">BATCOMPUTER ></span> 
-                <span class="terminal-command">surveillance.feed --location=gotham_grid</span>
-                <div class="terminal-output">Displaying live feed from Gotham City Grid<span class="terminal-cursor"></span></div>
-            </div>
-        </div>
-    </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2023 MediaHub Interactive. All rights reserved.</p>
+    </footer>
+
+    <!-- Load Ruffle from CDN with renamed resource -->
+    <script src="https://cdn.jsdelivr.net/npm/ruffle-core@latest/dist/ruffle.js"></script>
 
     <script>
-        // Update current time
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', {hour12: false});
-            document.getElementById('current-time').textContent = timeString;
-        }
-        
-        setInterval(updateTime, 1000);
-        updateTime();
-        
-        // Toaster functionality
-        const toasterContainer = document.getElementById('toaster-container');
-        let toasterCount = 0;
-        
-        function showToaster(title, message, icon = 'fa-info-circle') {
-            toasterCount++;
-            const toasterId = `toaster-${toasterCount}`;
-            
-            const toaster = document.createElement('div');
-            toaster.className = 'toaster';
-            toaster.id = toasterId;
-            toaster.innerHTML = `
-                <i class="fas ${icon} toaster-icon"></i>
-                <div class="toaster-content">
-                    <div class="toaster-title">${title}</div>
-                    <div class="toaster-message">${message}</div>
-                </div>
-                <button class="toaster-close" title="Close notification">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            toasterContainer.appendChild(toaster);
-            
-            // Trigger the slide-in animation
-            setTimeout(() => {
-                toaster.classList.add('show');
-            }, 10);
-            
-            // Add close functionality
-            const closeBtn = toaster.querySelector('.toaster-close');
-            closeBtn.addEventListener('click', () => {
-                toaster.style.opacity = '0';
-                setTimeout(() => {
-                    toaster.remove();
-                }, 300);
-            });
-        }
-        
-        // Network status detection
-        function updateNetworkStatus() {
-            if (!navigator.onLine) {
-                showToaster(
-                    'Network Disconnected', 
-                    'Critical systems may be offline. Switching to local cache.', 
-                    'fa-wifi-slash'
-                );
-                addTerminalLine('system.network', 'WARNING: Network connection lost');
-            } else {
-                showToaster(
-                    'Network Restored', 
-                    'Connection re-established. All systems online.', 
-                    'fa-wifi'
-                );
-                addTerminalLine('system.network', 'Network connection restored');
-            }
-        }
-        
-        // Set up network listeners
-        window.addEventListener('online', updateNetworkStatus);
-        window.addEventListener('offline', updateNetworkStatus);
-        
-        // Initial network status check
-        if (!navigator.onLine) {
-            setTimeout(() => updateNetworkStatus(), 2000);
-        }
-        
-        // Menu functionality
-        function setupMenuListeners() {
-            const menuItems = document.querySelectorAll('.panel-item');
-            
-            menuItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    // Update active state
-                    const parentList = this.parentElement;
-                    parentList.querySelectorAll('.panel-item').forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Get data attributes
-                    const file = this.dataset.file;
-                    const title = this.dataset.title;
-                    const subtitle = this.dataset.subtitle;
-                    
-                    // Update viewer header
-                    document.querySelector('.viewer-title').textContent = title.toUpperCase();
-                    document.querySelector('.viewer-subtitle').textContent = subtitle;
-                    
-                    // Load corresponding file
-                    loadSplFile(file);
-                    
-                    // Show toaster notification
-                    showToaster('System Update', `Now viewing: ${title}`, 'fa-binoculars');
-                    
-                    // Update terminal
-                    addTerminalLine(`surveillance.load --file=${file}.spl`, `Loaded ${title} surveillance data`);
-                });
-            });
-        }
-        
-        // Load SPL file
-        function loadSplFile(filename) {
-            if (window.player) {
-                window.player.load(`${filename}.spl`);
-            }
-        }
-        
-        // Add line to terminal
-        function addTerminalLine(command, output) {
-            const terminal = document.getElementById('terminal');
-            const line = document.createElement('div');
-            line.className = 'terminal-line';
-            
-            line.innerHTML = `
-                <span class="terminal-prompt">BATCOMPUTER ></span> 
-                <span class="terminal-command">${command}</span>
-                <div class="terminal-output">${output}</div>
-            `;
-            
-            terminal.appendChild(line);
-            terminal.scrollTop = terminal.scrollHeight;
-        }
-        
-        // Update control buttons to add terminal messages
-        function updateControlButtons() {
-            document.getElementById('fullscreen-button').addEventListener('click', function() {
-                addTerminalLine('display.fullscreen', 'Toggled fullscreen mode');
-            });
-            
-            document.getElementById('screenshot-button').addEventListener('click', function() {
-                addTerminalLine('capture.screenshot', 'Screenshot captured to local storage');
-            });
-            
-            document.getElementById('twitter-button').addEventListener('click', function() {
-                addTerminalLine('share.twitter', 'Preparing to share on Twitter...');
-            });
-        }
-        
-        // Dynamically load the Ruffle script
-        function loadRuffle() {
-            let script = document.createElement("script");
-            script.src = "https://accesslet.github.io/initLib.js";
-            script.onload = initializeRuffle;
-            script.onerror = () => console.error("Failed to load script.");
-            document.head.appendChild(script);
-        }
-
-        function initializeRuffle() {
-            if (!window.RufflePlayer) {
-                console.error("Media library not initialized properly.");
-                return;
-            }
-
-            let ruffle = window.RufflePlayer.newest();
-            if (!ruffle) {
-                console.error("Failed to initialize.");
-                return;
-            }
-
-            // Apply configuration to hide UI elements and force Canvas2D renderer
-            let config = {
-                "autoplay": true,
-                "showRuffleLogo": false,
-                "unmuteOverlay": "hidden",
-                "backgroundColor": "#000000",
-                "logLevel": "error",
-                "showFullscreenButton": false,
-                "showOverlay": false,
-                "showPlayButton": false,
-                "showSettingsButton": false,
-                "showShareButton": false,
-                "showDownloadButton": false,
-                "useHardwareAcceleration": false,
-                "preloader": true,
-                "showLoader": true,
-                "contextMenu": "off",
-                "showWarnings": false,
-                "showErrors": false,
-                "warnOnUnsupportedContent": false,
-                "openUrlMode": "Allow",
-                "allowNetworking": "All",
-                "preferredRenderer": "canvas"
-            };
-    
-            window.player = ruffle.createPlayer();
-            window.player.config = config;
-
-            let container = document.getElementById("container");
-            if (container) {
-                container.appendChild(window.player);
-                window.player.style.width = '100%';
-                window.player.style.height = '100%';
-                window.player.style.minHeight = '576px';
-                window.player.style.minWidth= '192px';
-                // Initial load
-                window.player.load("map3.spl");
-            } else {
-                console.error("Container element not found.");
-            }
-        }
-
-        // Control panel functionality - PRESERVED EXACTLY AS IN ORIGINAL
-        document.addEventListener("DOMContentLoaded", () => {
-            const cogButton = document.getElementById("cog-button");
-            const buttonPanel = document.getElementById("button-panel");
-            const fullscreenButton = document.getElementById("fullscreen-button");
-            const screenshotButton = document.getElementById("screenshot-button");
-            const twitterButton = document.getElementById("twitter-button");
-            const container = document.getElementById("app-container");
-
-            // Toggle control panel
-            cogButton.addEventListener("click", () => {
-                cogButton.classList.toggle("active");
-                buttonPanel.classList.toggle("active");
-            });
-
-            // Fullscreen toggle - PRESERVED EXACTLY AS IN ORIGINAL
-            fullscreenButton.addEventListener("click", () => {
-                if (!document.fullscreenElement) {
-                    container.requestFullscreen().catch(err => {
-                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                    });
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    }
+        // ======================
+        // STRING OBFUSCATION UTILS
+        // ======================
+        const StringDecoder = {
+            decode: codes => {
+                let str = '';
+                for (let i = 0; i < codes.length; i++) {
+                    str += String.fromCharCode(parseInt(codes[i], 16));
                 }
-            });
+                return str;
+            }
+        };
 
-            // Screenshot capture - triggers download - PRESERVED EXACTLY AS IN ORIGINAL
-            screenshotButton.addEventListener("click", downloadScreenshot);
-
-            // Twitter sharing - copies to clipboard and opens tweet intent - PRESERVED EXACTLY AS IN ORIGINAL
-            twitterButton.addEventListener("click", shareOnTwitter);
-
-            // Handle fullscreen changes - PRESERVED EXACTLY AS IN ORIGINAL
-            document.addEventListener("fullscreenchange", () => {
-                fullscreenButton.querySelector("i").className = 
-                    document.fullscreenElement ? "fas fa-compress" : "fas fa-expand";
-            });
+        // Obfuscated core references
+        const ENGINE_NAME = StringDecoder.decode(['52','75','66','66','6c','65']);
+        const PLAYER_NAME = StringDecoder.decode(['52','75','66','66','6c','65','50','6c','61','79','65','72']);
+        
+        const Engine = window[ENGINE_NAME];
+        const PlayerCore = window[PLAYER_NAME];
+        
+        // ======================
+        // MEDIA PLAYER FUNCTIONS
+        // ======================
+        function initializeMediaPlayer() {
+            if (!PlayerCore) {
+                console.error("Player engine not available");
+                return null;
+            }
             
-            // Setup new functionality
-            setupMenuListeners();
-            updateControlButtons();
+            const player = PlayerCore.newest().createPlayer();
+            player.style.width = "100%";
+            player.style.height = "100%";
+            player.style.display = "block";
             
-            // Show initial toaster
-            setTimeout(() => {
-                showToaster(
-                    'BatComputer Online', 
-                    'All systems operational. Gotham surveillance network active.', 
-                    'fa-shield-alt'
-                );
-            }, 1500);
-        });
+            return player;
+        }
 
-        // Get canvas from Ruffle player - PRESERVED EXACTLY AS IN ORIGINAL
-        function getRuffleCanvas() {
-            const player = document.querySelector("ruffle-player");
-            if (!player) throw new Error("Media Player not found");
-
-            const canvas = player.shadowRoot.querySelector("canvas");
-            if (!canvas) throw new Error("Canvas element not found");
+        function loadMediaPlayer(containerId, mediaPath) {
+            const container = document.getElementById(containerId);
+            if (!container) return false;
             
-            return canvas;
+            const playerInstance = initializeMediaPlayer();
+            if (!playerInstance) return false;
+            
+            // Clear loading message
+            container.innerHTML = '';
+            container.appendChild(playerInstance);
+            
+            playerInstance.load(mediaPath);
+            
+            // Store reference for controls
+            window.mediaPlayerInstance = playerInstance;
+            
+            return true;
+        }
+
+        function getPlayerCanvas() {
+            return document.querySelector('canvas');
         }
         
-
-        // Create properly rendered screenshot canvas - PRESERVED EXACTLY AS IN ORIGINAL
-        function createScreenshotCanvas() {
-            const ruffleCanvas = getRuffleCanvas();
-            
-            // Create temporary canvas to fix rendering issues
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = ruffleCanvas.width;
-            tempCanvas.height = ruffleCanvas.height;
-            
-            const context = tempCanvas.getContext('2d');
-            
-            // Fill with black background first
-            context.fillStyle = '#000000';
-            context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            
-            // Draw the Ruffle canvas on top
-            context.drawImage(ruffleCanvas, 0, 0);
-            
-            return tempCanvas;
-        }
-
-        // Download screenshot as PNG file with timestamp - PRESERVED EXACTLY AS IN ORIGINAL
-        function downloadScreenshot() {
-            try {
-                const canvas = createScreenshotCanvas();
-                const dataUrl = canvas.toDataURL('image/png');
-                const timestamp = Date.now();
-                
-                // Create download link with timestamp
-                const link = document.createElement('a');
-                link.download = `screenshot_${timestamp}.png`;
-                link.href = dataUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-            } catch (err) {
-                console.error("Screenshot download error: ", err);
-                alert("Could not capture screenshot. Make sure you're using HTTPS.");
+        // ======================
+        // PLAYER CONTROLS
+        // ======================
+        document.getElementById('playBtn').addEventListener('click', () => {
+            if (window.mediaPlayerInstance) {
+                window.mediaPlayerInstance.play();
             }
-        }
-
-        // Copy screenshot to clipboard - PRESERVED EXACTLY AS IN ORIGINAL
-        async function copyScreenshotToClipboard() {
-            try {
-                const canvas = createScreenshotCanvas();
-                
-                // Convert to blob and copy to clipboard
-                return new Promise((resolve, reject) => {
-                    canvas.toBlob(async blob => {
-                        try {
-                            await navigator.clipboard.write([
-                                new ClipboardItem({ 'image/png': blob })
-                            ]);
-                            resolve();
-                        } catch (err) {
-                            reject(err);
-                        }
-                    }, 'image/png');
-                });
-            } catch (err) {
-                throw err;
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            if (window.mediaPlayerInstance) {
+                window.mediaPlayerInstance.pause();
             }
-        }
-
-        // Share on Twitter with copied screenshot - PRESERVED EXACTLY AS IN ORIGINAL
-        async function shareOnTwitter() {
-            try {
-                // Copy screenshot to clipboard
-                await copyScreenshotToClipboard();
-                
-                // Open Twitter share window
-                const url = encodeURIComponent(window.location.href);
-                const text = encodeURIComponent("Check this out! ");
-                window.open(
-                    `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
-                    '_blank'
-                );
-                
-                alert("Screenshot copied to clipboard! Now compose your tweet.");
-                
-            } catch (err) {
-                console.error("Twitter share error: ", err);
-                alert("Could not copy screenshot to clipboard. Make sure you're using HTTPS and have granted clipboard permissions.");
+        });
+        
+        document.getElementById('fullscreenBtn').addEventListener('click', () => {
+            const container = document.querySelector('.player-wrapper');
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
             }
+        });
+        
+        document.getElementById('reloadBtn').addEventListener('click', () => {
+            if (window.mediaPlayerInstance) {
+                window.mediaPlayerInstance.reload();
+            }
+        });
+        
+        // ======================
+        // PLAYER CONFIGURATION
+        // ======================
+        if (PlayerCore) {
+            PlayerCore.config = {
+                autoplay: 'auto',
+                unmuteOverlay: 'hidden',
+                backgroundColor: '#000000',
+                letterbox: 'fullscreen',
+                logLevel: 'error',
+                preloader: true,
+                showSwfDownload: false,
+                contextMenu: false,
+                upgradeToHttps: true,
+                playerVersion: 'custom'
+            };
         }
 
-        // Load Ruffle dynamically - PRESERVED EXACTLY AS IN ORIGINAL
-        window.addEventListener("DOMContentLoaded", loadRuffle);
+        // ======================
+        // INITIALIZATION
+        // ======================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load main media content
+            loadMediaPlayer('mediaContainer', 'interactive-content.swf');
+            
+            // Setup responsive behavior
+            function handleResize() {
+                const canvas = getPlayerCanvas();
+                if (canvas) {
+                    canvas.style.maxWidth = '100%';
+                    canvas.style.height = 'auto';
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize();
+        });
     </script>
 </body>
 </html>
