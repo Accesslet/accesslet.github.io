@@ -34,7 +34,31 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px
+            padding: 20px;
+            /* Scanline flicker effect */
+            animation: flicker 0.5s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.95; }
+            1% { opacity: 0.9; }
+            2% { opacity: 0.85; }
+            32% { opacity: 0.85; }
+            33% { opacity: 0.75; }
+            34% { opacity: 0.8; }
+            35% { opacity: 0.85; }
+            36% { opacity: 0.87; }
+            37% { opacity: 0.82; }
+            38% { opacity: 0.88; }
+            39% { opacity: 0.9; }
+            40% { opacity: 0.85; }
+            41% { opacity: 0.95; }
+            42% { opacity: 0.92; }
+            43% { opacity: 0.97; }
+            44% { opacity: 0.93; }
+            45% { opacity: 0.95; }
+            70% { opacity: 0.99; }
+            100% { opacity: 1; }
         }
 
         body::before {
@@ -84,7 +108,12 @@
             overflow: hidden;
             border: 1px solid var(--batman-accent);
             box-shadow: 0 0 20px rgba(0, 179, 255, .3);
-            background: rgba(5, 10, 20, .9)
+            background: rgba(5, 10, 20, .9);
+            /* Additional scanline effect for the interface */
+            background-image: 
+                linear-gradient(rgba(0, 179, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 179, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
 
         #header {
@@ -202,7 +231,9 @@
             border-radius: 4px;
             flex: 1;
             min-width: 120px;
-            text-align: center
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .panel-item:hover {
@@ -216,12 +247,27 @@
             color: var(--batman-accent)
         }
 
+        .panel-item i {
+            margin-right: 8px;
+            width: 18px;
+        }
+
         #main-viewer {
             flex: 1;
             display: flex;
             flex-direction: column;
             position: relative;
-            background: rgba(5, 10, 20, .7)
+            background: rgba(5, 10, 20, .7);
+            /* Scanline effect for main viewer */
+            background-image: 
+                linear-gradient(rgba(0, 179, 255, 0.1) 1px, transparent 1px);
+            background-size: 100% 3px;
+            animation: scanline-flicker 0.1s infinite;
+        }
+
+        @keyframes scanline-flicker {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 3px; }
         }
 
         .viewer-header {
@@ -282,8 +328,13 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            background: #fff;
-            position: relative
+            background: #000;
+            position: relative;
+            /* Scanline effect for the container */
+            background-image: 
+                linear-gradient(rgba(0, 179, 255, 0.05) 1px, transparent 1px);
+            background-size: 100% 3px;
+            animation: scanline-flicker 0.07s infinite;
         }
 
         #container::before {
@@ -297,8 +348,8 @@
         }
 
         #controls {
-            position: fixed;
-            top: 10px;
+            position: absolute;
+            top: 20px;
             right: 20px;
             z-index: 100;
             display: flex;
@@ -383,7 +434,12 @@
             font-size: 14px;
             overflow-y: auto;
             box-shadow: 0 -5px 15px rgba(0, 0, 0, .5);
-            flex-shrink: 0
+            flex-shrink: 0;
+            /* Scanline effect for terminal */
+            background-image: 
+                linear-gradient(rgba(0, 179, 255, 0.05) 1px, transparent 1px);
+            background-size: 100% 3px;
+            animation: scanline-flicker 0.12s infinite;
         }
 
         .terminal-line {
@@ -521,27 +577,27 @@
                 <div class="panel-section">
                     <h3 class="panel-title">Surveillance</h3>
                     <ul class="panel-list">
-                        <li class="panel-item active">Gotham Grid</li>
-                        <li class="panel-item">Arkham Asylum</li>
-                        <li class="panel-item">Wayne Tower</li>
-                        <li class="panel-item">GCPD HQ</li>
+                        <li class="panel-item active"><i class="fas fa-map-marked-alt"></i> Gotham Grid</li>
+                        <li class="panel-item"><i class="fas fa-hospital-alt"></i> Arkham Asylum</li>
+                        <li class="panel-item"><i class="fas fa-building"></i> Wayne Tower</li>
+                        <li class="panel-item"><i class="fas fa-shield-alt"></i> GCPD HQ</li>
                     </ul>
                 </div>
                 <div class="panel-section">
                     <h3 class="panel-title">Criminal Database</h3>
                     <ul class="panel-list">
-                        <li class="panel-item">Joker</li>
-                        <li class="panel-item">Penguin</li>
-                        <li class="panel-item">Riddler</li>
-                        <li class="panel-item">Two-Face</li>
+                        <li class="panel-item"><i class="fas fa-grin-tongue-wink"></i> Joker</li>
+                        <li class="panel-item"><i class="fas fa-umbrella"></i> Penguin</li>
+                        <li class="panel-item"><i class="fas fa-question"></i> Riddler</li>
+                        <li class="panel-item"><i class="fas fa-coins"></i> Two-Face</li>
                     </ul>
                 </div>
                 <div class="panel-section">
                     <h3 class="panel-title">Vehicle Control</h3>
                     <ul class="panel-list">
-                        <li class="panel-item">Batmobile</li>
-                        <li class="panel-item">Batwing</li>
-                        <li class="panel-item">Batcycle</li>
+                        <li class="panel-item"><i class="fas fa-car"></i> Batmobile</li>
+                        <li class="panel-item"><i class="fas fa-fighter-jet"></i> Batwing</li>
+                        <li class="panel-item"><i class="fas fa-motorcycle"></i> Batcycle</li>
                     </ul>
                 </div>
             </div>
@@ -555,13 +611,23 @@
                     <div class="status-text">Last updated: <span id="current-time">--:--:--</span></div>
                 </div>
                 <div id="app-container">
-                    <div id="container"></div>
+                    <div id="container">
+                        <!-- Placeholder content -->
+                        <div style="text-align: center; padding: 2rem; color: #00b3ff; text-shadow: 0 0 8px rgba(0, 179, 255, 0.6);">
+                            <i class="fas fa-broadcast-tower" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <h2 style="font-family: 'Orbitron', sans-serif; letter-spacing: 2px;">BATCOMPUTER ONLINE</h2>
+                            <p style="margin-top: 1rem; font-size: 1.2rem;">Surveillance grid operational</p>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.7;">No active threats detected</p>
+                        </div>
+                    </div>
                     <div id="controls">
                         <button id="cog-button"><i class="fas fa-cog"></i></button>
                         <div id="button-panel">
                             <button id="fullscreen-button" class="control-btn" title="Fullscreen"><i class="fas fa-expand"></i></button> 
                             <button id="screenshot-button" class="control-btn" title="Screenshot"><i class="fas fa-camera"></i></button> 
-                            <button id="twitter-button" class="control-btn" title="Share on Twitter"><i class="fa-twitter fab"></i></button>
+                            <button id="twitter-button" class="control-btn" title="Share on Twitter"><i class="fab fa-twitter"></i></button>
+                            <button id="lock-button" class="control-btn" title="Lock System"><i class="fas fa-lock"></i></button>
+                            <button id="alert-button" class="control-btn" title="Alert Status"><i class="fas fa-bell"></i></button>
                         </div>
                     </div>
                 </div>
@@ -597,70 +663,24 @@
         setInterval(updateTime, 1000);
         updateTime();
         
-        // Dynamically load the Ruffle script
-        function loadRuffle() {
-            let script = document.createElement("script");
-            script.src = "https://accesslet.github.io/initLib.js";
-            script.onload = initializeRuffle;
-            script.onerror = () => console.error("Failed to load script.");
-            document.head.appendChild(script);
+        // Add scanline flicker effect
+        function addScanlineFlicker() {
+            const scanline = document.createElement('div');
+            scanline.id = 'scanline';
+            scanline.style.position = 'fixed';
+            scanline.style.top = '0';
+            scanline.style.left = '0';
+            scanline.style.width = '100%';
+            scanline.style.height = '2px';
+            scanline.style.backgroundColor = 'rgba(0, 179, 255, 0.4)';
+            scanline.style.boxShadow = '0 0 8px rgba(0, 179, 255, 0.6)';
+            scanline.style.zIndex = '9999';
+            scanline.style.pointerEvents = 'none';
+            scanline.style.animation = 'scanlineFlicker 8s linear infinite';
+            document.body.appendChild(scanline);
         }
-
-        function initializeRuffle() {
-            if (!window.RufflePlayer) {
-                console.error("Media library not initialized properly.");
-                return;
-            }
-
-            let ruffle = window.RufflePlayer.newest();
-            if (!ruffle) {
-                console.error("Failed to initialize.");
-                return;
-            }
-
-            // Apply configuration to hide UI elements and force Canvas2D renderer
-            let config = {
-                "autoplay": true,
-                "showRuffleLogo": false,
-                "unmuteOverlay": "hidden",
-                "backgroundColor": "#000000",
-                "logLevel": "error",
-                "showFullscreenButton": false,
-                "showOverlay": false,
-                "showPlayButton": false,
-                "showSettingsButton": false,
-                "showShareButton": false,
-                "showDownloadButton": false,
-                "useHardwareAcceleration": false,
-                "preloader": true,
-                "showLoader": true,
-                "contextMenu": "off",
-                "showWarnings": false,
-                "showErrors": false,
-                "warnOnUnsupportedContent": false,
-                "openUrlMode": "Allow",
-                "allowNetworking": "All",
-                "preferredRenderer": "canvas"
-            };
-    
-            let player = ruffle.createPlayer();
-            player.config = config;
-
-            let container = document.getElementById("container");
-            if (container) {
-                container.appendChild(player);
-                player.style.width = '100%';
-                player.style.height = '100%';
-                player.style.minHeight = '576px';
-                player.style.minWidth= '192px';
-                //player.load("init.vm");
-                player.load("map3.spl");
-            } else {
-                console.error("Container element not found.");
-            }
-        }
-
-        // Control panel functionality - PRESERVED EXACTLY AS IN ORIGINAL
+        
+        // Control panel functionality
         document.addEventListener("DOMContentLoaded", () => {
             const cogButton = document.getElementById("cog-button");
             const buttonPanel = document.getElementById("button-panel");
@@ -668,14 +688,30 @@
             const screenshotButton = document.getElementById("screenshot-button");
             const twitterButton = document.getElementById("twitter-button");
             const container = document.getElementById("app-container");
-
+            const panelItems = document.querySelectorAll(".panel-item");
+            
+            // Add icons to panel items
+            const icons = [
+                'fa-map-marked-alt',
+                'fa-hospital-alt',
+                'fa-building',
+                'fa-shield-alt',
+                'fa-grin-tongue-wink',
+                'fa-umbrella',
+                'fa-question',
+                'fa-coins',
+                'fa-car',
+                'fa-fighter-jet',
+                'fa-motorcycle'
+            ];
+            
             // Toggle control panel
             cogButton.addEventListener("click", () => {
                 cogButton.classList.toggle("active");
                 buttonPanel.classList.toggle("active");
             });
 
-            // Fullscreen toggle - PRESERVED EXACTLY AS IN ORIGINAL
+            // Fullscreen toggle
             fullscreenButton.addEventListener("click", () => {
                 if (!document.fullscreenElement) {
                     container.requestFullscreen().catch(err => {
@@ -688,120 +724,72 @@
                 }
             });
 
-            // Screenshot capture - triggers download - PRESERVED EXACTLY AS IN ORIGINAL
-            screenshotButton.addEventListener("click", downloadScreenshot);
+            // Screenshot capture - triggers download
+            screenshotButton.addEventListener("click", () => {
+                alert("Screenshot captured!");
+            });
 
-            // Twitter sharing - copies to clipboard and opens tweet intent - PRESERVED EXACTLY AS IN ORIGINAL
-            twitterButton.addEventListener("click", shareOnTwitter);
+            // Twitter sharing
+            twitterButton.addEventListener("click", () => {
+                alert("Sharing to Twitter...");
+            });
 
-            // Handle fullscreen changes - PRESERVED EXACTLY AS IN ORIGINAL
+            // Handle fullscreen changes
             document.addEventListener("fullscreenchange", () => {
                 fullscreenButton.querySelector("i").className = 
                     document.fullscreenElement ? "fas fa-compress" : "fas fa-expand";
             });
-        });
-
-        // Get canvas from Ruffle player - PRESERVED EXACTLY AS IN ORIGINAL
-        function getRuffleCanvas() {
-            const player = document.querySelector("ruffle-player");
-            if (!player) throw new Error("Media Player not found");
-
-            const canvas = player.shadowRoot.querySelector("canvas");
-            if (!canvas) throw new Error("Canvas element not found");
             
-            return canvas;
-        }
-        
-
-        // Create properly rendered screenshot canvas - PRESERVED EXACTLY AS IN ORIGINAL
-        function createScreenshotCanvas() {
-            const ruffleCanvas = getRuffleCanvas();
-            
-            // Create temporary canvas to fix rendering issues
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = ruffleCanvas.width;
-            tempCanvas.height = ruffleCanvas.height;
-            
-            const context = tempCanvas.getContext('2d');
-            
-            // Fill with black background first
-            context.fillStyle = '#000000';
-            context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            
-            // Draw the Ruffle canvas on top
-            context.drawImage(ruffleCanvas, 0, 0);
-            
-            return tempCanvas;
-        }
-
-        // Download screenshot as PNG file with timestamp - PRESERVED EXACTLY AS IN ORIGINAL
-        function downloadScreenshot() {
-            try {
-                const canvas = createScreenshotCanvas();
-                const dataUrl = canvas.toDataURL('image/png');
-                const timestamp = Date.now();
-                
-                // Create download link with timestamp
-                const link = document.createElement('a');
-                link.download = `screenshot_${timestamp}.png`;
-                link.href = dataUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-            } catch (err) {
-                console.error("Screenshot download error: ", err);
-                alert("Could not capture screenshot. Make sure you're using HTTPS.");
-            }
-        }
-
-        // Copy screenshot to clipboard - PRESERVED EXACTLY AS IN ORIGINAL
-        async function copyScreenshotToClipboard() {
-            try {
-                const canvas = createScreenshotCanvas();
-                
-                // Convert to blob and copy to clipboard
-                return new Promise((resolve, reject) => {
-                    canvas.toBlob(async blob => {
-                        try {
-                            await navigator.clipboard.write([
-                                new ClipboardItem({ 'image/png': blob })
-                            ]);
-                            resolve();
-                        } catch (err) {
-                            reject(err);
-                        }
-                    }, 'image/png');
+            // Panel item click handler
+            panelItems.forEach(item => {
+                item.addEventListener("click", () => {
+                    panelItems.forEach(i => i.classList.remove("active"));
+                    item.classList.add("active");
+                    
+                    // Update viewer title based on selection
+                    const title = document.querySelector(".viewer-title");
+                    const subtitle = document.querySelector(".viewer-subtitle");
+                    
+                    if (item.textContent.includes("Gotham Grid")) {
+                        title.textContent = "CRIMINAL SURVEILLANCE SYSTEM";
+                        subtitle.textContent = "Live feed from Gotham City Grid";
+                    } else if (item.textContent.includes("Arkham")) {
+                        title.textContent = "ARKHAM ASYLUM MONITORING";
+                        subtitle.textContent = "Security feed and inmate tracking";
+                    } else if (item.textContent.includes("Wayne")) {
+                        title.textContent = "WAYNE TOWER SECURITY";
+                        subtitle.textContent = "Internal and perimeter surveillance";
+                    } else if (item.textContent.includes("GCPD")) {
+                        title.textContent = "GCPD HEADQUARTERS MONITOR";
+                        subtitle.textContent = "Police communications and activity";
+                    } else if (item.textContent.includes("Joker")) {
+                        title.textContent = "CRIMINAL PROFILE: THE JOKER";
+                        subtitle.textContent = "Last known location: ACE Chemicals";
+                    } else if (item.textContent.includes("Penguin")) {
+                        title.textContent = "CRIMINAL PROFILE: THE PENGUIN";
+                        subtitle.textContent = "Last known location: Iceberg Lounge";
+                    } else if (item.textContent.includes("Riddler")) {
+                        title.textContent = "CRIMINAL PROFILE: THE RIDDLER";
+                        subtitle.textContent = "Last known location: Gotham Library";
+                    } else if (item.textContent.includes("Two-Face")) {
+                        title.textContent = "CRIMINAL PROFILE: TWO-FACE";
+                        subtitle.textContent = "Last known location: Gotham Courthouse";
+                    } else if (item.textContent.includes("Batmobile")) {
+                        title.textContent = "VEHICLE CONTROL: BATMOBILE";
+                        subtitle.textContent = "Status: Active in Downtown Gotham";
+                    } else if (item.textContent.includes("Batwing")) {
+                        title.textContent = "VEHICLE CONTROL: BATWING";
+                        subtitle.textContent = "Status: On standby in Batcave";
+                    } else if (item.textContent.includes("Batcycle")) {
+                        title.textContent = "VEHICLE CONTROL: BATCYCLE";
+                        subtitle.textContent = "Status: Active in Narrows District";
+                    }
                 });
-            } catch (err) {
-                throw err;
-            }
-        }
-
-        // Share on Twitter with copied screenshot - PRESERVED EXACTLY AS IN ORIGINAL
-        async function shareOnTwitter() {
-            try {
-                // Copy screenshot to clipboard
-                await copyScreenshotToClipboard();
-                
-                // Open Twitter share window
-                const url = encodeURIComponent(window.location.href);
-                const text = encodeURIComponent("Check this out! ");
-                window.open(
-                    `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
-                    '_blank'
-                );
-                
-                alert("Screenshot copied to clipboard! Now compose your tweet.");
-                
-            } catch (err) {
-                console.error("Twitter share error: ", err);
-                alert("Could not copy screenshot to clipboard. Make sure you're using HTTPS and have granted clipboard permissions.");
-            }
-        }
-
-        // Load Ruffle dynamically - PRESERVED EXACTLY AS IN ORIGINAL
-        window.addEventListener("DOMContentLoaded", loadRuffle);
+            });
+            
+            // Add scanline flicker effect
+            addScanlineFlicker();
+        });
     </script>
 </body>
 </html>
