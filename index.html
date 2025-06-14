@@ -298,6 +298,7 @@
 
         #controls {
             position: absolute;
+            top: 50px;
             right: 20px;
             z-index: 100;
             display: flex;
@@ -436,6 +437,35 @@
             }
         }
 
+        /* FIX FOR CONTROLS IN FULLSCREEN */
+        #app-container:fullscreen #controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+        
+        #app-container:-webkit-full-screen #controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+        
+        #app-container:-moz-full-screen #controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+        
+        #app-container:-ms-fullscreen #controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
         @media (max-width:768px) {
             .status-bar {
                 display: none
@@ -489,6 +519,12 @@
                 padding: 10px;
                 font-size: 12px
             }
+            
+            /* Fix for mobile fullscreen */
+            #app-container:fullscreen #controls {
+                top: 10px;
+                right: 10px;
+            }
         }
     </style>
 </head>
@@ -515,7 +551,6 @@
             </div>
         </header>
         <div id="content">
-            <!-- Moved side-panel above the main viewer -->
             <div id="top-panel">
                 <div class="panel-section">
                     <h3 class="panel-title">Surveillance</h3>
@@ -667,6 +702,7 @@
             const screenshotButton = document.getElementById("screenshot-button");
             const twitterButton = document.getElementById("twitter-button");
             const container = document.getElementById("app-container");
+            const controls = document.getElementById("controls");
 
             // Toggle control panel
             cogButton.addEventListener("click", () => {
@@ -693,11 +729,31 @@
             // Twitter sharing - copies to clipboard and opens tweet intent - PRESERVED EXACTLY AS IN ORIGINAL
             twitterButton.addEventListener("click", shareOnTwitter);
 
-            // Handle fullscreen changes - PRESERVED EXACTLY AS IN ORIGINAL
-            document.addEventListener("fullscreenchange", () => {
+            // Handle fullscreen changes - UPDATED TO FIX CONTROLS POSITION
+            function handleFullscreenChange() {
+                // Update icon
                 fullscreenButton.querySelector("i").className = 
                     document.fullscreenElement ? "fas fa-compress" : "fas fa-expand";
-            });
+                
+                // Update controls position
+                if (document.fullscreenElement) {
+                    controls.style.position = "fixed";
+                    controls.style.top = "20px";
+                    controls.style.right = "20px";
+                    controls.style.zIndex = "10000";
+                } else {
+                    controls.style.position = "absolute";
+                    controls.style.top = "50px";
+                    controls.style.right = "20px";
+                    controls.style.zIndex = "100";
+                }
+            }
+
+            // Add fullscreen event listeners
+            document.addEventListener("fullscreenchange", handleFullscreenChange);
+            document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+            document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+            document.addEventListener("MSFullscreenChange", handleFullscreenChange);
         });
 
         // Get canvas from Ruffle player - PRESERVED EXACTLY AS IN ORIGINAL
