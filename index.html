@@ -26,14 +26,14 @@
         body {
             width: 100%;
             min-height: 100vh;
-            overflow: auto;
+            overflow: auto; /* Changed to auto */
             font-family: 'Roboto Mono', monospace;
             background: var(--batman-dark);
             color: var(--batman-text);
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
         }
         
         /* Grid background effect */
@@ -158,6 +158,75 @@
             text-shadow: 0 0 5px var(--batman-glow);
         }
         
+        /* Top menu bar */
+        #top-menu {
+            height: 70px;
+            background: rgba(12, 29, 58, 0.9);
+            border-bottom: 1px solid var(--batman-accent);
+            display: flex;
+            padding: 10px 15px;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            z-index: 90;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+        }
+        
+        .menu-section {
+            background: rgba(28, 60, 106, 0.6);
+            border: 1px solid var(--batman-accent);
+            border-radius: 8px;
+            padding: 8px 15px;
+            min-width: 180px;
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .menu-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: var(--batman-accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 5px var(--batman-glow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .menu-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .menu-item {
+            padding: 6px 10px;
+            background: rgba(28, 60, 106, 0.3);
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid transparent;
+        }
+        
+        .menu-item:hover {
+            background: rgba(0, 179, 255, 0.3);
+            border: 1px solid var(--batman-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 0 10px var(--batman-glow);
+        }
+        
+        .menu-item.active {
+            background: rgba(28, 60, 106, 0.7);
+            border: 1px solid var(--batman-accent);
+            color: var(--batman-accent);
+        }
+        
         /* Main content area */
         #content {
             display: flex;
@@ -166,131 +235,32 @@
             overflow: hidden;
         }
         
-        /* Responsive side panel and viewer */
-        .main-content {
-            display: flex;
-            flex: 1;
-            flex-direction: column;
-        }
-        
-        @media (min-width: 768px) {
-            .main-content {
-                flex-direction: row;
-            }
-        }
-        
-        /* Side panel styling */
-        #side-panel {
-            width: 100%;
-            background: rgba(12, 29, 58, 0.8);
-            border-bottom: 1px solid var(--batman-accent);
-            padding: 15px 0;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-        
-        @media (min-width: 768px) {
-            #side-panel {
-                width: 250px;
-                border-right: 1px solid var(--batman-accent);
-                border-bottom: none;
-            }
-        }
-        
-        .panel-section {
-            margin-bottom: 15px;
-            padding: 0 15px;
-        }
-        
-        .panel-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 16px;
-            margin-bottom: 12px;
-            color: var(--batman-accent);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid var(--batman-accent);
-            padding-bottom: 5px;
-            text-shadow: 0 0 5px var(--batman-glow);
-        }
-        
-        .panel-list {
-            list-style: none;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        
-        @media (min-width: 768px) {
-            .panel-list {
-                display: block;
-                flex-wrap: nowrap;
-                gap: 0;
-            }
-        }
-        
-        .panel-item {
-            padding: 8px 10px;
-            margin: 3px 0;
-            border-left: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            background: rgba(28, 60, 106, 0.3);
-            border-radius: 4px;
-            flex: 1;
-            min-width: 120px;
-            text-align: center;
-        }
-        
-        @media (min-width: 768px) {
-            .panel-item {
-                border-radius: 0;
-                flex: none;
-                min-width: auto;
-                text-align: left;
-                background: transparent;
-            }
-        }
-        
-        .panel-item:hover {
-            background: rgba(28, 60, 106, 0.4);
-            border-left: 2px solid var(--batman-accent);
-        }
-        
-        .panel-item.active {
-            background: rgba(28, 60, 106, 0.7);
-            border-left: 2px solid var(--batman-accent);
-            color: var(--batman-accent);
-        }
-        
-        /* Main viewer area */
-        #main-viewer {
+        /* Game container section */
+        #game-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             position: relative;
             background: rgba(5, 10, 20, 0.7);
+            border-bottom: 1px solid var(--batman-accent);
         }
         
-        .viewer-header {
+        .game-header {
             padding: 10px 15px;
             background: rgba(12, 29, 58, 0.6);
-            border-bottom: 1px solid var(--batman-accent);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
         
         @media (min-width: 480px) {
-            .viewer-header {
+            .game-header {
                 flex-direction: row;
                 align-items: center;
             }
         }
         
-        .viewer-title {
+        .game-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 18px;
             color: var(--batman-accent);
@@ -299,12 +269,12 @@
         }
         
         @media (min-width: 480px) {
-            .viewer-title {
+            .game-title {
                 margin-bottom: 0;
             }
         }
         
-        .viewer-subtitle {
+        .game-subtitle {
             font-size: 14px;
             opacity: 0.8;
         }
@@ -419,17 +389,37 @@
             box-shadow: 0 0 12px var(--batman-glow);
         }
         
-        /* Terminal styling */
-        #terminal {
-            height: 150px;
+        /* Terminal section */
+        #terminal-section {
+            height: 200px;
             background: rgba(5, 10, 20, 0.9);
             border-top: 1px solid var(--batman-accent);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .terminal-header {
+            padding: 8px 15px;
+            background: rgba(12, 29, 58, 0.6);
+            border-bottom: 1px solid var(--batman-accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .terminal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: var(--batman-accent);
+            letter-spacing: 1px;
+        }
+        
+        #terminal {
+            flex: 1;
             padding: 15px;
             font-family: 'Roboto Mono', monospace;
             font-size: 14px;
             overflow-y: auto;
-            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5);
-            flex-shrink: 0;
         }
         
         .terminal-line {
@@ -481,7 +471,7 @@
         }
         
         /* Responsive adjustments */
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
             .status-bar {
                 display: none;
             }
@@ -490,16 +480,20 @@
                 font-size: 20px;
             }
             
-            .panel-title {
+            .menu-section {
+                min-width: 140px;
+            }
+            
+            .menu-title {
                 font-size: 14px;
             }
             
-            .panel-item {
-                font-size: 13px;
-                padding: 6px 8px;
+            .menu-item {
+                font-size: 12px;
+                padding: 5px 8px;
             }
             
-            .viewer-title {
+            .game-title {
                 font-size: 16px;
             }
             
@@ -518,6 +512,22 @@
                 width: 36px;
                 height: 36px;
                 font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            #top-menu {
+                height: auto;
+                padding: 10px;
+            }
+            
+            .menu-section {
+                min-width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            #terminal-section {
+                height: 180px;
             }
         }
         
@@ -541,9 +551,16 @@
             }
             
             #terminal {
-                height: 120px;
                 padding: 10px;
                 font-size: 12px;
+            }
+            
+            .terminal-header {
+                padding: 5px 10px;
+            }
+            
+            .terminal-title {
+                font-size: 14px;
             }
         }
     </style>
@@ -572,95 +589,127 @@
             </div>
         </header>
         
-        <!-- Main Content -->
-        <div id="content">
-            <div class="main-content">
-                <!-- Side Panel -->
-                <aside id="side-panel">
-                    <div class="panel-section">
-                        <h3 class="panel-title">Surveillance</h3>
-                        <ul class="panel-list">
-                            <li class="panel-item active">Gotham Grid</li>
-                            <li class="panel-item">Arkham Asylum</li>
-                            <li class="panel-item">Wayne Tower</li>
-                            <li class="panel-item">GCPD HQ</li>
-                        </ul>
+        <!-- Top Menu Bar -->
+        <div id="top-menu">
+            <!-- Surveillance Section -->
+            <div class="menu-section">
+                <div class="menu-title">
+                    <i class="fas fa-video"></i>
+                    SURVEILLANCE
+                </div>
+                <div class="menu-items">
+                    <div class="menu-item active" data-file="gotham_grid.swf">
+                        <i class="fas fa-map"></i> Gotham Grid
                     </div>
-                    
-                    <div class="panel-section">
-                        <h3 class="panel-title">Criminal Database</h3>
-                        <ul class="panel-list">
-                            <li class="panel-item">Joker</li>
-                            <li class="panel-item">Penguin</li>
-                            <li class="panel-item">Riddler</li>
-                            <li class="panel-item">Two-Face</li>
-                        </ul>
+                    <div class="menu-item" data-file="arkham_asylum.swf">
+                        <i class="fas fa-building"></i> Arkham Asylum
                     </div>
-                    
-                    <div class="panel-section">
-                        <h3 class="panel-title">Vehicle Control</h3>
-                        <ul class="panel-list">
-                            <li class="panel-item">Batmobile</li>
-                            <li class="panel-item">Batwing</li>
-                            <li class="panel-item">Batcycle</li>
-                        </ul>
+                    <div class="menu-item" data-file="wayne_tower.swf">
+                        <i class="fas fa-skyscraper"></i> Wayne Tower
                     </div>
-                </aside>
-                
-                <!-- Main Viewer -->
-                <main id="main-viewer">
-                    <div class="viewer-header">
-                        <div>
-                            <h2 class="viewer-title">CRIMINAL SURVEILLANCE SYSTEM</h2>
-                            <div class="viewer-subtitle">Live feed from Gotham City Grid</div>
-                        </div>
-                        <div class="status-text">Last updated: <span id="current-time">--:--:--</span></div>
+                </div>
+            </div>
+            
+            <!-- Criminal Database Section -->
+            <div class="menu-section">
+                <div class="menu-title">
+                    <i class="fas fa-user-secret"></i>
+                    CRIMINAL DATABASE
+                </div>
+                <div class="menu-items">
+                    <div class="menu-item" data-file="joker.swf">
+                        <i class="fas fa-grin"></i> Joker
                     </div>
-                    
-                    <!-- Original app container preserved inside BatComputer -->
-                    <div id="app-container">
-                        <div id="container">
-                            <!-- Ruffle player will be inserted here -->
-                        </div>
-                        
-                        <!-- Controls - preserved -->
-                        <div id="controls">
-                            <button id="cog-button">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <div id="button-panel">
-                                <button class="control-btn" id="fullscreen-button" title="Fullscreen">
-                                    <i class="fas fa-expand"></i>
-                                </button>
-                                <button class="control-btn" id="screenshot-button" title="Screenshot">
-                                    <i class="fas fa-camera"></i>
-                                </button>
-                                <button class="control-btn" id="twitter-button" title="Share on Twitter">
-                                    <i class="fab fa-twitter"></i>
-                                </button>
-                            </div>
-                        </div>
+                    <div class="menu-item" data-file="penguin.swf">
+                        <i class="fas fa-umbrella"></i> Penguin
                     </div>
-                </main>
+                    <div class="menu-item" data-file="riddler.swf">
+                        <i class="fas fa-question"></i> Riddler
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vehicle Control Section -->
+            <div class="menu-section">
+                <div class="menu-title">
+                    <i class="fas fa-car"></i>
+                    VEHICLE CONTROL
+                </div>
+                <div class="menu-items">
+                    <div class="menu-item" data-file="batmobile.swf">
+                        <i class="fas fa-car-burst"></i> Batmobile
+                    </div>
+                    <div class="menu-item" data-file="batwing.swf">
+                        <i class="fas fa-plane"></i> Batwing
+                    </div>
+                    <div class="menu-item" data-file="batcycle.swf">
+                        <i class="fas fa-motorcycle"></i> Batcycle
+                    </div>
+                </div>
             </div>
         </div>
         
-        <!-- Terminal -->
-        <div id="terminal">
-            <div class="terminal-line">
-                <span class="terminal-prompt">BATCOMPUTER ></span>
-                <span class="terminal-command">system.status</span>
-                <div class="terminal-output">All systems operational. Surveillance network active.</div>
+        <!-- Main Content -->
+        <div id="content">
+            <!-- Game Container Section -->
+            <div id="game-container">
+                <div class="game-header">
+                    <div>
+                        <h2 class="game-title">CRIMINAL SURVEILLANCE SYSTEM</h2>
+                        <div class="game-subtitle">Live feed from: <span id="current-file">Gotham City Grid</span></div>
+                    </div>
+                    <div class="status-text">Last updated: <span id="current-time">--:--:--</span></div>
+                </div>
+                
+                <!-- Original app container preserved inside BatComputer -->
+                <div id="app-container">
+                    <div id="container">
+                        <!-- Ruffle player will be inserted here -->
+                    </div>
+                    
+                    <!-- Controls - preserved -->
+                    <div id="controls">
+                        <button id="cog-button">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <div id="button-panel">
+                            <button class="control-btn" id="fullscreen-button" title="Fullscreen">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <button class="control-btn" id="screenshot-button" title="Screenshot">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <button class="control-btn" id="twitter-button" title="Share on Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="terminal-line">
-                <span class="terminal-prompt">BATCOMPUTER ></span>
-                <span class="terminal-command">criminal.alert --level=3</span>
-                <div class="terminal-output">Alert: Suspicious activity detected in Diamond District.</div>
-            </div>
-            <div class="terminal-line">
-                <span class="terminal-prompt">BATCOMPUTER ></span>
-                <span class="terminal-command">surveillance.feed --location=gotham_grid</span>
-                <div class="terminal-output">Displaying live feed from Gotham City Grid<span class="terminal-cursor"></span></div>
+            
+            <!-- Terminal Section -->
+            <div id="terminal-section">
+                <div class="terminal-header">
+                    <i class="fas fa-terminal"></i>
+                    <h3 class="terminal-title">SYSTEM TERMINAL</h3>
+                </div>
+                <div id="terminal">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BATCOMPUTER ></span>
+                        <span class="terminal-command">system.status</span>
+                        <div class="terminal-output">All systems operational. Surveillance network active.</div>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BATCOMPUTER ></span>
+                        <span class="terminal-command">criminal.alert --level=3</span>
+                        <div class="terminal-output">Alert: Suspicious activity detected in Diamond District.</div>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BATCOMPUTER ></span>
+                        <span class="terminal-command">surveillance.feed --location=gotham_grid</span>
+                        <div class="terminal-output">Displaying live feed from Gotham City Grid<span class="terminal-cursor"></span></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -675,6 +724,9 @@
         
         setInterval(updateTime, 1000);
         updateTime();
+        
+        // Current player instance
+        let player = null;
         
         // Dynamically load the Ruffle script
         function loadRuffle() {
@@ -722,7 +774,7 @@
                 "preferredRenderer": "canvas"
             };
     
-            let player = ruffle.createPlayer();
+            player = ruffle.createPlayer();
             player.config = config;
             
             // Set player dimensions to fill container
@@ -732,17 +784,70 @@
             let container = document.getElementById("container");
             if (container) {
                 container.appendChild(player);
-                //player.load("init.vm");
-                player.load("map.spl");
+                // Load the default file
+                player.load("gotham_grid.swf");
             } else {
                 console.error("Container element not found.");
             }
+        }
+
+        // Menu item click functionality
+        function setupMenu() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const currentFileDisplay = document.getElementById('current-file');
             
-            // Ensure player fills container after load
-            setTimeout(() => {
-                player.style.width = '100%';
-                player.style.height = '100%';
-            }, 500);
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Get the file name from data attribute
+                    const file = this.getAttribute('data-file');
+                    const displayName = this.textContent.trim();
+                    
+                    // Update the current file display
+                    currentFileDisplay.textContent = displayName;
+                    
+                    // Add terminal output
+                    addTerminalOutput(`Loading surveillance feed: ${displayName}`);
+                    
+                    // Load the new file
+                    if (player) {
+                        player.load(file);
+                    }
+                });
+            });
+        }
+        
+        // Add output to terminal
+        function addTerminalOutput(message) {
+            const terminal = document.getElementById('terminal');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            
+            const prompt = document.createElement('span');
+            prompt.className = 'terminal-prompt';
+            prompt.textContent = 'BATCOMPUTER >';
+            
+            const command = document.createElement('span');
+            command.className = 'terminal-command';
+            command.textContent = 'feed.update';
+            
+            const output = document.createElement('div');
+            output.className = 'terminal-output';
+            output.textContent = message;
+            
+            line.appendChild(prompt);
+            line.appendChild(command);
+            line.appendChild(output);
+            
+            terminal.appendChild(line);
+            
+            // Scroll to bottom
+            terminal.scrollTop = terminal.scrollHeight;
         }
 
         // Control panel functionality - PRESERVED EXACTLY AS IN ORIGINAL
@@ -784,6 +889,9 @@
                 fullscreenButton.querySelector("i").className = 
                     document.fullscreenElement ? "fas fa-compress" : "fas fa-expand";
             });
+            
+            // Setup menu functionality
+            setupMenu();
         });
 
         // Get canvas from Ruffle player - PRESERVED EXACTLY AS IN ORIGINAL
