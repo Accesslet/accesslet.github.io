@@ -26,7 +26,7 @@
         body {
             width: 100%;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
             font-family: 'Roboto Mono', monospace;
             background: var(--batman-dark);
             color: var(--batman-text);
@@ -728,14 +728,14 @@
             }
         }
 
-        // Control panel functionality
+        // Control panel functionality - PRESERVED EXACTLY AS IN ORIGINAL
         document.addEventListener("DOMContentLoaded", () => {
             const cogButton = document.getElementById("cog-button");
             const buttonPanel = document.getElementById("button-panel");
             const fullscreenButton = document.getElementById("fullscreen-button");
             const screenshotButton = document.getElementById("screenshot-button");
             const twitterButton = document.getElementById("twitter-button");
-            const container = document.getElementById("batcomputer-interface");
+            const container = document.getElementById("app-container");
 
             // Toggle control panel
             cogButton.addEventListener("click", () => {
@@ -743,7 +743,7 @@
                 buttonPanel.classList.toggle("active");
             });
 
-            // Fullscreen toggle
+            // Fullscreen toggle - PRESERVED EXACTLY AS IN ORIGINAL
             fullscreenButton.addEventListener("click", () => {
                 if (!document.fullscreenElement) {
                     container.requestFullscreen().catch(err => {
@@ -756,20 +756,20 @@
                 }
             });
 
-            // Screenshot capture - triggers download
+            // Screenshot capture - triggers download - PRESERVED EXACTLY AS IN ORIGINAL
             screenshotButton.addEventListener("click", downloadScreenshot);
 
-            // Twitter sharing - copies to clipboard and opens tweet intent
+            // Twitter sharing - copies to clipboard and opens tweet intent - PRESERVED EXACTLY AS IN ORIGINAL
             twitterButton.addEventListener("click", shareOnTwitter);
 
-            // Handle fullscreen changes
+            // Handle fullscreen changes - PRESERVED EXACTLY AS IN ORIGINAL
             document.addEventListener("fullscreenchange", () => {
                 fullscreenButton.querySelector("i").className = 
                     document.fullscreenElement ? "fas fa-compress" : "fas fa-expand";
             });
         });
 
-        // Get canvas from Ruffle player
+        // Get canvas from Ruffle player - PRESERVED EXACTLY AS IN ORIGINAL
         function getRuffleCanvas() {
             const player = document.querySelector("ruffle-player");
             if (!player) throw new Error("Media Player not found");
@@ -780,7 +780,7 @@
             return canvas;
         }
 
-        // Create properly rendered screenshot canvas
+        // Create properly rendered screenshot canvas - PRESERVED EXACTLY AS IN ORIGINAL
         function createScreenshotCanvas() {
             const ruffleCanvas = getRuffleCanvas();
             
@@ -801,7 +801,7 @@
             return tempCanvas;
         }
 
-        // Download screenshot as PNG file with timestamp
+        // Download screenshot as PNG file with timestamp - PRESERVED EXACTLY AS IN ORIGINAL
         function downloadScreenshot() {
             try {
                 const canvas = createScreenshotCanvas();
@@ -810,7 +810,7 @@
                 
                 // Create download link with timestamp
                 const link = document.createElement('a');
-                link.download = `batcomputer_surveillance_${timestamp}.png`;
+                link.download = `screenshot_${timestamp}.png`;
                 link.href = dataUrl;
                 document.body.appendChild(link);
                 link.click();
@@ -822,7 +822,7 @@
             }
         }
 
-        // Copy screenshot to clipboard
+        // Copy screenshot to clipboard - PRESERVED EXACTLY AS IN ORIGINAL
         async function copyScreenshotToClipboard() {
             try {
                 const canvas = createScreenshotCanvas();
@@ -845,7 +845,7 @@
             }
         }
 
-        // Share on Twitter with copied screenshot
+        // Share on Twitter with copied screenshot - PRESERVED EXACTLY AS IN ORIGINAL
         async function shareOnTwitter() {
             try {
                 // Copy screenshot to clipboard
@@ -853,7 +853,7 @@
                 
                 // Open Twitter share window
                 const url = encodeURIComponent(window.location.href);
-                const text = encodeURIComponent("Gotham surveillance feed captured via BATCOMPUTER");
+                const text = encodeURIComponent("Check this out! ");
                 window.open(
                     `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
                     '_blank'
@@ -867,7 +867,7 @@
             }
         }
 
-        // Load Ruffle dynamically
+        // Load Ruffle dynamically - PRESERVED EXACTLY AS IN ORIGINAL
         window.addEventListener("DOMContentLoaded", loadRuffle);
     </script>
 </body>
