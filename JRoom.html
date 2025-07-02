@@ -1,129 +1,163 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>WebRTC Peer Squares</title>
+  <title>WebRTC Multiplayer Canvas</title>
   <style>
-    body { font-family: sans-serif; }
-    textarea { width: 100%; height: 100px; margin: 5px 0; }
+    body { font-family: sans-serif; margin: 20px; }
+    textarea { width: 100%; height: 100px; margin: 5px 0; font-family: monospace; }
     canvas { border: 1px solid black; margin-top: 10px; display: block; }
-    button { margin: 5px 0; }
+    #chat { margin-top: 10px; }
   </style>
 </head>
 <body>
-  <h3>Local SDP (copy to peer)</h3>
+
+  <h3>Local SDP (copy this)</h3>
   <textarea id="local"></textarea>
 
-  <h3>Remote SDP (paste from peer)</h3>
+  <h3>Remote SDP (paste here)</h3>
   <textarea id="remote"></textarea>
 
-  <button onclick="connect()">Set Remote Description</button>
-  <button onclick="answer()">Create Answer</button>
+  <button onclick="createOffer()">Create Offer</button>
+  <button onclick="setRemote()">Set Remote Description</button>
+  <button onclick="createAnswer()">Create Answer</button>
 
   <canvas id="canvas" width="600" height="400"></canvas>
 
+  <div id="chat">
+    <h3>Chat</h3>
+    <div id="messages" style="border:1px solid #ccc; height:100px; overflow:auto; padding:5px;"></div>
+    <input type="text" id="chatInput" placeholder="Type a message..." style="width: 80%;" />
+    <button onclick="sendChat()">Send</button>
+  </div>
+
   <script>
     const pc = new RTCPeerConnection();
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
+    let channel;
 
     const myId = crypto.randomUUID();
-    const peers = {}; // id -> dot
-    const dotSize = 15;
+    const myName = prompt("Enter your name", "Player");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const messagesDiv = document.getElementById("messages");
+    const chatInput = document.getElementById("chatInput");
+
+    const peers = {};
 
     const myDot = {
       id: myId,
+      name: myName || "Player",
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      color: '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'),
-      label: "You"
+      tx: 0, ty: 0,  // target x/y for animation
+      color: '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
     };
+    myDot.tx = myDot.x;
+    myDot.ty = myDot.y;
     peers[myId] = myDot;
 
-    function draw() {
+    // Drawing loop with animation
+    function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (const id in peers) {
         const dot = peers[id];
+        dot.x += (dot.tx - dot.x) * 0.1;
+        dot.y += (dot.ty - dot.y) * 0.1;
         ctx.fillStyle = dot.color;
-        ctx.fillRect(dot.x, dot.y, dotSize, dotSize);
-        ctx.fillText(dot.label, dot.x + dotSize + 5, dot.y + 12);
+        ctx.fillRect(dot.x, dot.y, 15, 15);
+        ctx.font = "12px sans-serif";
+        ctx.fillText(dot.name, dot.x + 20, dot.y + 12);
       }
+      requestAnimationFrame(animate);
     }
+    animate();
 
-    setInterval(draw, 100);
-
+    // Canvas click = move self
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      myDot.x = x;
-      myDot.y = y;
-      send({ type: "move", id: myId, x, y });
+      const tx = e.clientX - rect.left;
+      const ty = e.clientY - rect.top;
+      myDot.tx = tx;
+      myDot.ty = ty;
+      send({ type: "move", id: myId, tx, ty });
     });
 
-    function send(obj) {
-      const data = JSON.stringify(obj);
-      if (channel.readyState === "open") channel.send(data);
-    }
-
-    // Incoming data handler
-    function handleMessage(e) {
-      const msg = JSON.parse(e.data);
-      if (msg.type === "hello") {
-        msg.dot.label = "Peer";
-        peers[msg.id] = msg.dot;
-        send({ type: "hello", dot: myDot, id: myId });
-      } else if (msg.type === "move") {
-        if (peers[msg.id]) {
-          peers[msg.id].x = msg.x;
-          peers[msg.id].y = msg.y;
-        }
-      }
-    }
-
-    // Create data channel and handle connection
-    const channel = pc.createDataChannel("chat");
-
-    channel.onopen = () => {
-      console.log("Channel open! Sending hello.");
-      send({ type: "hello", dot: myDot, id: myId });
-    };
-
-    channel.onmessage = handleMessage;
-
-    pc.ondatachannel = (event) => {
-      event.channel.onmessage = handleMessage;
-      event.channel.onopen = () => {
-        console.log("Data channel opened by peer.");
-        send({ type: "hello", dot: myDot, id: myId });
-      };
-    };
-
-    // ICE & SDP handling
-    pc.onicecandidate = (e) => {
+    // WebRTC handlers
+    pc.onicecandidate = e => {
       if (!e.candidate) {
         document.getElementById("local").value = JSON.stringify(pc.localDescription);
       }
     };
 
-    pc.createOffer().then(offer => pc.setLocalDescription(offer));
+    pc.ondatachannel = e => {
+      setupChannel(e.channel);
+    };
 
-    // Buttons
-    window.connect = () => {
+    function setupChannel(dc) {
+      channel = dc;
+      channel.onopen = () => {
+        send({ type: "hello", dot: myDot });
+      };
+      channel.onmessage = e => {
+        const msg = JSON.parse(e.data);
+        if (msg.type === "hello") {
+          msg.dot.tx = msg.dot.x;
+          msg.dot.ty = msg.dot.y;
+          peers[msg.dot.id] = msg.dot;
+          send({ type: "hello", dot: myDot });
+        } else if (msg.type === "move") {
+          if (peers[msg.id]) {
+            peers[msg.id].tx = msg.tx;
+            peers[msg.id].ty = msg.ty;
+          }
+        } else if (msg.type === "chat") {
+          showMessage(msg.name + ": " + msg.text);
+        }
+      };
+    }
+
+    function send(obj) {
+      if (channel && channel.readyState === "open") {
+        channel.send(JSON.stringify(obj));
+      }
+    }
+
+    function showMessage(msg) {
+      const div = document.createElement("div");
+      div.textContent = msg;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // SDP buttons
+    function createOffer() {
+      const dc = pc.createDataChannel("chat");
+      setupChannel(dc);
+      pc.createOffer().then(o => pc.setLocalDescription(o));
+    }
+
+    function setRemote() {
       const sdp = JSON.parse(document.getElementById("remote").value);
       pc.setRemoteDescription(new RTCSessionDescription(sdp));
-    };
+    }
 
-    window.answer = () => {
-      pc.createAnswer().then(answer => {
-        pc.setLocalDescription(answer).then(() => {
-          document.getElementById("local").value = JSON.stringify(answer);
+    function createAnswer() {
+      pc.createAnswer().then(a => {
+        pc.setLocalDescription(a).then(() => {
+          document.getElementById("local").value = JSON.stringify(pc.localDescription);
         });
       });
-    };
+    }
+
+    function sendChat() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      showMessage("You: " + text);
+      send({ type: "chat", name: myDot.name, text });
+      chatInput.value = "";
+    }
 
     window.addEventListener("beforeunload", () => {
-      if (channel.readyState === "open") {
+      if (channel && channel.readyState === "open") {
         channel.send(JSON.stringify({ type: "bye", id: myId }));
       }
     });
