@@ -11,18 +11,21 @@
 </head>
 <body>
 
-  <h3>Local SDP (copy this)</h3>
+  <!-- Manual WebRTC signaling UI -->
+  <h3>Local SDP (copy this and send to peer)</h3>
   <textarea id="local"></textarea>
 
-  <h3>Remote SDP (paste here)</h3>
+  <h3>Remote SDP (paste peer's offer/answer here)</h3>
   <textarea id="remote"></textarea>
 
-  <button onclick="createOffer()">Create Offer</button>
+  <button onclick="createOffer()">Create Offer (for Host)</button>
   <button onclick="setRemote()">Set Remote Description</button>
-  <button onclick="createAnswer()">Create Answer</button>
+  <button onclick="createAnswer()">Create Answer (for Guest)</button>
 
+  <!-- Canvas for visualizing players -->
   <canvas id="canvas" width="600" height="400"></canvas>
 
+  <!-- Chat UI -->
   <div id="chat">
     <h3>Chat</h3>
     <div id="messages" style="border:1px solid #ccc; height:100px; overflow:auto; padding:5px;"></div>
@@ -31,22 +34,26 @@
   </div>
 
   <script>
+    // WebRTC config with STUN server for NAT traversal
     const config = {
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
     };
     const pc = new RTCPeerConnection(config);
     let channel;
 
+    // Generate unique ID and prompt for name
     const myId = crypto.randomUUID();
     const myName = prompt("Enter your name", "Player") || "Player";
+
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     const messagesDiv = document.getElementById("messages");
     const chatInput = document.getElementById("chatInput");
 
-    const peers = {};
+    const peers = {}; // Stores all visible players
     const dotSize = 15;
 
+    // Create your own dot
     const myDot = {
       id: myId,
       name: myName,
@@ -59,6 +66,7 @@
     myDot.ty = myDot.y;
     peers[myId] = myDot;
 
+    // Animate all dots smoothly
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (const id in peers) {
@@ -74,6 +82,7 @@
     }
     animate();
 
+    // Move your dot on click
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const tx = e.clientX - rect.left;
@@ -83,12 +92,14 @@
       send({ type: "move", id: myId, tx, ty });
     });
 
+    // Send data over the DataChannel
     function send(obj) {
       if (channel && channel.readyState === "open") {
         channel.send(JSON.stringify(obj));
       }
     }
 
+    // Display chat messages
     function showMessage(msg) {
       const div = document.createElement("div");
       div.textContent = msg;
@@ -96,6 +107,7 @@
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
+    // Send chat message
     function sendChat() {
       const text = chatInput.value.trim();
       if (!text) return;
@@ -104,18 +116,22 @@
       chatInput.value = "";
     }
 
+    // Setup DataChannel handlers
     function setupChannel(dc) {
       channel = dc;
+
       channel.onopen = () => {
         send({ type: "hello", dot: myDot });
       };
+
       channel.onmessage = (e) => {
         const msg = JSON.parse(e.data);
+
         if (msg.type === "hello") {
           msg.dot.tx = msg.dot.x;
           msg.dot.ty = msg.dot.y;
           peers[msg.dot.id] = msg.dot;
-          send({ type: "hello", dot: myDot });
+          send({ type: "hello", dot: myDot }); // respond with our info
         } else if (msg.type === "move") {
           if (peers[msg.id]) {
             peers[msg.id].tx = msg.tx;
@@ -123,31 +139,38 @@
           }
         } else if (msg.type === "chat") {
           showMessage(msg.name + ": " + msg.text);
+        } else if (msg.type === "bye") {
+          delete peers[msg.id]; // remove disconnected peer
         }
       };
     }
 
+    // ICE candidate handling
     pc.onicecandidate = e => {
       if (!e.candidate) {
         document.getElementById("local").value = JSON.stringify(pc.localDescription);
       }
     };
 
+    // Incoming DataChannel (for answerer)
     pc.ondatachannel = e => {
       setupChannel(e.channel);
     };
 
+    // Create offer (host)
     function createOffer() {
       const dc = pc.createDataChannel("chat");
       setupChannel(dc);
       pc.createOffer().then(o => pc.setLocalDescription(o));
     }
 
+    // Set remote SDP
     function setRemote() {
       const sdp = JSON.parse(document.getElementById("remote").value);
       pc.setRemoteDescription(new RTCSessionDescription(sdp));
     }
 
+    // Create answer (guest)
     function createAnswer() {
       pc.createAnswer().then(a => {
         pc.setLocalDescription(a).then(() => {
@@ -156,11 +179,35 @@
       });
     }
 
+    // On tab/browser close → notify peer and close connection
     window.addEventListener("beforeunload", () => {
       if (channel && channel.readyState === "open") {
         channel.send(JSON.stringify({ type: "bye", id: myId }));
       }
+      pc.close(); // clean up connection
     });
   </script>
+
+  <!--
+    📋 HOW TO USE:
+
+    1. Open this page in two tabs or browsers.
+    2. In one tab (Host):
+        - Click "Create Offer"
+        - Copy the LOCAL SDP and send it to the other peer
+    3. In the second tab (Guest):
+        - Paste that offer into Remote SDP and click "Set Remote Description"
+        - Click "Create Answer"
+        - Copy your new LOCAL SDP and send it back to the Host
+    4. In Host:
+        - Paste that answer into Remote SDP and click "Set Remote Description"
+
+    ✅ Now you're connected!
+       - Click anywhere on the canvas to move your dot
+       - Type in chat below to message the peer in real time
+       - If a peer closes their tab, their dot disappears automatically
+
+    🌐 Works globally with STUN; no server needed after setup
+  -->
 </body>
 </html>
