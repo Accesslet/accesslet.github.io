@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>WebRTC Multiplayer Canvas</title>
+  <title>WebRTC Peer Canvas</title>
   <style>
     body { font-family: sans-serif; margin: 20px; }
     textarea { width: 100%; height: 100px; margin: 5px 0; font-family: monospace; }
@@ -31,31 +31,34 @@
   </div>
 
   <script>
-    const pc = new RTCPeerConnection();
+    const config = {
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+    };
+    const pc = new RTCPeerConnection(config);
     let channel;
 
     const myId = crypto.randomUUID();
-    const myName = prompt("Enter your name", "Player");
+    const myName = prompt("Enter your name", "Player") || "Player";
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     const messagesDiv = document.getElementById("messages");
     const chatInput = document.getElementById("chatInput");
 
     const peers = {};
+    const dotSize = 15;
 
     const myDot = {
       id: myId,
-      name: myName || "Player",
+      name: myName,
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      tx: 0, ty: 0,  // target x/y for animation
+      tx: 0, ty: 0,
       color: '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
     };
     myDot.tx = myDot.x;
     myDot.ty = myDot.y;
     peers[myId] = myDot;
 
-    // Drawing loop with animation
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (const id in peers) {
@@ -63,7 +66,7 @@
         dot.x += (dot.tx - dot.x) * 0.1;
         dot.y += (dot.ty - dot.y) * 0.1;
         ctx.fillStyle = dot.color;
-        ctx.fillRect(dot.x, dot.y, 15, 15);
+        ctx.fillRect(dot.x, dot.y, dotSize, dotSize);
         ctx.font = "12px sans-serif";
         ctx.fillText(dot.name, dot.x + 20, dot.y + 12);
       }
@@ -71,7 +74,6 @@
     }
     animate();
 
-    // Canvas click = move self
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const tx = e.clientX - rect.left;
@@ -81,23 +83,33 @@
       send({ type: "move", id: myId, tx, ty });
     });
 
-    // WebRTC handlers
-    pc.onicecandidate = e => {
-      if (!e.candidate) {
-        document.getElementById("local").value = JSON.stringify(pc.localDescription);
+    function send(obj) {
+      if (channel && channel.readyState === "open") {
+        channel.send(JSON.stringify(obj));
       }
-    };
+    }
 
-    pc.ondatachannel = e => {
-      setupChannel(e.channel);
-    };
+    function showMessage(msg) {
+      const div = document.createElement("div");
+      div.textContent = msg;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function sendChat() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      showMessage("You: " + text);
+      send({ type: "chat", name: myDot.name, text });
+      chatInput.value = "";
+    }
 
     function setupChannel(dc) {
       channel = dc;
       channel.onopen = () => {
         send({ type: "hello", dot: myDot });
       };
-      channel.onmessage = e => {
+      channel.onmessage = (e) => {
         const msg = JSON.parse(e.data);
         if (msg.type === "hello") {
           msg.dot.tx = msg.dot.x;
@@ -115,20 +127,16 @@
       };
     }
 
-    function send(obj) {
-      if (channel && channel.readyState === "open") {
-        channel.send(JSON.stringify(obj));
+    pc.onicecandidate = e => {
+      if (!e.candidate) {
+        document.getElementById("local").value = JSON.stringify(pc.localDescription);
       }
-    }
+    };
 
-    function showMessage(msg) {
-      const div = document.createElement("div");
-      div.textContent = msg;
-      messagesDiv.appendChild(div);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
+    pc.ondatachannel = e => {
+      setupChannel(e.channel);
+    };
 
-    // SDP buttons
     function createOffer() {
       const dc = pc.createDataChannel("chat");
       setupChannel(dc);
@@ -146,14 +154,6 @@
           document.getElementById("local").value = JSON.stringify(pc.localDescription);
         });
       });
-    }
-
-    function sendChat() {
-      const text = chatInput.value.trim();
-      if (!text) return;
-      showMessage("You: " + text);
-      send({ type: "chat", name: myDot.name, text });
-      chatInput.value = "";
     }
 
     window.addEventListener("beforeunload", () => {
