@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<!-- 🧭 Landing UI -->
+<!-- 🧭 Landing page: choose name and role -->
 <div id="landing">
   <h2>WebRTC Multiplayer</h2>
   <input id="nameInput" placeholder="Your Name" />
@@ -21,20 +21,22 @@
   <button onclick="start('guest')">Join Room</button>
 </div>
 
-<!-- 📡 Session UI -->
+<!-- 🎮 Game UI -->
 <div id="session" class="hidden">
   <h3 id="roleLabel"></h3>
 
+  <!-- Host UI -->
   <div id="hostArea" class="hidden">
-    <label>Host → Share this SDP:</label>
+    <label>Share this SDP with guest:</label>
     <textarea id="localOffer" readonly></textarea>
     <label>Paste guest’s answer here:</label>
     <textarea id="remoteAnswer"></textarea>
     <button onclick="setRemoteAnswer()">Connect</button>
   </div>
 
+  <!-- Guest UI -->
   <div id="guestArea" class="hidden">
-    <label>Guest → Paste host’s offer:</label>
+    <label>Paste host’s offer:</label>
     <textarea id="remoteOffer"></textarea>
     <button onclick="setRemoteOffer()">Set Offer</button>
     <button onclick="createAnswer()">Create Answer</button>
@@ -42,10 +44,10 @@
     <textarea id="localAnswer" readonly></textarea>
   </div>
 
-  <!-- 🎮 Canvas -->
+  <!-- Canvas for players -->
   <canvas id="canvas" width="600" height="400"></canvas>
 
-  <!-- 💬 Chat -->
+  <!-- Chat -->
   <div id="chat">
     <h3>Chat</h3>
     <div id="chatLog" style="border:1px solid #ccc; height:100px; overflow:auto; padding:5px;"></div>
@@ -60,11 +62,13 @@ let role = "";
 let myName = "";
 let myId = crypto.randomUUID();
 
+// Canvas and drawing setup
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const peers = {};
 const dotSize = 15;
 
+// My player dot
 const myDot = {
   id: myId,
   name: "",
@@ -78,7 +82,7 @@ myDot.tx = myDot.x;
 myDot.ty = myDot.y;
 peers[myId] = myDot;
 
-// 🧭 Start session
+// 🎯 Start game with role (host or guest)
 function start(selectedRole) {
   myName = document.getElementById("nameInput").value.trim() || "Player";
   myDot.name = myName;
@@ -98,7 +102,7 @@ function start(selectedRole) {
   }
 }
 
-// 🎥 Setup WebRTC
+// 🛰️ Setup WebRTC connection
 function setupConnection() {
   pc = new RTCPeerConnection({
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
@@ -106,10 +110,11 @@ function setupConnection() {
 
   pc.onicecandidate = e => {
     if (!e.candidate) {
+      const sdp = JSON.stringify(pc.localDescription);
       if (role === "host") {
-        document.getElementById("localOffer").value = JSON.stringify(pc.localDescription);
+        document.getElementById("localOffer").value = sdp;
       } else {
-        document.getElementById("localAnswer").value = JSON.stringify(pc.localDescription);
+        document.getElementById("localAnswer").value = sdp;
       }
     }
   };
@@ -117,31 +122,7 @@ function setupConnection() {
   pc.ondatachannel = e => setupChannel(e.channel);
 }
 
-// 📡 Host creates offer
-function createOffer() {
-  const dc = pc.createDataChannel("chat");
-  setupChannel(dc);
-  pc.createOffer().then(o => pc.setLocalDescription(o));
-}
-
-// 📥 Host receives guest answer
-function setRemoteAnswer() {
-  const sdp = JSON.parse(document.getElementById("remoteAnswer").value);
-  pc.setRemoteDescription(new RTCSessionDescription(sdp));
-}
-
-// 📥 Guest sets host offer
-function setRemoteOffer() {
-  const sdp = JSON.parse(document.getElementById("remoteOffer").value);
-  pc.setRemoteDescription(new RTCSessionDescription(sdp));
-}
-
-// 🔄 Guest creates answer
-function createAnswer() {
-  pc.createAnswer().then(a => pc.setLocalDescription(a));
-}
-
-// 🧠 Setup DataChannel
+// 🧠 Setup data channel communication
 function setupChannel(dc) {
   channel = dc;
 
@@ -151,28 +132,33 @@ function setupChannel(dc) {
 
   channel.onmessage = (e) => {
     const msg = JSON.parse(e.data);
+
     if (msg.type === "hello") {
       msg.dot.tx = msg.dot.x;
       msg.dot.ty = msg.dot.y;
       peers[msg.dot.id] = msg.dot;
       send({ type: "hello", dot: myDot });
+
     } else if (msg.type === "move") {
       if (peers[msg.id]) {
         peers[msg.id].tx = msg.tx;
         peers[msg.id].ty = msg.ty;
       }
+
     } else if (msg.type === "chat") {
       writeChat(`${msg.name}: ${msg.text}`);
+
     } else if (msg.type === "bye") {
       if (peers[msg.id]) {
         writeChat(`${peers[msg.id].name} disconnected`);
         delete peers[msg.id];
+        drawNow();
       }
     }
   };
 }
 
-// 💬 Chat
+// 💬 Send chat message
 function sendChat() {
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
@@ -182,6 +168,7 @@ function sendChat() {
   input.value = "";
 }
 
+// 🖊️ Append chat message
 function writeChat(msg) {
   const log = document.getElementById("chatLog");
   const div = document.createElement("div");
@@ -190,7 +177,7 @@ function writeChat(msg) {
   log.scrollTop = log.scrollHeight;
 }
 
-// 🎯 Movement
+// 🕹️ Player movement on click
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
   const tx = e.clientX - rect.left;
@@ -200,14 +187,7 @@ canvas.addEventListener("click", (e) => {
   send({ type: "move", id: myId, tx, ty });
 });
 
-// 🔁 Send data
-function send(obj) {
-  if (channel && channel.readyState === "open") {
-    channel.send(JSON.stringify(obj));
-  }
-}
-
-// 🎬 Animate canvas
+// ✈️ Interpolated movement animation loop
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (const id in peers) {
@@ -222,7 +202,47 @@ function animate() {
 }
 animate();
 
-// 👋 Disconnect handling
+// 🧹 Immediate redraw to remove disconnected players
+function drawNow() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (const id in peers) {
+    const dot = peers[id];
+    ctx.fillStyle = dot.color;
+    ctx.fillRect(dot.x, dot.y, dotSize, dotSize);
+    ctx.fillText(dot.name, dot.x + 20, dot.y + 12);
+  }
+}
+
+// 🟦 Data sending helper
+function send(obj) {
+  if (channel && channel.readyState === "open") {
+    channel.send(JSON.stringify(obj));
+  }
+}
+
+// 🧠 Host steps
+function createOffer() {
+  const dc = pc.createDataChannel("chat");
+  setupChannel(dc);
+  pc.createOffer().then(o => pc.setLocalDescription(o));
+}
+
+function setRemoteAnswer() {
+  const sdp = JSON.parse(document.getElementById("remoteAnswer").value);
+  pc.setRemoteDescription(new RTCSessionDescription(sdp));
+}
+
+// 🧠 Guest steps
+function setRemoteOffer() {
+  const sdp = JSON.parse(document.getElementById("remoteOffer").value);
+  pc.setRemoteDescription(new RTCSessionDescription(sdp));
+}
+
+function createAnswer() {
+  pc.createAnswer().then(a => pc.setLocalDescription(a));
+}
+
+// 👋 Send goodbye before unload
 window.addEventListener("beforeunload", () => {
   send({ type: "bye", id: myId });
 });
