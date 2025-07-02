@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebRTC Dot Peer</title>
+  <style>
+    canvas { border: 1px solid black; margin-top: 10px; }
+    textarea { width: 100%; height: 100px; }
+  </style>
+</head>
+<body>
+
+  <h3>Local SDP (copy this to remote)</h3>
+  <textarea id="local"></textarea>
+
+  <h3>Remote SDP (paste from other peer)</h3>
+  <textarea id="remote"></textarea>
+  <button onclick="connect()">Set Remote Description</button>
+
+  <canvas id="canvas" width="500" height="300"></canvas>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const myId = crypto.randomUUID();
+    const peers = {};  // Stores all peers (including self)
+
+    // Add self immediately
+    const myDot = {
+      id: myId,
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      color: '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'),
+      label: 'You (' + myId.slice(0, 4) + ')'
+    };
+    peers[myId] = myDot;
+
+    function drawDots() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const id in peers) {
+        const p = peers[id];
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 12, 12);
+        ctx.font = '12px sans-serif';
+        ctx.fillText(p.label, p.x + 15, p.y + 10);
+      }
+    }
+    setInterval(drawDots, 100); // Keep refreshing
+
+    const pc = new RTCPeerConnection();
+
+    pc.onicecandidate = (e) => {
+      if (e.candidate === null) {
+        document.getElementById('local').value = JSON.stringify(pc.localDescription);
+      }
+    };
+
+    pc.ondatachannel = (event) => {
+      const receiveChannel = event.channel;
+      receiveChannel.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        if (data.type === "hello") {
+          data.dot.label = 'Peer (' + data.id.slice(0, 4) + ')';
+          peers[data.id] = data.dot;
+          drawDots();
+        } else if (data.type === "bye") {
+          delete peers[data.id];
+        }
+      };
+      receiveChannel.onopen = () => {
+        console.log("Data channel opened. Sending hello.");
+        receiveChannel.send(JSON.stringify({ type: "hello", id: myId, dot: myDot }));
+      };
+    };
+
+    const channel = pc.createDataChannel("chat");
+
+    channel.onopen = () => {
+      console.log("Data channel ready! Sending hello.");
+      channel.send(JSON.stringify({ type: "hello", id: myId, dot: myDot }));
+    };
+
+    channel.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.type === "hello") {
+        data.dot.label = 'Peer (' + data.id.slice(0, 4) + ')';
+        peers[data.id] = data.dot;
+        drawDots();
+        channel.send(JSON.stringify({ type: "hello", id: myId, dot: myDot }));
+      } else if (data.type === "bye") {
+        delete peers[data.id];
+      }
+    };
+
+    pc.createOffer().then(offer => pc.setLocalDescription(offer));
+
+    window.connect = () => {
+      const remoteSDP = JSON.parse(document.getElementById('remote').value);
+      pc.setRemoteDescription(new RTCSessionDescription(remoteSDP));
+    };
+
+    window.addEventListener("beforeunload", () => {
+      const msg = JSON.stringify({ type: "bye", id: myId });
+      if (channel.readyState === "open") channel.send(msg);
+    });
+  </script>
+
+</body>
+</html>
