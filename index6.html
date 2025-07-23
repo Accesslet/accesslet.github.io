@@ -250,7 +250,9 @@ e<!DOCTYPE html>
             if (container) {
                 container.appendChild(player);
                 //player.load("init.vm");
-                player.load("DSTAT.spl");
+                //player.load("map.spl"); //vcam
+                //player.load("map3.spl"); //no-vcam
+                player.load("DSTAT.spl"); /*Get dimension stats*/
             } else {
                 console.error("Container element not found.");
             }
