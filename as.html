@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ROG‑style Dashboard (canvas-only)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: #0a0a0c;
+      color: #e6e6e6;
+      font-family: system-ui, sans-serif;
+    }
+    canvas { display: block; width: 100%; height: 100vh; }
+  </style>
+</head>
+<body>
+  <canvas id="dashboard"></canvas>
+  <script>
+    const canvas = document.getElementById('dashboard');
+    const ctx = canvas.getContext('2d');
+
+    // State
+    let cryptoSamples = [];
+    let weatherSamples = [];
+    let githubEvents = [];
+    let toasters = [];
+    let toasterScroll = 0;
+
+    let hoverInfo = null;
+    let mouse = { x: 0, y: 0, down: false };
+    let pressButtonId = null;
+
+    // Hit/interaction regions
+    const buttons = [];          // { id, label, x, y, w, h }
+    const hitsRadials = [];      // { cx, cy, r, ri, start, end, payload }
+    let toasterPanelRect = { x: 0, y: 0, w: 0, h: 0 };
+    let scrollbarRect = { x: 0, y: 0, w: 0, h: 0 };
+    let scrollbarKnob = { x: 0, y: 0, w: 0, h: 0 };
+    let isDraggingScroll = false;
+    let scrollDragOffset = 0;
+
+    // Layout
+    function layout() {
+      const pad = 10;
+      const W = canvas.width;
+      const H = canvas.height;
+      const colW = (W - pad * 5) / 4;
+      const contentH = H - pad * 2;
+
+      const panels = Array.from({ length: 4 }, (_, i) => ({
+        x: pad * (i + 1) + colW * i,
+        y: pad + 48,         // buttons row height
+        w: colW,
+        h: contentH - 48
+      }));
+      return { pad, W, H, colW, contentH, panels };
+    }
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      render();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Drawing helpers
+    function roundRectFill(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+      ctx.fill();
+    }
+    function roundRectStroke(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+      ctx.stroke();
+    }
+    function pointInRect(px, py, r) {
+      return px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
+    }
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = String(text).split(' ');
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        const test = line + words[n] + ' ';
+        if (ctx.measureText(test).width > maxWidth && n > 0) {
+          ctx.fillText(line, x, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        } else {
+          line = test;
+        }
+      }
+      ctx.fillText(line, x, y);
+    }
+    function drawGlowArc(cx, cy, R, start, end, mainColor, glowColor) {
+      // Drop shadow
+      ctx.save();
+      ctx.lineWidth = 12;
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath();
+      ctx.arc(cx + 2, cy + 2, R, start, end);
+      ctx.stroke();
+      ctx.restore();
+
+      // Glow halo
+      ctx.save();
+      ctx.lineWidth = 16;
+      ctx.strokeStyle = glowColor;
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = 16;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, start, end);
+      ctx.stroke();
+      ctx.restore();
+
+      // Main arc
+      ctx.save();
+      ctx.lineWidth = 12;
+      ctx.strokeStyle = mainColor;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, start, end);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Buttons
+    function buildButtons(colW, pad) {
+      buttons.length = 0;
+      const bx = pad, by = pad;
+      const bw = 120, bh = 32, gap = 10;
+      const labels = [
+        { id: 'crypto', label: 'Add crypto' },
+        { id: 'weather', label: 'Add weather' },
+        { id: 'github', label: 'Refresh GitHub' },
+        { id: 'toaster', label: 'Add toaster' },
+        { id: 'clear', label: 'Clear' }
+      ];
+      let x = bx;
+      for (const l of labels) {
+        buttons.push({ id: l.id, label: l.label, x, y: by, w: bw, h: bh });
+        x += bw + gap;
+      }
+    }
+    function drawButton(b) {
+      const pressed = pressButtonId === b.id && mouse.down;
+      const offsetY = pressed ? 2 : 0;
+
+      ctx.save();
+      ctx.shadowColor = pressed ? 'rgba(180,0,255,0.35)' : 'rgba(180,0,255,0.6)';
+      ctx.shadowBlur = pressed ? 10 : 20;
+      ctx.fillStyle = '#0a0a0c';
+      roundRectFill(b.x, b.y + offsetY, b.w, b.h, 8);
+
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = pressed ? '#444' : '#666';
+      roundRectStroke(b.x, b.y + offsetY, b.w, b.h, 8);
+      ctx.restore();
+
+      ctx.fillStyle = pressed ? '#aaaaaa' : '#e6e6e6';
+      ctx.font = '600 13px system-ui, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      ctx.fillText(b.label, b.x + b.w / 2, b.y + b.h / 2 + offsetY);
+    }
+
+    // Main render
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const { pad, colW, panels } = layout();
+      buildButtons(colW, pad);
+      for (const b of buttons) drawButton(b);
+
+      const names = ['Crypto', 'Weather', 'GitHub', 'Toasters'];
+      for (let i = 0; i < 4; i++) {
+        const p = panels[i];
+        ctx.fillStyle = '#111316';
+        roundRectFill(p.x, p.y, p.w, p.h, 10);
+        ctx.strokeStyle = '#1d1f24';
+        ctx.lineWidth = 1;
+        roundRectStroke(p.x, p.y, p.w, p.h, 10);
+
+        // Header
+        ctx.fillStyle = '#0d0f13';
+        ctx.fillRect(p.x, p.y, p.w, 32);
+        ctx.fillStyle = '#a0a6b3';
+        ctx.font = '600 12px system-ui, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(names[i], p.x + 12, p.y + 16);
+      }
+
+      hitsRadials.length = 0;
+
+      // Crypto radial
+      {
+        const p = panels[0];
+        const cx = p.x + p.w * 0.5;
+        const cy = p.y + p.h * 0.5 + 10;
+        const R = Math.min(p.w, p.h) * 0.28;
+
+        // Inactive ring
+        ctx.lineWidth = 16;
+        ctx.strokeStyle = '#181a20';
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, 0, Math.PI * 2);
+        ctx.stroke();
+
+        if (cryptoSamples.length) {
+          const last = cryptoSamples.at(-1);
+          const start = -Math.PI * 0.75;
+          const btcEnd = start + Math.min(1, (last.btc - 20000) / 80000) * Math.PI * 1.5;
+          const ethEnd = start + Math.min(1, (last.eth - 1000) / 7000) * Math.PI * 1.5;
+
+          drawGlowArc(cx, cy, R, start, btcEnd, 'rgba(255,0,85,0.8)', 'rgba(255,0,85,0.25)');
+          drawGlowArc(cx, cy, R * 0.86, start, ethEnd, 'rgba(180,0,255,0.9)', 'rgba(180,0,255,0.25)');
+
+          hitsRadials.push({
+            cx, cy, r: R, ri: R - 8, start, end: btcEnd,
+            payload: { title: 'BTC', lines: [{ label: 'USD', value: `$${last.btc.toLocaleString()}` }] }
+          });
+          hitsRadials.push({
+            cx, cy, r: R * 0.86, ri: R * 0.86 - 8, start, end: ethEnd,
+            payload: { title: 'ETH', lines: [{ label: 'USD', value: `$${last.eth.toLocaleString()}` }] }
+          });
+
+          ctx.fillStyle = '#e6e6e6';
+          ctx.font = '600 12px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText(`BTC: $${last.btc.toLocaleString()}`, cx, cy + R + 20);
+          ctx.fillText(`ETH: $${last.eth.toLocaleString()}`, cx, cy + R + 38);
+        }
+      }
+
+      // Weather radial
+      {
+        const p = panels[1];
+        const cx = p.x + p.w * 0.5;
+        const cy = p.y + p.h * 0.5 + 10;
+        const R = Math.min(p.w, p.h) * 0.28;
+
+        // Inactive ring
+        ctx.lineWidth = 16;
+        ctx.strokeStyle = '#181a20';
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, 0, Math.PI * 2);
+        ctx.stroke();
+
+        if (weatherSamples.length) {
+          const temp = weatherSamples.at(-1).temp;
+          const start = -Math.PI * 0.75;
+          const end = start + Math.min(1, (temp + 10) / 50) * Math.PI * 1.5;
+          const colMain = temp >= 30 ? 'rgba(255,80,0,0.9)' : 'rgba(0,200,255,0.9)';
+          const colGlow = temp >= 30 ? 'rgba(255,80,0,0.25)' : 'rgba(0,200,255,0.25)';
+
+          drawGlowArc(cx, cy, R, start, end, colMain, colGlow);
+
+          hitsRadials.push({
+            cx, cy, r: R, ri: R - 8, start, end,
+            payload: { title: 'Temperature', lines: [
+              { label: 'Location', value: 'Islamabad' },
+              { label: 'Current', value: `${temp} °C` }
+            ] }
+          });
+
+          ctx.fillStyle = '#e6e6e6';
+          ctx.font = '600 12px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText(`Islamabad: ${temp} °C`, cx, cy + R + 22);
+        }
+      }
+
+      // GitHub radial
+      {
+        const p = panels[2];
+        const cx = p.x + p.w * 0.5;
+        const cy = p.y + p.h * 0.4;
+        const R = Math.min(p.w, p.h) * 0.26;
+
+        // Inactive ring
+        ctx.lineWidth = 16;
+        ctx.strokeStyle = '#181a20';
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, 0, Math.PI * 2);
+        ctx.stroke();
+
+        const count = githubEvents.length;
+        const start = -Math.PI * 0.75;
+        const end = start + Math.min(1, count / 100) * Math.PI * 1.5;
+
+        drawGlowArc(cx, cy, R, start, end, 'rgba(0,220,255,0.9)', 'rgba(0,220,255,0.25)');
+
+        hitsRadials.push({
+          cx, cy, r: R, ri: R - 8, start, end,
+          payload: { title: 'GitHub Events', lines: [{ label: 'Count', value: `${count}` }] }
+        });
+
+        ctx.fillStyle = '#e6e6e6';
+        ctx.font = '600 12px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(`Events: ${count}`, cx, cy + R + 20);
+
+        // Small grid below
+        const gridX = p.x + 12;
+        const gridY = p.y + p.h * 0.65;
+        const cell = 10, gap = 2;
+        const cols = Math.max(1, Math.floor((p.w - 24) / (cell + gap)));
+        const rows = Math.max(1, Math.floor((p.y + p.h - gridY - 12) / (cell + gap)));
+        const maxCells = cols * rows;
+        for (let i = 0; i < Math.min(count, maxCells); i++) {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const x = gridX + col * (cell + gap);
+          const y = gridY + row * (cell + gap);
+          ctx.fillStyle = `rgba(${(i * 17) % 255}, ${(i * 31) % 255}, ${(i * 53) % 255}, 0.9)`;
+          ctx.fillRect(x, y, cell, cell);
+        }
+      }
+
+      // Toaster panel with header, dark background, scroll and scrollbar
+      {
+        const p = panels[3];
+        const innerPad = 10;
+        const xBase = p.x + innerPad;
+        const yBase = p.y + 42;
+        const w = p.w - innerPad * 2;
+        const visibleH = p.h - 52;
+        toasterPanelRect = { x: xBase, y: yBase, w, h: visibleH };
+
+        // Cards area
+        const hCard = 100;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(xBase, yBase, w, visibleH);
+        ctx.clip();
+
+        const yStart = yBase - toasterScroll;
+        for (let i = 0; i < toasters.length; i++) {
+          const x = xBase;
+          const y = yStart + i * (hCard + 16);
+          if (y + hCard < yBase || y > yBase + visibleH) continue;
+
+          // Purple glow halo
+          ctx.save();
+          ctx.shadowColor = 'rgba(180,0,255,0.45)';
+          ctx.shadowBlur = 20;
+          ctx.fillStyle = 'rgba(180,0,255,0.20)';
+          roundRectFill(x - 4, y - 4, w + 8, hCard + 8, 12);
+          ctx.restore();
+
+          // Card body
+          const grad = ctx.createLinearGradient(x, y, x, y + hCard);
+          grad.addColorStop(0, '#0a0a0c');
+          grad.addColorStop(1, '#151520');
+          ctx.fillStyle = grad;
+          roundRectFill(x, y, w, hCard, 12);
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#666';
+          roundRectStroke(x, y, w, hCard, 12);
+
+          // Text content
+          ctx.fillStyle = '#b080ff';
+          ctx.font = '700 14px system-ui, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.fillText(`Post #${toasters[i].id}`, x + 12, y + 12);
+
+          ctx.fillStyle = '#ccc';
+          ctx.font = 'italic 13px system-ui, sans-serif';
+          ctx.fillText(toasters[i].title, x + 12, y + 34);
+
+          ctx.fillStyle = '#aaa';
+          ctx.font = '12px system-ui, sans-serif';
+          wrapText(ctx, toasters[i].body, x + 12, y + 54, w - 24, 14);
+        }
+        ctx.restore();
+
+        // Scrollbar track (stretched oval) and knob
+        const trackW = 16;
+        const trackX = xBase + w - trackW;
+        const trackY = yBase;
+        const trackH = visibleH;
+        scrollbarRect = { x: trackX, y: trackY, w: trackW, h: trackH };
+
+        // Track
+        ctx.fillStyle = '#181a20';
+        roundRectFill(trackX, trackY, trackW, trackH, trackW / 2);
+
+        // Knob geometry
+        const totalH = toasters.length * (hCard + 16);
+        const viewRatio = Math.min(1, visibleH / Math.max(visibleH, totalH));
+        const knobH = Math.max(40, trackH * viewRatio);
+        const maxScroll = Math.max(0, totalH - visibleH);
+        const knobY = trackY + (maxScroll ? (toasterScroll / maxScroll) * (trackH - knobH) : 0);
+        scrollbarKnob = { x: trackX, y: knobY, w: trackW, h: knobH };
+
+        // Knob (orange glow, stretched oval)
+        ctx.save();
+        ctx.shadowColor = 'rgba(255,140,0,0.8)';
+        ctx.shadowBlur = 18;
+        ctx.fillStyle = 'rgba(255,140,0,0.85)';
+        roundRectFill(scrollbarKnob.x + 2, scrollbarKnob.y + 4, scrollbarKnob.w - 4, scrollbarKnob.h - 8, scrollbarKnob.w / 2);
+        ctx.restore();
+
+        // Knob outline
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#aa5a00';
+        roundRectStroke(scrollbarKnob.x + 2, scrollbarKnob.y + 4, scrollbarKnob.w - 4, scrollbarKnob.h - 8, scrollbarKnob.w / 2);
+      }
+
+      // Tooltip (last so it draws on top)
+      if (hoverInfo) drawTooltip(hoverInfo);
+    }
+
+    // Tooltip design: red title with gray glow, cyan dot top-right, near pointer
+    function drawTooltip(info) {
+      const { x, y, title, lines } = info;
+      const tx = x + 12;
+      const ty = y + 12;
+      const w = 220;
+      const h = 24 + lines.length * 18 + 12;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = 'rgba(16,16,20,0.95)';
+      roundRectFill(tx, ty, w, h, 10);
+
+      // Title (red with gray glow)
+      ctx.save();
+      ctx.shadowColor = 'rgba(160,160,160,0.6)';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#ff2a44';
+      ctx.font = '700 14px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(title, tx + 12, ty + 8);
+      ctx.restore();
+
+      // Lines
+      let ly = ty + 28;
+      for (const ln of lines) {
+        ctx.fillStyle = '#9fa3ac';
+        ctx.fillText(ln.label + ':', tx + 12, ly);
+        ctx.fillStyle = '#e6e6e6';
+        ctx.fillText(ln.value, tx + 90, ly);
+        ly += 18;
+      }
+
+      // Cyan dot top-right
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,255,255,0.8)';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = '#00ffff';
+      ctx.beginPath();
+      ctx.arc(tx + w - 8, ty + 8, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.restore();
+    }
+
+    // Events
+    canvas.addEventListener('mousemove', (e) => {
+      mouse.x = e.offsetX;
+      mouse.y = e.offsetY;
+      hoverInfo = null;
+
+      // Hover detect on radials
+      for (const r of hitsRadials) {
+        const dx = mouse.x - r.cx, dy = mouse.y - r.cy;
+        const rr = Math.hypot(dx, dy);
+        if (rr >= r.ri && rr <= r.r + 8) {
+          let a = Math.atan2(dy, dx);
+          const twopi = Math.PI * 2;
+          const norm = (v) => (v % twopi + twopi) % twopi;
+          a = norm(a); const s = norm(r.start); const eArc = norm(r.end);
+          const inArc = s <= eArc ? (a >= s && a <= eArc) : (a >= s || a <= eArc);
+          if (inArc) {
+            hoverInfo = { title: r.payload.title, lines: r.payload.lines, x: e.offsetX, y: e.offsetY };
+            break;
+          }
+        }
+      }
+
+      // Cursor hint over scrollbar knob/track
+      if (pointInRect(mouse.x, mouse.y, scrollbarKnob)) {
+        canvas.style.cursor = 'grab';
+      } else if (pointInRect(mouse.x, mouse.y, scrollbarRect)) {
+        canvas.style.cursor = 'pointer';
+      } else {
+        canvas.style.cursor = 'default';
+      }
+
+      // If dragging scrollbar knob
+      if (isDraggingScroll) {
+        const trackH = scrollbarRect.h;
+        const knobH = scrollbarKnob.h;
+        const totalH = toasters.length * (100 + 16);
+        const visibleH = toasterPanelRect.h;
+        const maxScroll = Math.max(0, totalH - visibleH);
+        if (maxScroll > 0) {
+          const knobTopMin = scrollbarRect.y;
+          const knobTopMax = scrollbarRect.y + (trackH - knobH);
+          let newKnobTop = Math.max(knobTopMin, Math.min(knobTopMax, mouse.y - scrollDragOffset));
+          const ratio = (newKnobTop - knobTopMin) / (trackH - knobH);
+          toasterScroll = ratio * maxScroll;
+        }
+      }
+
+      render();
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      mouse.down = true;
+
+      // Buttons press
+      for (const b of buttons) {
+        if (pointInRect(e.offsetX, e.offsetY, b)) {
+          pressButtonId = b.id;
+          render();
+          return;
+        }
+      }
+
+      // Scrollbar knob drag
+      if (pointInRect(e.offsetX, e.offsetY, scrollbarKnob)) {
+        isDraggingScroll = true;
+        scrollDragOffset = e.offsetY - scrollbarKnob.y;
+        canvas.style.cursor = 'grabbing';
+      }
+    });
+
+    canvas.addEventListener('mouseup', (e) => {
+      mouse.down = false;
+
+      // Button click
+      if (pressButtonId) {
+        const b = buttons.find(x => x.id === pressButtonId);
+        if (b && pointInRect(e.offsetX, e.offsetY, b)) {
+          handleButton(b.id);
+        }
+        pressButtonId = null;
+        render();
+      }
+
+      // End scrollbar drag
+      isDraggingScroll = false;
+      canvas.style.cursor = 'default';
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      mouse.down = false;
+      pressButtonId = null;
+      isDraggingScroll = false;
+      hoverInfo = null;
+      canvas.style.cursor = 'default';
+      render();
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      // Scroll only within toaster panel
+      if (pointInRect(e.offsetX, e.offsetY, toasterPanelRect)) {
+        e.preventDefault();
+        const totalH = toasters.length * (100 + 16);
+        const visibleH = toasterPanelRect.h;
+        const maxScroll = Math.max(0, totalH - visibleH);
+        toasterScroll = Math.max(0, Math.min(maxScroll, toasterScroll + e.deltaY));
+        render();
+      }
+    }, { passive: false });
+
+    // Button actions
+    async function handleButton(id) {
+      try {
+        if (id === 'crypto') {
+          const btc = Math.round(Math.random() * 50000 + 20000);
+          const eth = Math.round(Math.random() * 3000 + 1000);
+          cryptoSamples.push({ btc, eth });
+        } else if (id === 'weather') {
+          const temp = Math.round(Math.random() * 40);
+          weatherSamples.push({ temp });
+        } else if (id === 'github') {
+          githubEvents = new Array(Math.floor(Math.random() * 100)).fill({});
+        } else if (id === 'toaster') {
+          const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${toasters.length + 1}`);
+          const data = await res.json();
+          toasters.push({ id: data.id, title: data.title, body: data.body });
+        } else if (id === 'clear') {
+          cryptoSamples = [];
+          weatherSamples = [];
+          githubEvents = [];
+          toasters = [];
+          toasterScroll = 0;
+        }
+      } catch (err) {
+        // keep UI responsive on errors
+        console.warn(err);
+      } finally {
+        render();
+      }
+    }
+
+    // Initial sample content for visibility
+    (async () => {
+      cryptoSamples.push({ btc: 42000, eth: 2600 });
+      weatherSamples.push({ temp: 28 });
+      githubEvents = new Array(36).fill({});
+      const res = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+      const data = await res.json();
+      toasters.push({ id: data.id, title: data.title, body: data.body });
+      render();
+    })();
+  </script>
+</body>
+</html>
