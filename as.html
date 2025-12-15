@@ -14,6 +14,92 @@
     }
     canvas { display: block; width: 100%; height: 100vh; }
   </style>
+  <style>
+  html, body { height: 100%; margin: 0; background: #0a0a0c; color: #e6e6e6; font-family: system-ui, sans-serif; }
+  canvas { display: block; width: 100%; height: 100vh; touch-action: none; }
+</style>
+
+<script>
+  // Helper to get touch coordinates relative to canvas
+  function getTouchPos(touch) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top
+    };
+  }
+
+  // Touch start
+  canvas.addEventListener('touchstart', (e) => {
+    const t = getTouchPos(e.touches[0]);
+    mouse.x = t.x;
+    mouse.y = t.y;
+    mouse.down = true;
+
+    // Button press
+    for (const b of buttons) {
+      if (pointInRect(t.x, t.y, b)) {
+        pressButtonId = b.id;
+        render();
+        return;
+      }
+    }
+
+    // Scrollbar knob drag
+    if (pointInRect(t.x, t.y, scrollbarKnob)) {
+      isDraggingScroll = true;
+      scrollDragOffset = t.y - scrollbarKnob.y;
+      canvas.style.cursor = 'grabbing';
+    }
+  });
+
+  // Touch move
+  canvas.addEventListener('touchmove', (e) => {
+    const t = getTouchPos(e.touches[0]);
+    mouse.x = t.x;
+    mouse.y = t.y;
+
+    if (isDraggingScroll) {
+      const trackH = scrollbarRect.h;
+      const knobH = scrollbarKnob.h;
+      const totalH = toasters.length * (100 + 16);
+      const visibleH = toasterPanelRect.h;
+      const maxScroll = Math.max(0, totalH - visibleH);
+      if (maxScroll > 0) {
+        const knobTopMin = scrollbarRect.y;
+        const knobTopMax = scrollbarRect.y + (trackH - knobH);
+        let newKnobTop = Math.max(knobTopMin, Math.min(knobTopMax, t.y - scrollDragOffset));
+        const ratio = (newKnobTop - knobTopMin) / (trackH - knobH);
+        toasterScroll = ratio * maxScroll;
+      }
+    } else if (pointInRect(t.x, t.y, toasterPanelRect)) {
+      // Swipe scroll
+      if (e.touches.length === 1) {
+        const dy = e.touches[0].movementY || 0;
+        const totalH = toasters.length * (100 + 16);
+        const visibleH = toasterPanelRect.h;
+        const maxScroll = Math.max(0, totalH - visibleH);
+        toasterScroll = Math.max(0, Math.min(maxScroll, toasterScroll - dy));
+      }
+    }
+
+    render();
+    e.preventDefault();
+  }, { passive: false });
+
+  // Touch end
+  canvas.addEventListener('touchend', (e) => {
+    mouse.down = false;
+    if (pressButtonId) {
+      const b = buttons.find(x => x.id === pressButtonId);
+      if (b) handleButton(b.id);
+      pressButtonId = null;
+      render();
+    }
+    isDraggingScroll = false;
+    canvas.style.cursor = 'default';
+  });
+</script>
 </head>
 <body>
   <canvas id="dashboard"></canvas>
