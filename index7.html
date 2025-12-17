@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Ruffle Player - Fill Screen</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Responsive Ruffle Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css  ">
     <style>
         /* Reset & Base Styles */
         * {
@@ -44,19 +44,6 @@
             flex: 1; /* Takes all remaining vertical space */
             overflow: hidden;
             background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        /* Style for the Ruffle player element itself */
-        ruffle-player {
-            width: 100vw; /* Full viewport width */
-            height: 100vh; /* Full viewport height */
-            max-width: 100%; /* Respect container bounds */
-            max-height: 100%;
-            display: block; /* Ensure it behaves as a block element */
-            transform-origin: 50% 50%; /* Scale from center */
         }
         
         #container > * {
@@ -210,14 +197,10 @@
     </div>
 
     <script>
-        // Define your SWF dimensions here
-        const SWF_WIDTH = 800;  // Replace with your actual SWF width
-        const SWF_HEIGHT = 600; // Replace with your actual SWF height
-
         // Dynamically load the Ruffle script
         function loadRuffle() {
             let script = document.createElement("script");
-            script.src = "https://accesslet.github.io/initLib.js";
+            script.src = "https://accesslet.github.io/initLib.js  ";
             script.onload = initializeRuffle;
             script.onerror = () => console.error("Failed to load script.");
             document.head.appendChild(script);
@@ -266,58 +249,14 @@
             let container = document.getElementById("container");
             if (container) {
                 container.appendChild(player);
-                player.load("DSTAT.spl"); /*Get dimension stats*/
-
-                // Apply initial scaling after player is loaded and appended
-                setTimeout(() => {
-                    applyScaling();
-                    // Observe for changes in the player's intrinsic size if needed
-                    const resizeObserver = new ResizeObserver(entries => {
-                        applyScaling();
-                    });
-                    resizeObserver.observe(player);
-                }, 100);
+                //player.load("init.vm");
+                //player.load("map.spl"); //vcam
+                //player.load("map3.spl"); //no-vcam
+                player.load("wasted_sky.swf"); /*Get dimension stats*/
             } else {
                 console.error("Container element not found.");
             }
         }
-
-        // Calculate and apply scaling to the player element
-        function applyScaling() {
-            const player = document.querySelector("ruffle-player");
-            if (!player) return;
-
-            // Get the player's computed style dimensions (what it's currently displayed as)
-            const playerRect = player.getBoundingClientRect();
-            const playerDisplayWidth = playerRect.width;
-            const playerDisplayHeight = playerRect.height;
-
-            // Calculate scale factors based on desired vs actual display size
-            // We want the player to appear as if it's the original SWF size
-            const scaleX = playerDisplayWidth / SWF_WIDTH;
-            const scaleY = playerDisplayHeight / SWF_HEIGHT;
-            
-            // Use the larger scale to fill the space (potentially cropping)
-            const scale = Math.max(scaleX, scaleY);
-            
-            // Apply the inverse scale to make the content appear at original size relative to its display area
-            // However, for full-screen fill, we actually want the content to stretch to fill the display area
-            // So we calculate the scale needed to make the original content fill the display area
-            const container = document.getElementById("container");
-            const containerRect = container.getBoundingClientRect();
-            const containerWidth = containerRect.width;
-            const containerHeight = containerRect.height;
-
-            const scaleToFitWidth = containerWidth / SWF_WIDTH;
-            const scaleToFitHeight = containerHeight / SWF_HEIGHT;
-            const finalScale = Math.max(scaleToFitWidth, scaleToFitHeight);
-
-            player.style.transform = `scale(${finalScale})`;
-        }
-
-
-        // Handle window resize
-        window.addEventListener("resize", applyScaling);
 
         // Control panel functionality
         document.addEventListener("DOMContentLoaded", () => {
@@ -358,9 +297,6 @@
             document.addEventListener("fullscreenchange", () => {
                 fullscreenButton.querySelector("i").className = 
                     document.fullscreenElement ? "fas fa-compress" : "fas fa-expand";
-                
-                // Reapply scaling when entering/exiting fullscreen
-                setTimeout(applyScaling, 100);
             });
             
             // Drag and drop handling for overlay
