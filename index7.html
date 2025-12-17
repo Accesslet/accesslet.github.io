@@ -42,22 +42,20 @@
         #container {
             position: relative;
             flex: 1; /* Takes all remaining vertical space */
-            overflow: hidden; /* Important: Hides overflow */
+            overflow: hidden;
             background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
         }
         
-        /* Wrapper for scaling - added this element */
-        #player-wrapper {
-            position: relative;
-            /* Initial size based on SWF dimensions */
-            width: 800px; /* Replace with your SWF width */
-            height: 600px; /* Replace with your SWF height */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* Style for the Ruffle player element itself */
+        ruffle-player {
+            width: 100vw; /* Full viewport width */
+            height: 100vh; /* Full viewport height */
+            max-width: 100%; /* Respect container bounds */
+            max-height: 100%;
+            display: block; /* Ensure it behaves as a block element */
             transform-origin: 50% 50%; /* Scale from center */
         }
         
@@ -189,10 +187,8 @@
 <body>
     <div id="app-container">
         <div id="container">
-            <div id="player-wrapper">
-                <div id="overlay"></div>
-                <!-- Ruffle player will be inserted here -->
-            </div>
+            <div id="overlay"></div>
+            <!-- Ruffle player will be inserted here -->
         </div>
         
         <div id="controls">
@@ -267,40 +263,58 @@
             let player = ruffle.createPlayer();
             player.config = config;
 
-            // Insert player into the wrapper instead of container
-            let wrapper = document.getElementById("player-wrapper");
-            if (wrapper) {
-                wrapper.appendChild(player);
+            let container = document.getElementById("container");
+            if (container) {
+                container.appendChild(player);
                 player.load("DSTAT.spl"); /*Get dimension stats*/
-            } else {
-                console.error("Wrapper element not found.");
-            }
 
-            // Apply initial scaling after player loads
-            setTimeout(applyScaling, 100);
+                // Apply initial scaling after player is loaded and appended
+                setTimeout(() => {
+                    applyScaling();
+                    // Observe for changes in the player's intrinsic size if needed
+                    const resizeObserver = new ResizeObserver(entries => {
+                        applyScaling();
+                    });
+                    resizeObserver.observe(player);
+                }, 100);
+            } else {
+                console.error("Container element not found.");
+            }
         }
 
-        // Calculate and apply scaling to fill the container
+        // Calculate and apply scaling to the player element
         function applyScaling() {
-            const container = document.getElementById("container");
-            const wrapper = document.getElementById("player-wrapper");
-            
-            if (!container || !wrapper) return;
+            const player = document.querySelector("ruffle-player");
+            if (!player) return;
 
+            // Get the player's computed style dimensions (what it's currently displayed as)
+            const playerRect = player.getBoundingClientRect();
+            const playerDisplayWidth = playerRect.width;
+            const playerDisplayHeight = playerRect.height;
+
+            // Calculate scale factors based on desired vs actual display size
+            // We want the player to appear as if it's the original SWF size
+            const scaleX = playerDisplayWidth / SWF_WIDTH;
+            const scaleY = playerDisplayHeight / SWF_HEIGHT;
+            
+            // Use the larger scale to fill the space (potentially cropping)
+            const scale = Math.max(scaleX, scaleY);
+            
+            // Apply the inverse scale to make the content appear at original size relative to its display area
+            // However, for full-screen fill, we actually want the content to stretch to fill the display area
+            // So we calculate the scale needed to make the original content fill the display area
+            const container = document.getElementById("container");
             const containerRect = container.getBoundingClientRect();
             const containerWidth = containerRect.width;
             const containerHeight = containerRect.height;
 
-            // Calculate scale factors
-            const scaleX = containerWidth / SWF_WIDTH;
-            const scaleY = containerHeight / SWF_HEIGHT;
-            
-            // Use the LARGER scale to fill the container (this might cause cropping)
-            const scale = Math.max(scaleX, scaleY);
-            
-            // Apply the scale transformation
-            wrapper.style.transform = `scale(${scale})`;
+            const scaleToFitWidth = containerWidth / SWF_WIDTH;
+            const scaleToFitHeight = containerHeight / SWF_HEIGHT;
+            const finalScale = Math.max(scaleToFitWidth, scaleToFitHeight);
+
+            player.style.transform = `scale(${finalScale})`;
         }
+
 
         // Handle window resize
         window.addEventListener("resize", applyScaling);
@@ -345,7 +359,7 @@
                 fullscreenButton.querySelector("i").className = 
                     document.fullscreenElement ? "fas fa-compress" : "fas fa-expand";
                 
-                // Reapply scaling when exiting fullscreen
+                // Reapply scaling when entering/exiting fullscreen
                 setTimeout(applyScaling, 100);
             });
             
