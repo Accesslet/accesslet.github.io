@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Ruffle Player with Scaling</title>
+    <title>Responsive Ruffle Player - Fill Screen</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Reset & Base Styles */
@@ -42,7 +42,7 @@
         #container {
             position: relative;
             flex: 1; /* Takes all remaining vertical space */
-            overflow: hidden;
+            overflow: hidden; /* Important: Hides overflow */
             background: #000;
             display: flex;
             justify-content: center;
@@ -52,8 +52,9 @@
         /* Wrapper for scaling - added this element */
         #player-wrapper {
             position: relative;
-            width: 100%;
-            height: 100%;
+            /* Initial size based on SWF dimensions */
+            width: 800px; /* Replace with your SWF width */
+            height: 600px; /* Replace with your SWF height */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -279,7 +280,7 @@
             setTimeout(applyScaling, 100);
         }
 
-        // Calculate and apply scaling
+        // Calculate and apply scaling to fill the container
         function applyScaling() {
             const container = document.getElementById("container");
             const wrapper = document.getElementById("player-wrapper");
@@ -294,8 +295,8 @@
             const scaleX = containerWidth / SWF_WIDTH;
             const scaleY = containerHeight / SWF_HEIGHT;
             
-            // Use the smaller scale to fit entirely within the container
-            const scale = Math.min(scaleX, scaleY);
+            // Use the LARGER scale to fill the container (this might cause cropping)
+            const scale = Math.max(scaleX, scaleY);
             
             // Apply the scale transformation
             wrapper.style.transform = `scale(${scale})`;
