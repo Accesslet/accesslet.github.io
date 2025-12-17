@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Ruffle Player with Scaling</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset & Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        :root {
+            --ruffle-light-blue: #546da3;
+            --ruffle-blue: #37528c;
+            --ruffle-dark-blue: #184778;
+            --ruffle-orange: #ffad33;
+            --ruffle-dark-orange: #966214;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--ruffle-blue);
+            font-family: Arial, sans-serif;
+        }
+        
+        /* App Container - Similar to Ruffle's #root */
+        #app-container {
+            position: absolute;
+            inset: 0; /* Covers entire viewport */
+            display: flex;
+            flex-direction: column;
+            background: #000;
+        }
+        
+        /* Player Container - Responsive like Ruffle's #player-container */
+        #container {
+            position: relative;
+            flex: 1; /* Takes all remaining vertical space */
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Wrapper for scaling - added this element */
+        #player-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-origin: 50% 50%; /* Scale from center */
+        }
+        
+        #container > * {
+            position: absolute;
+            inset: 0; /* Fills container */
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Controls */
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        
+        #cog-button {
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            color: white;
+            font-size: 24px;
+            border: none;
+        }
+        
+        #cog-button.active {
+            transform: rotate(180deg);
+        }
+        
+        #button-panel {
+            display: none;
+            background: rgba(0,0,0,0.7);
+            border-radius: 25px;
+            padding: 10px;
+            margin-top: 10px;
+            backdrop-filter: blur(5px);
+        }
+        
+        #button-panel.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            margin: 0 5px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+        
+        /* Drag Overlay - Similar to Ruffle's */
+        #overlay {
+            pointer-events: none;
+            border: 8px dashed var(--ruffle-orange);
+            border-radius: 30px;
+            opacity: 0;
+            transition: opacity .3s ease-in;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+        
+        #overlay.drag {
+            opacity: 1;
+            transition-timing-function: ease-out;
+        }
+        
+        /* Responsive Adjustments */
+        @media only screen and (max-width: 1120px) {
+            .control-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+            
+            #cog-button {
+                width: 44px;
+                height: 44px;
+                font-size: 22px;
+            }
+        }
+        
+        @media only screen and (max-width: 600px) {
+            #controls {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+            
+            #cog-button {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div id="container">
+            <div id="player-wrapper">
+                <div id="overlay"></div>
+                <!-- Ruffle player will be inserted here -->
+            </div>
+        </div>
+        
+        <div id="controls">
+            <button id="cog-button">
+                <i class="fas fa-cog"></i>
+            </button>
+            <div id="button-panel">
+                <button class="control-btn" id="fullscreen-button" title="Fullscreen">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="control-btn" id="screenshot-button" title="Screenshot">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <button class="control-btn" id="twitter-button" title="Share on Twitter">
+                    <i class="fab fa-twitter"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Define your SWF dimensions here
+        const SWF_WIDTH = 800;  // Replace with your actual SWF width
+        const SWF_HEIGHT = 600; // Replace with your actual SWF height
+
+        // Dynamically load the Ruffle script
+        function loadRuffle() {
+            let script = document.createElement("script");
+            script.src = "https://accesslet.github.io/initLib.js";
+            script.onload = initializeRuffle;
+            script.onerror = () => console.error("Failed to load script.");
+            document.head.appendChild(script);
+        }
+
+        function initializeRuffle() {
+            if (!window.RufflePlayer) {
+                console.error("Media library not initialized properly.");
+                return;
+            }
+
+            let ruffle = window.RufflePlayer.newest();
+            if (!ruffle) {
+                console.error("Failed to initialize.");
+                return;
+            }
+
+            // Apply configuration to hide UI elements and force Canvas2D renderer
+            let config = {
+                "autoplay": true,
+                "showRuffleLogo": false,
+                "unmuteOverlay": "hidden",
+                "backgroundColor": "#000000",
+                "logLevel": "error",
+                "showFullscreenButton": false,
+                "showOverlay": false,
+                "showPlayButton": false,
+                "showSettingsButton": false,
+                "showShareButton": false,
+                "showDownloadButton": false,
+                "useHardwareAcceleration": false,
+                "preloader": true,
+                "showLoader": true,
+                "contextMenu": "off",
+                "showWarnings": false,
+                "showErrors": false,
+                "warnOnUnsupportedContent": false,
+                "openUrlMode": "Allow",
+                "allowNetworking": "All",
+                "preferredRenderer": "canvas"
+            };
+    
+            let player = ruffle.createPlayer();
+            player.config = config;
+
+            // Insert player into the wrapper instead of container
+            let wrapper = document.getElementById("player-wrapper");
+            if (wrapper) {
+                wrapper.appendChild(player);
+                player.load("DSTAT.spl"); /*Get dimension stats*/
+            } else {
+                console.error("Wrapper element not found.");
+            }
+
+            // Apply initial scaling after player loads
+            setTimeout(applyScaling, 100);
+        }
+
+        // Calculate and apply scaling
+        function applyScaling() {
+            const container = document.getElementById("container");
+            const wrapper = document.getElementById("player-wrapper");
+            
+            if (!container || !wrapper) return;
+
+            const containerRect = container.getBoundingClientRect();
+            const containerWidth = containerRect.width;
+            const containerHeight = containerRect.height;
+
+            // Calculate scale factors
+            const scaleX = containerWidth / SWF_WIDTH;
+            const scaleY = containerHeight / SWF_HEIGHT;
+            
+            // Use the smaller scale to fit entirely within the container
+            const scale = Math.min(scaleX, scaleY);
+            
+            // Apply the scale transformation
+            wrapper.style.transform = `scale(${scale})`;
+        }
+
+        // Handle window resize
+        window.addEventListener("resize", applyScaling);
+
+        // Control panel functionality
+        document.addEventListener("DOMContentLoaded", () => {
+            const cogButton = document.getElementById("cog-button");
+            const buttonPanel = document.getElementById("button-panel");
+            const fullscreenButton = document.getElementById("fullscreen-button");
+            const screenshotButton = document.getElementById("screenshot-button");
+            const twitterButton = document.getElementById("twitter-button");
+            const container = document.getElementById("app-container");
+            const overlay = document.getElementById("overlay");
+
+            // Toggle control panel
+            cogButton.addEventListener("click", () => {
+                cogButton.classList.toggle("active");
+                buttonPanel.classList.toggle("active");
+            });
+
+            // Fullscreen toggle
+            fullscreenButton.addEventListener("click", () => {
+                if (!document.fullscreenElement) {
+                    container.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            });
+
+            // Screenshot capture - triggers download
+            screenshotButton.addEventListener("click", downloadScreenshot);
+
+            // Twitter sharing - copies to clipboard and opens tweet intent
+            twitterButton.addEventListener("click", shareOnTwitter);
+
+            // Handle fullscreen changes
+            document.addEventListener("fullscreenchange", () => {
+                fullscreenButton.querySelector("i").className = 
+                    document.fullscreenElement ? "fas fa-compress" : "fas fa-expand";
+                
+                // Reapply scaling when exiting fullscreen
+                setTimeout(applyScaling, 100);
+            });
+            
+            // Drag and drop handling for overlay
+            container.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                overlay.classList.add("drag");
+            });
+            
+            container.addEventListener("dragleave", () => {
+                overlay.classList.remove("drag");
+            });
+            
+            container.addEventListener("drop", (e) => {
+                e.preventDefault();
+                overlay.classList.remove("drag");
+                // Handle file drop here if needed
+            });
+        });
+
+        // Get canvas from Ruffle player
+        function getRuffleCanvas() {
+            const player = document.querySelector("ruffle-player");
+            if (!player) throw new Error("Media Player not found");
+            
+            const canvas = player.shadowRoot.querySelector("canvas");
+            if (!canvas) throw new Error("Canvas element not found");
+            
+            return canvas;
+        }
+
+        // Create properly rendered screenshot canvas
+        function createScreenshotCanvas() {
+            const ruffleCanvas = getRuffleCanvas();
+            
+            // Create temporary canvas to fix rendering issues
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = ruffleCanvas.width;
+            tempCanvas.height = ruffleCanvas.height;
+            
+            const context = tempCanvas.getContext('2d');
+            
+            // Fill with black background first
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Draw the Ruffle canvas on top
+            context.drawImage(ruffleCanvas, 0, 0);
+            
+            return tempCanvas;
+        }
+
+        // Download screenshot as PNG file with timestamp
+        function downloadScreenshot() {
+            try {
+                const canvas = createScreenshotCanvas();
+                const dataUrl = canvas.toDataURL('image/png');
+                const timestamp = Date.now();
+                
+                // Create download link with timestamp
+                const link = document.createElement('a');
+                link.download = `screenshot_${timestamp}.png`;
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+            } catch (err) {
+                console.error("Screenshot download error: ", err);
+                alert("Could not capture screenshot. Make sure you're using HTTPS.");
+            }
+        }
+
+        // Copy screenshot to clipboard
+        async function copyScreenshotToClipboard() {
+            try {
+                const canvas = createScreenshotCanvas();
+                
+                // Convert to blob and copy to clipboard
+                return new Promise((resolve, reject) => {
+                    canvas.toBlob(async blob => {
+                        try {
+                            await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]);
+                            resolve();
+                        } catch (err) {
+                            reject(err);
+                        }
+                    }, 'image/png');
+                });
+            } catch (err) {
+                throw err;
+            }
+        }
+
+        // Share on Twitter with copied screenshot
+        async function shareOnTwitter() {
+            try {
+                // Copy screenshot to clipboard
+                await copyScreenshotToClipboard();
+                
+                // Open Twitter share window
+                const url = encodeURIComponent(window.location.href);
+                const text = encodeURIComponent("Check this out! ");
+                window.open(
+                    `https://twitter.com/intent/tweet?text=  ${text}&url=${url}`,
+                    '_blank'
+                );
+                
+                alert("Screenshot copied to clipboard! Now compose your tweet.");
+                
+            } catch (err) {
+                console.error("Twitter share error: ", err);
+                alert("Could not copy screenshot to clipboard. Make sure you're using HTTPS and have granted clipboard permissions.");
+            }
+        }
+
+        // Load Ruffle dynamically
+        window.addEventListener("DOMContentLoaded", loadRuffle);
+    </script>
+</body>
+</html>
