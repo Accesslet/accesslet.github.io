@@ -229,7 +229,7 @@
                 return;
             }
 
-            // Apply configuration to hide UI elements and force WebGL renderer
+            // Apply configuration to hide UI elements and use wgpu-webgl renderer
             let config = {
                 "autoplay": true,
                 "showRuffleLogo": false,
@@ -251,7 +251,7 @@
                 "warnOnUnsupportedContent": false,
                 "openUrlMode": "Allow",
                 "allowNetworking": "All",
-                "preferredRenderer": "webgl" // Use WebGL
+                "preferredRenderer": "wgpu-webgl" // Use wgpu-webgl as requested
             };
     
             let player = ruffle.createPlayer();
@@ -285,40 +285,10 @@
             // Initialize Feather Icons
             feather.replace();
 
-            // Auto-hide functionality
-            let hideTimeout;
-            function startHideTimer() {
-                clearTimeout(hideTimeout);
-                hideTimeout = setTimeout(() => {
-                    if(buttonPanel.classList.contains("active")) {
-                        cogButton.classList.remove("active");
-                        buttonPanel.classList.remove("active");
-                    }
-                }, 3000); // 3 seconds
-            }
-
             // Toggle control panel
             cogButton.addEventListener("click", () => {
                 cogButton.classList.toggle("active");
                 buttonPanel.classList.toggle("active");
-                
-                if(buttonPanel.classList.contains("active")) {
-                    startHideTimer();
-                } else {
-                    clearTimeout(hideTimeout);
-                }
-            });
-
-            // Start timer when mouse enters controls
-            document.getElementById("controls").addEventListener("mouseenter", () => {
-                if(buttonPanel.classList.contains("active")) {
-                    startHideTimer();
-                }
-            });
-
-            // Stop timer when mouse leaves controls
-            document.getElementById("controls").addEventListener("mouseleave", () => {
-                clearTimeout(hideTimeout);
             });
 
             // Fullscreen toggle
@@ -368,40 +338,34 @@
             });
         });
 
-        // Get canvas from Ruffle player (WebGL compatible)
+        // Get canvas from Ruffle player (should be WebGL-based with wgpu-webgl)
         function getRuffleCanvas() {
             const player = document.querySelector("ruffle-player");
             if (!player) throw new Error("Media Player not found");
             
-            // For WebGL renderer, we need to access the canvas differently
-            // Try both possible locations
+            // Try to find the canvas element, likely inside the shadow root for wgpu-webgl
             let canvas = null;
             
-            // Check for canvas in shadow root (most common case)
+            // Check for canvas in shadow root (most common case with modern Ruffle)
             if (player.shadowRoot) {
                 canvas = player.shadowRoot.querySelector("canvas");
             }
             
-            // If not found in shadow root, check direct children
+            // If not found in shadow root, check direct children (fallback)
             if (!canvas) {
                 canvas = player.querySelector("canvas");
             }
             
-            // If still not found, try to get the active renderer canvas
-            if (!canvas && player._stage) {
-                canvas = player._stage.canvas || player._stage.gl.canvas;
-            }
-            
-            if (!canvas) throw new Error("Canvas element not found");
+            if (!canvas) throw new Error("Canvas element not found within Ruffle player. Renderer might not be wgpu-webgl or canvas structure changed.");
             
             return canvas;
         }
 
-        // Create properly rendered screenshot canvas (WebGL compatible)
+        // Create properly rendered screenshot canvas for wgpu-webgl
         function createScreenshotCanvas() {
             const ruffleCanvas = getRuffleCanvas();
             
-            // Create temporary canvas to ensure proper rendering
+            // Create temporary canvas to ensure proper rendering and apply background
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = ruffleCanvas.width;
             tempCanvas.height = ruffleCanvas.height;
@@ -412,52 +376,9 @@
             context.fillStyle = '#000000';
             context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
             
-            // For WebGL contexts, read pixels directly
-            if (ruffleCanvas.tagName === 'CANVAS' && ruffleCanvas.getContext('webgl')) {
-                const gl = ruffleCanvas.getContext('webgl') || ruffleCanvas.getContext('experimental-webgl');
-                if (gl) {
-                    // Read pixels from the WebGL context
-                    const pixels = new Uint8Array(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
-                    gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-                    
-                    // Create image data from pixels
-                    const imageData = new ImageData(
-                        new Uint8ClampedArray(pixels),
-                        gl.drawingBufferWidth,
-                        gl.drawingBufferHeight
-                    );
-                    
-                    // Flip the image vertically since WebGL coordinates are different
-                    const flippedImageData = new ImageData(
-                        new Uint8ClampedArray(imageData.data),
-                        imageData.width,
-                        imageData.height
-                    );
-                    
-                    // Flip the image data manually
-                    for (let y = 0; y < Math.floor(imageData.height / 2); y++) {
-                        for (let x = 0; x < imageData.width; x++) {
-                            const topIndex = (y * imageData.width + x) * 4;
-                            const bottomIndex = ((imageData.height - y - 1) * imageData.width + x) * 4;
-                            
-                            // Swap RGBA values
-                            for (let i = 0; i < 4; i++) {
-                                const temp = imageData.data[topIndex + i];
-                                flippedImageData.data[topIndex + i] = imageData.data[bottomIndex + i];
-                                flippedImageData.data[bottomIndex + i] = temp;
-                            }
-                        }
-                    }
-                    
-                    context.putImageData(flippedImageData, 0, 0);
-                } else {
-                    // Fallback to drawImage if no WebGL context
-                    context.drawImage(ruffleCanvas, 0, 0);
-                }
-            } else {
-                // For regular 2D canvas, just draw the image
-                context.drawImage(ruffleCanvas, 0, 0);
-            }
+            // Draw the Ruffle canvas onto the temporary canvas
+            // This works because toDataURL/toBlob reads the final rendered pixels
+            context.drawImage(ruffleCanvas, 0, 0);
             
             return tempCanvas;
         }
