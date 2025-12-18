@@ -443,41 +443,7 @@
     }
   }
 
-  // Function to check for modal and apply styles using requestAnimationFrame
-  function pollForModalAndStyle(shadowRoot, cssText, sheet) {
-    let animationFrameId = null; // Store the ID to cancel later
-
-    function checkAndApply() {
-      // Check if the shadow root still exists and is valid
-      if (!shadowRoot || !shadowRoot.querySelector) {
-         console.warn("Shadow root disappeared or became invalid.");
-         if (animationFrameId) cancelAnimationFrame(animationFrameId);
-         return;
-      }
-
-      const modalElement = shadowRoot.querySelector('#video-modal');
-      if (modalElement) {
-        injectCSS(shadowRoot, cssText, sheet);
-        // Stop polling once the modal is found and styled
-        if (animationFrameId) cancelAnimationFrame(animationFrameId);
-        console.log("Batman CSS injected into Ruffle shadow DOM for #video-modal!");
-      } else {
-        // Schedule the next check
-        animationFrameId = requestAnimationFrame(checkAndApply);
-      }
-    }
-
-    // Start the loop
-    animationFrameId = requestAnimationFrame(checkAndApply);
-
-    // Optional: Return a function to manually cancel the polling if needed elsewhere
-    return () => {
-        if (animationFrameId) cancelAnimationFrame(animationFrameId);
-    };
-  }
-
-
-  // Process a single Ruffle player instance
+  // Process a single Ruffle player instance: add event listener and inject when condition is met
   async function processRuffleInstance(player) {
     const shadow = player.shadowRoot;
     if (!shadow) {
@@ -486,22 +452,34 @@
     }
 
     const sheet = createSheet(BATMAN_CSS);
-    // Start polling for the modal within this specific shadow root
-    const cancelPolling = pollForModalAndStyle(shadow, BATMAN_CSS, sheet);
 
-    // Optional: Attach event listeners for other actions if needed, e.g., pause
-    // Ensure the listener is removed if the player/shadowroot is destroyed
-    const onPauseHandler = (ev) => {
-      const playBtn = shadow.getElementById('play_button');
-      if (playBtn) playBtn.style.display = 'none';
-    };
+    // Define the event handler
+    function onRuffleLoadOrRender() {
+      // Check *once* when the event fires if the target element exists
+      const targetElement = shadow.querySelector('#video-holder'); // Or '#video-modal'
+      if (targetElement) {
+        console.log("Found #video-holder (or #video-modal) in ruffle-player shadow DOM, injecting CSS.");
+        injectCSS(shadow, BATMAN_CSS, sheet);
+        // Remove the event listener after successful injection to prevent multiple runs
+        player.removeEventListener('load', onRuffleLoadOrRender); 
+        player.removeEventListener('render-start', onRuffleLoadOrRender); // Example of another potential event
+        player.removeEventListener('render-stop', onRuffleLoadOrRender); // Example of another potential event
+        // Add other potential Ruffle events here if known
+      } else {
+          console.log("Event fired, but #video-holder (or #video-modal) not found yet in this shadow root.");
+          // Optionally, if the event fires early, you might want to keep listening or use a short timeout once
+          // setTimeout(() => injectIfPresent(shadow, BATMAN_CSS, sheet), 100); // Example
+      }
+    }
 
-    shadow.addEventListener('pause', onPauseHandler, { capture: true });
+    // Attach the event listener to the ruffle-player element
+    // 'load' is a common event for media/embedded content, might work for Ruffle
+    // You might need to check Ruffle docs for specific events like 'ruffle-ready', 'content-loaded', etc.
+    player.addEventListener('load', onRuffleLoadOrRender);
+    // player.addEventListener('render-start', onRuffleLoadOrRender); // Uncomment if appropriate event is known
+    // player.addEventListener('render-stop', onRuffleLoadOrRender); // Uncomment if appropriate event is known
 
-    // If you have a way to know when the player is destroyed, remove listeners
-    // Example: player.addEventListener('destroy', () => { cancelPolling(); shadow.removeEventListener('pause', onPauseHandler); });
-
-    console.log("Started watching ruffle-player for #video-modal...");
+    console.log(`Attached event listener to ruffle-player for CSS injection.`);
   }
 
   // Find and process all current ruffle-player instances
@@ -511,8 +489,10 @@
     const players = Array.from(document.querySelectorAll('#container ruffle-player, #player')); // Check both selectors
     if (players.length === 0) {
       console.warn('No <ruffle-player> found under #container or with id #player initially.');
-      // If players might be added later, consider polling for the player itself too,
-      // or relying on an event when the player is created.
+      // If players are added dynamically later, you'd ideally need *one* observer just for adding
+      // the event listener to *new* ruffle-player elements, not for styling directly.
+      // But based on your request to avoid observers entirely for styling logic, we assume
+      // players are mostly static or handled by other code that calls this function again.
       return;
     }
 
