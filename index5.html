@@ -304,7 +304,7 @@
         // Load Ruffle dynamically
         window.addEventListener("DOMContentLoaded", loadRuffle);
     </script>
-    <script>
+<script>
   // Batman CSS (native-like)
   const BATMAN_CSS = `
     /* Modal area */
@@ -334,7 +334,6 @@
       border-radius: 8px !important;
       box-shadow: 0 0 20px rgba(31,111,235,0.35) !important;
       /* --- Custom Control Styling --- */
-      /* Hide default controls first */
       /* control bar background */
       &::-webkit-media-controls-panel-container,
       &::-webkit-media-controls-panel {
@@ -352,7 +351,6 @@
       &::-webkit-media-controls-fullscreen-button,
       &::-webkit-media-controls-fullscreen-exit-button,
       &::-webkit-media-controls-volume-slider-container {
-        /* Adjust default appearance */
         opacity: 0.9 !important;
         transition: opacity 0.2s ease, transform 0.2s ease !important;
       }
@@ -365,9 +363,9 @@
       &::-webkit-media-controls-fullscreen-exit-button:hover,
       &::-webkit-media-controls-volume-slider-container:hover {
          opacity: 1 !important;
-         transform: scale(1.1); /* Slight hover effect */
+         transform: scale(1.1);
       }
-       /* Icon colors - adjust these for your custom look */
+       /* Icon colors */
       &::-webkit-media-controls-overlay-play-button,
       &::-webkit-media-controls-play-button,
       &::-webkit-media-controls-pause-button,
@@ -375,25 +373,15 @@
       &::-webkit-media-controls-unmute-button,
       &::-webkit-media-controls-fullscreen-button,
       &::-webkit-media-controls-fullscreen-exit-button {
-        color: #e6edf3 !important; /* Default icon color */
-        /* To fully customize appearance (background, shape, size), you might need more complex overrides */
-        /* Often, changing just the color is the most reliable cross-browser method */
-        /* Example of attempting a background change (may not work in all cases) */
-        /* background: rgba(31, 111, 235, 0.2) !important; */
-        /* border-radius: 50% !important; */
-        /* padding: 5px !important; */
+        color: #e6edf3 !important;
       }
-      /* Firefox specific (if Ruffle triggers native controls) */
+      /* Firefox specific (if applicable) */
       &::-moz-media-controls {
-        /* Firefox doesn't allow deep customization of individual controls via CSS like Webkit */
-        /* Styling often relies on system themes or limited properties */
         background: linear-gradient(180deg, rgba(18,21,24,0.85), rgba(12,15,18,0.85)) !important;
       }
       &::-moz-native-anonymous videocontrols {
-        /* Container for Firefox controls */
         background: linear-gradient(180deg, rgba(18,21,24,0.85), rgba(12,15,18,0.85)) !important;
       }
-      /* General control button appearance (Firefox sometimes respects these) */
       &::-moz-media-controls-overlay-play-button,
       &::-moz-media-controls-play-button,
       &::-moz-media-controls-pause-button,
@@ -401,8 +389,7 @@
       &::-moz-media-controls-unmute-button,
       &::-moz-media-controls-fullscreen-button,
       &::-moz-media-controls-fullscreen-exit-button {
-         /* Limited styling possible here in Firefox */
-         fill: #e6edf3 !important; /* For SVG icons */
+         fill: #e6edf3 !important;
       }
       /* --- End Custom Control Styling --- */
     }
@@ -456,95 +443,87 @@
     }
   }
 
-  // Optimized observer for Ruffle shadow root
-  // Only observes for the specific modal element, not general subtree changes
-  function observeModalOptimized(shadowRoot, cssText, sheet) {
-    const apply = () => injectCSS(shadowRoot, cssText, sheet);
-    apply(); // Apply immediately
+  // Function to check for modal and apply styles using requestAnimationFrame
+  function pollForModalAndStyle(shadowRoot, cssText, sheet) {
+    let animationFrameId = null; // Store the ID to cancel later
 
-    // Watch specifically for the #video-modal element being added or removed within the shadow root
-    const mo = new MutationObserver((mutations) => {
-      let shouldReApply = false;
-      for (const m of mutations) {
-        for (const node of m.addedNodes) {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-             // Check if the added node IS the modal or CONTAINS the modal
-             if (node.id === 'video-modal' || node.querySelector && node.querySelector('#video-modal')) {
-               shouldReApply = true;
-               break; // Exit inner loop if modal found
-             }
-          }
-        }
-        if (shouldReApply) break; // Exit outer loop if modal found
+    function checkAndApply() {
+      // Check if the shadow root still exists and is valid
+      if (!shadowRoot || !shadowRoot.querySelector) {
+         console.warn("Shadow root disappeared or became invalid.");
+         if (animationFrameId) cancelAnimationFrame(animationFrameId);
+         return;
       }
-      if (shouldReApply) {
-        apply(); // Re-apply styles if modal appeared
-      }
-    });
 
-    // Observe only for childList changes directly on the shadowRoot
-    // This is much less intensive than observing subtree changes inside Ruffle's complex UI
-    mo.observe(shadowRoot, { childList: true });
-    return mo;
+      const modalElement = shadowRoot.querySelector('#video-modal');
+      if (modalElement) {
+        injectCSS(shadowRoot, cssText, sheet);
+        // Stop polling once the modal is found and styled
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        console.log("Batman CSS injected into Ruffle shadow DOM for #video-modal!");
+      } else {
+        // Schedule the next check
+        animationFrameId = requestAnimationFrame(checkAndApply);
+      }
+    }
+
+    // Start the loop
+    animationFrameId = requestAnimationFrame(checkAndApply);
+
+    // Optional: Return a function to manually cancel the polling if needed elsewhere
+    return () => {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
   }
 
 
-  // Find all ruffle-player under #container; handle closed shadow roots
+  // Process a single Ruffle player instance
+  async function processRuffleInstance(player) {
+    const shadow = player.shadowRoot;
+    if (!shadow) {
+      console.warn('ruffle-player has a closed shadow root; direct styling is not possible from the host page.');
+      return;
+    }
+
+    const sheet = createSheet(BATMAN_CSS);
+    // Start polling for the modal within this specific shadow root
+    const cancelPolling = pollForModalAndStyle(shadow, BATMAN_CSS, sheet);
+
+    // Optional: Attach event listeners for other actions if needed, e.g., pause
+    // Ensure the listener is removed if the player/shadowroot is destroyed
+    const onPauseHandler = (ev) => {
+      const playBtn = shadow.getElementById('play_button');
+      if (playBtn) playBtn.style.display = 'none';
+    };
+
+    shadow.addEventListener('pause', onPauseHandler, { capture: true });
+
+    // If you have a way to know when the player is destroyed, remove listeners
+    // Example: player.addEventListener('destroy', () => { cancelPolling(); shadow.removeEventListener('pause', onPauseHandler); });
+
+    console.log("Started watching ruffle-player for #video-modal...");
+  }
+
+  // Find and process all current ruffle-player instances
   async function initRuffleStyling() {
     await customElements.whenDefined('ruffle-player');
 
     const players = Array.from(document.querySelectorAll('#container ruffle-player, #player')); // Check both selectors
     if (players.length === 0) {
-      console.warn('No <ruffle-player> found under #container or with id #player.');
+      console.warn('No <ruffle-player> found under #container or with id #player initially.');
+      // If players might be added later, consider polling for the player itself too,
+      // or relying on an event when the player is created.
       return;
     }
 
-    const sheet = createSheet(BATMAN_CSS);
-
     for (const player of players) {
-      const shadow = player.shadowRoot;
-      if (!shadow) {
-        console.warn('ruffle-player has a closed shadow root; direct styling is not possible from the host page.');
-        continue;
-      }
-
-      // Use the optimized observer
-      observeModalOptimized(shadow, BATMAN_CSS, sheet);
-
-      // Optional: if you need to manipulate buttons inside the ShadowRoot
-      // after pause, guard against missing elements.
-      shadow.addEventListener('pause', (ev) => {
-        const playBtn = shadow.getElementById('play_button');
-        if (playBtn) playBtn.style.display = 'none';
-      }, { capture: true });
+      await processRuffleInstance(player); // Process each found instance
     }
   }
 
-  // Start once DOM is ready; also handle late insertion of ruffle-player
+  // Start once DOM is ready
   function boot() {
     initRuffleStyling();
-
-    // Observer for #container or #player only to catch newly added ruffle instances
-    const containerHost = document.getElementById('container') || document.getElementById('player');
-    if (containerHost) {
-      const mo = new MutationObserver((mutations) => {
-        // Check if any mutation adds a ruffle-player
-        for (const mutation of mutations) {
-          if (mutation.type === 'childList') {
-            for (const node of mutation.addedNodes) {
-              if (node.nodeType === Node.ELEMENT_NODE) {
-                // Check if the added node itself is a ruffle-player or contains one
-                if (node.tagName.toLowerCase() === 'ruffle-player' || node.querySelector('ruffle-player')) {
-                  initRuffleStyling(); // Re-run initialization
-                  break; // Assume one run covers all new players found
-                }
-              }
-            }
-          }
-        }
-      });
-      mo.observe(containerHost, { childList: true, subtree: true }); // Observe container for new players
-    }
   }
 
   if (document.readyState === 'loading') {
