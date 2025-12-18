@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsive Ruffle Player</title>
-    <!-- Feather Icons CDN -->
-    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <style>
         /* Reset & Base Styles */
         * {
@@ -54,7 +53,7 @@
             height: 100%;
         }
         
-        /* Controls - MOVED TO LEFT */
+        /* Controls */
         #controls {
             position: absolute;
             top: 20px;
@@ -62,7 +61,7 @@
             z-index: 100;
             display: flex;
             flex-direction: column;
-            align-items: flex-start; /* Changed from flex-end to flex-start */
+            align-items: flex-start; /* Align to start (left) */
         }
         
         #cog-button {
@@ -76,8 +75,8 @@
             cursor: pointer;
             transition: transform 0.3s ease;
             color: white;
+            font-size: 24px;
             border: none;
-            padding: 0;
         }
         
         #cog-button.active {
@@ -89,11 +88,8 @@
             background: rgba(0,0,0,0.7);
             border-radius: 25px;
             padding: 10px;
-            margin-top: 10px;
+            margin-left: 10px; /* Space between cog and panel */
             backdrop-filter: blur(5px);
-            display: flex; /* Changed to flex for proper Feather icon alignment */
-            flex-direction: column; /* Stack icons vertically */
-            align-items: flex-start; /* Align icons to left */
         }
         
         #button-panel.active {
@@ -102,18 +98,19 @@
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateX(-10px); } /* Changed to horizontal movement */
+            to { opacity: 1; transform: translateX(0); }
         }
         
         .control-btn {
             width: 40px;
             height: 40px;
-            margin: 5px 0; /* Vertical margin for vertical layout */
+            margin: 0 5px;
             border-radius: 50%;
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
+            font-size: 18px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -126,14 +123,9 @@
             transform: scale(1.1);
         }
         
-        /* Feather Icon Styling */
-        .feather-icon {
-            width: 20px;
-            height: 20px;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+        /* Feather icon adjustments */
+        .control-btn i {
+            pointer-events: none; /* Prevent double click issues */
         }
         
         /* Drag Overlay - Similar to Ruffle's */
@@ -157,11 +149,13 @@
             .control-btn {
                 width: 36px;
                 height: 36px;
+                font-size: 16px;
             }
             
             #cog-button {
                 width: 44px;
                 height: 44px;
+                font-size: 22px;
             }
         }
         
@@ -174,11 +168,13 @@
             .control-btn {
                 width: 32px;
                 height: 32px;
+                font-size: 14px;
             }
             
             #cog-button {
                 width: 40px;
                 height: 40px;
+                font-size: 20px;
             }
         }
     </style>
@@ -191,11 +187,19 @@
         </div>
         
         <div id="controls">
-            <button id="cog-button" data-feather="settings"></button>
+            <button id="cog-button">
+                <i data-feather="settings"></i>
+            </button>
             <div id="button-panel">
-                <button class="control-btn" id="fullscreen-button" data-feather="maximize" title="Fullscreen"></button>
-                <button class="control-btn" id="screenshot-button" data-feather="camera" title="Screenshot"></button>
-                <button class="control-btn" id="twitter-button" data-feather="twitter" title="Share on Twitter"></button>
+                <button class="control-btn" id="fullscreen-button" title="Fullscreen">
+                    <i data-feather="maximize"></i>
+                </button>
+                <button class="control-btn" id="screenshot-button" title="Screenshot">
+                    <i data-feather="camera"></i>
+                </button>
+                <button class="control-btn" id="twitter-button" title="Share on Twitter">
+                    <i data-feather="twitter"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -203,10 +207,11 @@
     <script>
         //Disable context-menu (right-click) on entire website first:
         document.addEventListener('contextmenu', function (e) { e.preventDefault(); return false; }, { capture: true });
+        
         // Dynamically load the Ruffle script
         function loadRuffle() {
             let script = document.createElement("script");
-            script.src = "https://accesslet.github.io/initLib.js";
+            script.src = "https://accesslet.github.io/initLib.js  ";
             script.onload = initializeRuffle;
             script.onerror = () => console.error("Failed to load script.");
             document.head.appendChild(script);
@@ -224,7 +229,7 @@
                 return;
             }
 
-            // Apply configuration to use WebGL and hide UI elements
+            // Apply configuration to hide UI elements and force WebGL renderer
             let config = {
                 "autoplay": true,
                 "showRuffleLogo": false,
@@ -246,7 +251,7 @@
                 "warnOnUnsupportedContent": false,
                 "openUrlMode": "Allow",
                 "allowNetworking": "All",
-                "preferredRenderer": "webgl" // Force WebGL renderer
+                "preferredRenderer": "webgl" // Use WebGL
             };
     
             let player = ruffle.createPlayer();
@@ -269,9 +274,6 @@
 
         // Control panel functionality
         document.addEventListener("DOMContentLoaded", () => {
-            // Initialize Feather Icons AFTER DOM is ready
-            feather.replace();
-            
             const cogButton = document.getElementById("cog-button");
             const buttonPanel = document.getElementById("button-panel");
             const fullscreenButton = document.getElementById("fullscreen-button");
@@ -280,10 +282,43 @@
             const container = document.getElementById("app-container");
             const overlay = document.getElementById("overlay");
 
+            // Initialize Feather Icons
+            feather.replace();
+
+            // Auto-hide functionality
+            let hideTimeout;
+            function startHideTimer() {
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(() => {
+                    if(buttonPanel.classList.contains("active")) {
+                        cogButton.classList.remove("active");
+                        buttonPanel.classList.remove("active");
+                    }
+                }, 3000); // 3 seconds
+            }
+
             // Toggle control panel
             cogButton.addEventListener("click", () => {
                 cogButton.classList.toggle("active");
                 buttonPanel.classList.toggle("active");
+                
+                if(buttonPanel.classList.contains("active")) {
+                    startHideTimer();
+                } else {
+                    clearTimeout(hideTimeout);
+                }
+            });
+
+            // Start timer when mouse enters controls
+            document.getElementById("controls").addEventListener("mouseenter", () => {
+                if(buttonPanel.classList.contains("active")) {
+                    startHideTimer();
+                }
+            });
+
+            // Stop timer when mouse leaves controls
+            document.getElementById("controls").addEventListener("mouseleave", () => {
+                clearTimeout(hideTimeout);
             });
 
             // Fullscreen toggle
@@ -307,15 +342,13 @@
 
             // Handle fullscreen changes
             document.addEventListener("fullscreenchange", () => {
-                // Update Feather icon
+                // Update fullscreen icon based on state
+                const iconElement = fullscreenButton.querySelector("i");
                 if (document.fullscreenElement) {
-                    fullscreenButton.innerHTML = '';
-                    fullscreenButton.setAttribute('data-feather', 'minimize');
+                    feather.replace({icon: 'minimize'}, iconElement.parentElement);
                 } else {
-                    fullscreenButton.innerHTML = '';
-                    fullscreenButton.setAttribute('data-feather', 'maximize');
+                    feather.replace({icon: 'maximize'}, iconElement.parentElement);
                 }
-                feather.replace(); // Re-render icons
             });
             
             // Drag and drop handling for overlay
@@ -340,15 +373,25 @@
             const player = document.querySelector("ruffle-player");
             if (!player) throw new Error("Media Player not found");
             
-            // Try WebGL canvas first (inside canvas-container)
-            const canvasContainer = player.shadowRoot.querySelector('.canvas-container');
-            if (canvasContainer) {
-                const canvas = canvasContainer.querySelector('canvas');
-                if (canvas) return canvas;
+            // For WebGL renderer, we need to access the canvas differently
+            // Try both possible locations
+            let canvas = null;
+            
+            // Check for canvas in shadow root (most common case)
+            if (player.shadowRoot) {
+                canvas = player.shadowRoot.querySelector("canvas");
             }
             
-            // Fallback to direct canvas
-            const canvas = player.shadowRoot.querySelector("canvas");
+            // If not found in shadow root, check direct children
+            if (!canvas) {
+                canvas = player.querySelector("canvas");
+            }
+            
+            // If still not found, try to get the active renderer canvas
+            if (!canvas && player._stage) {
+                canvas = player._stage.canvas || player._stage.gl.canvas;
+            }
+            
             if (!canvas) throw new Error("Canvas element not found");
             
             return canvas;
@@ -358,23 +401,63 @@
         function createScreenshotCanvas() {
             const ruffleCanvas = getRuffleCanvas();
             
-            // Create temporary canvas to fix rendering issues
+            // Create temporary canvas to ensure proper rendering
             const tempCanvas = document.createElement('canvas');
-            const ctx = tempCanvas.getContext('2d', { 
-                alpha: false, 
-                desynchronized: true 
-            });
-            
-            // Match dimensions
             tempCanvas.width = ruffleCanvas.width;
             tempCanvas.height = ruffleCanvas.height;
             
-            // Fill with black background first (transparent WebGL might show black)
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            const context = tempCanvas.getContext('2d');
             
-            // Draw the Ruffle canvas on top
-            ctx.drawImage(ruffleCanvas, 0, 0);
+            // Fill with black background first (to match player background)
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // For WebGL contexts, read pixels directly
+            if (ruffleCanvas.tagName === 'CANVAS' && ruffleCanvas.getContext('webgl')) {
+                const gl = ruffleCanvas.getContext('webgl') || ruffleCanvas.getContext('experimental-webgl');
+                if (gl) {
+                    // Read pixels from the WebGL context
+                    const pixels = new Uint8Array(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
+                    gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                    
+                    // Create image data from pixels
+                    const imageData = new ImageData(
+                        new Uint8ClampedArray(pixels),
+                        gl.drawingBufferWidth,
+                        gl.drawingBufferHeight
+                    );
+                    
+                    // Flip the image vertically since WebGL coordinates are different
+                    const flippedImageData = new ImageData(
+                        new Uint8ClampedArray(imageData.data),
+                        imageData.width,
+                        imageData.height
+                    );
+                    
+                    // Flip the image data manually
+                    for (let y = 0; y < Math.floor(imageData.height / 2); y++) {
+                        for (let x = 0; x < imageData.width; x++) {
+                            const topIndex = (y * imageData.width + x) * 4;
+                            const bottomIndex = ((imageData.height - y - 1) * imageData.width + x) * 4;
+                            
+                            // Swap RGBA values
+                            for (let i = 0; i < 4; i++) {
+                                const temp = imageData.data[topIndex + i];
+                                flippedImageData.data[topIndex + i] = imageData.data[bottomIndex + i];
+                                flippedImageData.data[bottomIndex + i] = temp;
+                            }
+                        }
+                    }
+                    
+                    context.putImageData(flippedImageData, 0, 0);
+                } else {
+                    // Fallback to drawImage if no WebGL context
+                    context.drawImage(ruffleCanvas, 0, 0);
+                }
+            } else {
+                // For regular 2D canvas, just draw the image
+                context.drawImage(ruffleCanvas, 0, 0);
+            }
             
             return tempCanvas;
         }
@@ -400,59 +483,48 @@
             }
         }
 
-        // Convert canvas to Blob
-        function canvasToBlob(canvas) {
-            return new Promise((resolve, reject) => {
-                canvas.toBlob(blob => {
-                    if (blob) {
-                        resolve(blob);
-                    } else {
-                        reject(new Error('Canvas toBlob failed'));
-                    }
-                }, 'image/png');
-            });
+        // Copy screenshot to clipboard
+        async function copyScreenshotToClipboard() {
+            try {
+                const canvas = createScreenshotCanvas();
+                
+                // Convert to blob and copy to clipboard
+                return new Promise((resolve, reject) => {
+                    canvas.toBlob(async blob => {
+                        try {
+                            await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]);
+                            resolve();
+                        } catch (err) {
+                            reject(err);
+                        }
+                    }, 'image/png');
+                });
+            } catch (err) {
+                throw err;
+            }
         }
 
-        // Twitter sharing with image upload
+        // Share on Twitter with copied screenshot
         async function shareOnTwitter() {
             try {
-                // Capture screenshot
-                const canvas = createScreenshotCanvas();
-                const blob = await canvasToBlob(canvas);
+                // Copy screenshot to clipboard
+                await copyScreenshotToClipboard();
                 
-                // Create FormData for Twitter image upload
-                const formData = new FormData();
-                formData.append('image', blob, 'screenshot.png');
-                
-                // Note: Twitter API v2 requires OAuth 2.0 Bearer Token
-                // Since we can't securely do this client-side, we'll use Twitter's legacy intent
-                // which doesn't support pre-uploaded images but allows media upload during compose
-                
-                // Open Twitter compose window with pre-filled text
+                // Open Twitter share window
                 const url = encodeURIComponent(window.location.href);
                 const text = encodeURIComponent("Check this out! ");
-                const tweetUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+                window.open(
+                    `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+                    '_blank'
+                );
                 
-                // Open in new tab
-                const tweetWindow = window.open(tweetUrl, '_blank');
-                
-                // Inform user about manual image upload
-                setTimeout(() => {
-                    alert("Screenshot ready! Paste this image into your tweet:\n\n1. Click 'Add photos' in Twitter compose\n2. Use Ctrl+V (Cmd+V on Mac) to paste");
-                }, 1000);
-                
-                // Copy image to clipboard for easy pasting
-                try {
-                    await navigator.clipboard.write([
-                        new ClipboardItem({ 'image/png': blob })
-                    ]);
-                } catch (clipErr) {
-                    console.warn("Clipboard copy failed, but image is ready for manual upload", clipErr);
-                }
+                alert("Screenshot copied to clipboard! Now compose your tweet.");
                 
             } catch (err) {
                 console.error("Twitter share error: ", err);
-                alert("Could not prepare screenshot for sharing. Make sure you're using HTTPS.");
+                alert("Could not copy screenshot to clipboard. Make sure you're using HTTPS and have granted clipboard permissions.");
             }
         }
 
