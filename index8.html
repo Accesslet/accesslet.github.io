@@ -13,11 +13,19 @@
             padding: 0;
         }
         
+        :root {
+            --ruffle-light-blue: #546da3;
+            --ruffle-blue: #37528c;
+            --ruffle-dark-blue: #184778;
+            --ruffle-orange: #ffad33;
+            --ruffle-dark-orange: #966214;
+        }
+        
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #000;
+            background: var(--ruffle-blue);
             font-family: Arial, sans-serif;
         }
         
@@ -123,7 +131,7 @@
         /* Drag Overlay - Similar to Ruffle's */
         #overlay {
             pointer-events: none;
-            border: 8px dashed #872424;
+            border: 8px dashed var(--ruffle-orange);
             border-radius: 30px;
             opacity: 0;
             transition: opacity .3s ease-in;
@@ -354,13 +362,13 @@
         }
 
         // Create properly rendered screenshot canvas for any renderer
-        function createScreenshotCanvas() {
+        async function createScreenshotCanvas() {
             const ruffleCanvas = getRuffleCanvas();
             
-            // Determine the context type
+            // Attempt to determine the context type
             const isWebGLContext = ruffleCanvas.getContext('webgl') || ruffleCanvas.getContext('experimental-webgl');
             
-            // Create temporary canvas to ensure consistent output
+            // Create temporary canvas to ensure consistent output and apply background
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = ruffleCanvas.width;
             tempCanvas.height = ruffleCanvas.height;
@@ -416,18 +424,36 @@
                     tempCtx.drawImage(ruffleCanvas, 0, 0);
                 }
             } else {
-                // --- Canvas2D Handling ---
-                // Simply draw the source canvas onto the temporary canvas
-                tempCtx.drawImage(ruffleCanvas, 0, 0);
+                // --- Canvas2D Handling (or cases where context detection failed) ---
+                // This path is crucial for Canvas2D renderer, especially on mobile.
+                // We might need to wait a frame or two for the content to be fully drawn.
+                
+                // Wait for the next repaint to ensure the canvas is up-to-date
+                await new Promise(resolve => requestAnimationFrame(resolve));
+                await new Promise(resolve => requestAnimationFrame(resolve)); // Sometimes one frame isn't enough
+                
+                try {
+                    // Draw the source canvas onto the temporary canvas
+                    // This step can fail if the canvas is 'tainted' by cross-origin content
+                    tempCtx.drawImage(ruffleCanvas, 0, 0);
+                } catch (e) {
+                    console.error("Error drawing canvas for screenshot:", e);
+                    if (e.name === 'SecurityError') {
+                         alert("Cannot capture screenshot: The content is from a different origin and the canvas is tainted.");
+                    }
+                    // Re-throw to let the calling function know it failed
+                    throw e; 
+                }
             }
             
             return tempCanvas;
         }
 
         // Download screenshot as PNG file with timestamp
-        function downloadScreenshot() {
+        async function downloadScreenshot() {
             try {
-                const canvas = createScreenshotCanvas();
+                // Await the asynchronous canvas creation
+                const canvas = await createScreenshotCanvas();
                 const dataUrl = canvas.toDataURL('image/png');
                 const timestamp = Date.now();
                 
@@ -441,29 +467,39 @@
                 
             } catch (err) {
                 console.error("Screenshot download error: ", err);
-                alert("Could not capture screenshot. Make sure you're using HTTPS.");
+                // More specific error message handling
+                if (err.name !== 'SecurityError') {
+                     alert("Could not capture screenshot. Make sure you're using HTTPS.");
+                }
             }
         }
 
         // Copy screenshot to clipboard
         async function copyScreenshotToClipboard() {
             try {
-                const canvas = createScreenshotCanvas();
+                const canvas = await createScreenshotCanvas(); // Await the canvas creation
                 
                 // Convert to blob and copy to clipboard
                 return new Promise((resolve, reject) => {
                     canvas.toBlob(async blob => {
+                        if (!blob) {
+                             console.error("Failed to create blob from canvas");
+                             reject(new Error("Failed to create image blob"));
+                             return;
+                        }
                         try {
                             await navigator.clipboard.write([
                                 new ClipboardItem({ 'image/png': blob })
                             ]);
                             resolve();
                         } catch (err) {
+                            console.error("Clipboard write failed:", err);
                             reject(err);
                         }
                     }, 'image/png');
                 });
             } catch (err) {
+                console.error("Error preparing screenshot for clipboard:", err);
                 throw err;
             }
         }
