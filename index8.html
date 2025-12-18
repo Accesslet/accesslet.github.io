@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Ruffle Player</title>
+    <title>Responsive Canvas Test</title>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <style>
         /* Reset & Base Styles */
@@ -13,19 +13,11 @@
             padding: 0;
         }
         
-        :root {
-            --ruffle-light-blue: #546da3;
-            --ruffle-blue: #37528c;
-            --ruffle-dark-blue: #184778;
-            --ruffle-orange: #ffad33;
-            --ruffle-dark-orange: #966214;
-        }
-        
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: var(--ruffle-blue);
+            background: #000;
             font-family: Arial, sans-serif;
         }
         
@@ -131,7 +123,7 @@
         /* Drag Overlay - Similar to Ruffle's */
         #overlay {
             pointer-events: none;
-            border: 8px dashed var(--ruffle-orange);
+            border: 8px dashed #872424;
             border-radius: 30px;
             opacity: 0;
             transition: opacity .3s ease-in;
@@ -229,7 +221,7 @@
                 return;
             }
 
-            // Apply configuration to hide UI elements and use wgpu-webgl renderer
+            // Apply configuration to hide UI elements and force Canvas2D renderer
             let config = {
                 "autoplay": true,
                 "showRuffleLogo": false,
@@ -242,7 +234,7 @@
                 "showSettingsButton": false,
                 "showShareButton": false,
                 "showDownloadButton": false,
-                "useHardwareAcceleration": true, // Enable hardware acceleration
+                "useHardwareAcceleration": false,
                 "preloader": true,
                 "showLoader": true,
                 "contextMenu": "off",
@@ -251,7 +243,7 @@
                 "warnOnUnsupportedContent": false,
                 "openUrlMode": "Allow",
                 "allowNetworking": "All",
-                "preferredRenderer": "wgpu-webgl" // Use wgpu-webgl as requested
+                "preferredRenderer": "canvas" // Use Canvas2D
             };
     
             let player = ruffle.createPlayer();
@@ -338,122 +330,43 @@
             });
         });
 
-        // Get canvas from Ruffle player (handles different renderers)
+        // Get canvas from Ruffle player (simplified for Canvas2D)
         function getRuffleCanvas() {
             const player = document.querySelector("ruffle-player");
             if (!player) throw new Error("Media Player not found");
             
-            // Try to find the canvas element, likely inside the shadow root
-            let canvas = null;
-            
-            // Check for canvas in shadow root (most common case)
-            if (player.shadowRoot) {
-                canvas = player.shadowRoot.querySelector("canvas");
-            }
-            
-            // If not found in shadow root, check direct children (fallback)
-            if (!canvas) {
-                canvas = player.querySelector("canvas");
-            }
-            
-            if (!canvas) throw new Error("Canvas element not found within Ruffle player.");
+            // Access canvas inside shadow root
+            const canvas = player.shadowRoot.querySelector("canvas");
+            if (!canvas) throw new Error("Canvas element not found");
             
             return canvas;
         }
 
-        // Create properly rendered screenshot canvas for any renderer
-        async function createScreenshotCanvas() {
+        // Create properly rendered screenshot canvas (simple Canvas2D version)
+        function createScreenshotCanvas() {
             const ruffleCanvas = getRuffleCanvas();
-            
-            // Attempt to determine the context type
-            const isWebGLContext = ruffleCanvas.getContext('webgl') || ruffleCanvas.getContext('experimental-webgl');
             
             // Create temporary canvas to ensure consistent output and apply background
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = ruffleCanvas.width;
             tempCanvas.height = ruffleCanvas.height;
             
-            const tempCtx = tempCanvas.getContext('2d');
+            const context = tempCanvas.getContext('2d');
             
             // Fill with black background first (to match player background)
-            tempCtx.fillStyle = '#000000';
-            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
             
-            if (isWebGLContext) {
-                // --- WebGL/WGPU-WebGL Handling ---
-                const gl = isWebGLContext; // We already have the context
-                
-                try {
-                    // Read pixels from the WebGL context
-                    const pixels = new Uint8Array(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
-                    gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-                    
-                    // Create ImageData from the pixel array
-                    const imageData = new ImageData(
-                        new Uint8ClampedArray(pixels),
-                        gl.drawingBufferWidth,
-                        gl.drawingBufferHeight
-                    );
-                    
-                    // WebGL has Y=0 at the bottom, so we need to flip the image vertically
-                    const flippedImageData = new ImageData(
-                        new Uint8ClampedArray(imageData.data.length),
-                        imageData.width,
-                        imageData.height
-                    );
-                    
-                    for (let y = 0; y < imageData.height; y++) {
-                        for (let x = 0; x < imageData.width; x++) {
-                            const sourceIdx = (y * imageData.width + x) * 4;
-                            const destIdx = ((imageData.height - y - 1) * imageData.width + x) * 4;
-                            
-                            // Copy RGBA values
-                            for (let i = 0; i < 4; i++) {
-                                flippedImageData.data[destIdx + i] = imageData.data[sourceIdx + i];
-                            }
-                        }
-                    }
-                    
-                    // Put the flipped image data onto our temporary canvas
-                    tempCtx.putImageData(flippedImageData, 0, 0);
-                    
-                } catch (e) {
-                    console.warn("Failed to read pixels from WebGL context:", e);
-                    console.info("Falling back to drawImage for WebGL canvas.");
-                    // Fallback: try drawImage even for WebGL (may work depending on context settings)
-                    tempCtx.drawImage(ruffleCanvas, 0, 0);
-                }
-            } else {
-                // --- Canvas2D Handling (or cases where context detection failed) ---
-                // This path is crucial for Canvas2D renderer, especially on mobile.
-                // We might need to wait a frame or two for the content to be fully drawn.
-                
-                // Wait for the next repaint to ensure the canvas is up-to-date
-                await new Promise(resolve => requestAnimationFrame(resolve));
-                await new Promise(resolve => requestAnimationFrame(resolve)); // Sometimes one frame isn't enough
-                
-                try {
-                    // Draw the source canvas onto the temporary canvas
-                    // This step can fail if the canvas is 'tainted' by cross-origin content
-                    tempCtx.drawImage(ruffleCanvas, 0, 0);
-                } catch (e) {
-                    console.error("Error drawing canvas for screenshot:", e);
-                    if (e.name === 'SecurityError') {
-                         alert("Cannot capture screenshot: The content is from a different origin and the canvas is tainted.");
-                    }
-                    // Re-throw to let the calling function know it failed
-                    throw e; 
-                }
-            }
+            // Draw the Ruffle canvas on top
+            context.drawImage(ruffleCanvas, 0, 0);
             
             return tempCanvas;
         }
 
         // Download screenshot as PNG file with timestamp
-        async function downloadScreenshot() {
+        function downloadScreenshot() {
             try {
-                // Await the asynchronous canvas creation
-                const canvas = await createScreenshotCanvas();
+                const canvas = createScreenshotCanvas();
                 const dataUrl = canvas.toDataURL('image/png');
                 const timestamp = Date.now();
                 
@@ -467,39 +380,29 @@
                 
             } catch (err) {
                 console.error("Screenshot download error: ", err);
-                // More specific error message handling
-                if (err.name !== 'SecurityError') {
-                     alert("Could not capture screenshot. Make sure you're using HTTPS.");
-                }
+                alert("Could not capture screenshot. Make sure you're using HTTPS.");
             }
         }
 
         // Copy screenshot to clipboard
         async function copyScreenshotToClipboard() {
             try {
-                const canvas = await createScreenshotCanvas(); // Await the canvas creation
+                const canvas = createScreenshotCanvas();
                 
                 // Convert to blob and copy to clipboard
                 return new Promise((resolve, reject) => {
                     canvas.toBlob(async blob => {
-                        if (!blob) {
-                             console.error("Failed to create blob from canvas");
-                             reject(new Error("Failed to create image blob"));
-                             return;
-                        }
                         try {
                             await navigator.clipboard.write([
                                 new ClipboardItem({ 'image/png': blob })
                             ]);
                             resolve();
                         } catch (err) {
-                            console.error("Clipboard write failed:", err);
                             reject(err);
                         }
                     }, 'image/png');
                 });
             } catch (err) {
-                console.error("Error preparing screenshot for clipboard:", err);
                 throw err;
             }
         }
