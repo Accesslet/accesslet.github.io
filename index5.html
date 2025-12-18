@@ -6,80 +6,7 @@
     <title>Persona Test</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <style>
-        /*Video CSS ALL START*/
-/* Base modal background */
-:host {
-  --modal-background: #0b0d10 !important;
-  --modal-foreground-rgb: 230, 237, 243 !important;
-  --modal-foreground-filter: invert(90%) !important;
-}
-
-/* Modal area sizing */
-#video-modal .modal-area {
-  box-sizing: border-box !important;
-  height: 95% !important;
-  width: 95% !important;
-  background: radial-gradient(1200px 600px at 80% 20%, #0e1216, #0a0c0f 70%, #07080a 100%) no-repeat !important;
-  border: 1px solid #1a1f27 !important;
-  border-radius: 12px !important;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6),
-              inset 0 0 0 1px rgba(255,255,255,0.03) !important;
-}
-
-/* Video holder */
-#video-holder {
-  box-sizing: border-box !important;
-  height: 100% !important;
-  padding: 36px 4px 6px !important;
-}
-
-/* Video element itself */
-#video-holder video {
-  width: 100% !important;
-  height: 100% !important;
-  background-color: #000 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 0 20px rgba(31,111,235,0.35) !important;
-}
-
-/* Native controls (WebKit browsers only) */
-#video-holder video::-webkit-media-controls {
-  background: linear-gradient(180deg, rgba(18,21,24,0.85), rgba(12,15,18,0.85)) !important;
-  backdrop-filter: blur(6px) !important;
-  border-top: 1px solid #1a1f27 !important;
-}
-
-#video-holder video::-webkit-media-controls-play-button,
-#video-holder video::-webkit-media-controls-pause-button,
-#video-holder video::-webkit-media-controls-mute-button,
-#video-holder video::-webkit-media-controls-fullscreen-button {
-  color: rgb(var(--modal-foreground-rgb)) !important;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)) !important;
-}
-
-#video-holder video::-webkit-media-controls-play-button:hover,
-#video-holder video::-webkit-media-controls-pause-button:hover {
-  color: #1f6feb !important;
-}
-
-/* Light/Dark theme overrides */
-@media (prefers-color-scheme: light) {
-  :host {
-    --modal-background: #fafafa !important;
-    --modal-foreground-rgb: 0,0,0 !important;
-    --modal-foreground-filter: none !important;
-  }
-}
-@media (prefers-color-scheme: dark) {
-  :host {
-    --modal-background: #0b0d10 !important;
-    --modal-foreground-rgb: 221,221,221 !important;
-    --modal-foreground-filter: invert(90%) !important;
-  }
-}
-        /* Video CSS ALL END */
-        
+    <style>        
         html, body {
             margin: 0;
             padding: 0;
@@ -377,5 +304,97 @@
         // Load Ruffle dynamically
         window.addEventListener("DOMContentLoaded", loadRuffle);
     </script>
+    <script>
+    // Wait until Ruffle has rendered its shadow DOM
+    window.addEventListener("load", () => {
+      const player = document.getElementById("player");
+
+      // Poll until shadowRoot exists
+      const interval = setInterval(() => {
+        if (player.shadowRoot) {
+          clearInterval(interval);
+
+          const shadow = player.shadowRoot;
+
+          // Create a <style> element with Batman theme
+          const style = document.createElement("style");
+          style.textContent = `
+            #video-modal .modal-area {
+              box-sizing: border-box !important;
+              height: 95% !important;
+              width: 95% !important;
+              background: radial-gradient(1200px 600px at 80% 20%, #0e1216, #0a0c0f 70%, #07080a 100%) !important;
+              border: 1px solid #1a1f27 !important;
+              border-radius: 12px !important;
+              box-shadow: 0 20px 50px rgba(0,0,0,0.6),
+                          inset 0 0 0 1px rgba(255,255,255,0.03) !important;
+            }
+
+            #video-holder {
+              box-sizing: border-box !important;
+              height: 100% !important;
+              padding: 36px 4px 6px !important;
+            }
+
+            #video-holder video {
+              width: 100% !important;
+              height: 100% !important;
+              background-color: #000 !important;
+              border-radius: 8px !important;
+              box-shadow: 0 0 20px rgba(31,111,235,0.35) !important;
+            }
+
+            /* WebKit native controls */
+            #video-holder video::-webkit-media-controls {
+              background: linear-gradient(180deg, rgba(18,21,24,0.85), rgba(12,15,18,0.85)) !important;
+              backdrop-filter: blur(6px) !important;
+              border-top: 1px solid #1a1f27 !important;
+            }
+
+            #video-holder video::-webkit-media-controls-play-button,
+            #video-holder video::-webkit-media-controls-pause-button,
+            #video-holder video::-webkit-media-controls-mute-button,
+            #video-holder video::-webkit-media-controls-fullscreen-button {
+              color: #e6edf3 !important;
+              filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)) !important;
+            }
+
+            #video-holder video::-webkit-media-controls-play-button:hover,
+            #video-holder video::-webkit-media-controls-pause-button:hover {
+              color: #1f6feb !important;
+            }
+
+            @media (prefers-color-scheme: light) {
+              :host {
+                --modal-background: #fafafa !important;
+                --modal-foreground-rgb: 0,0,0 !important;
+                --modal-foreground-filter: none !important;
+              }
+            }
+            @media (prefers-color-scheme: dark) {
+              :host {
+                --modal-background: #0b0d10 !important;
+                --modal-foreground-rgb: 221,221,221 !important;
+                --modal-foreground-filter: invert(90%) !important;
+              }
+            }
+          `;
+
+          // Inject into shadowRoot
+          shadow.appendChild(style);
+
+          // Example: hide play button after pause
+          const videoModal = shadow.querySelector("#video-modal");
+          const video = shadow.querySelector("#video-holder video");
+          if (video) {
+            video.addEventListener("pause", () => {
+              const playBtn = shadow.getElementById("play_button");
+              if (playBtn) playBtn.style.display = "none";
+            });
+          }
+        }
+      }, 200);
+    });
+</script>
 </body>
 </html>
