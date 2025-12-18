@@ -197,6 +197,8 @@ e<!DOCTYPE html>
     </div>
 
     <script>
+        //Disable context-menu (right-click) on entire website first:
+        document.addEventListener('contextmenu', function (e) { e.preventDefault(); return false; }, { capture: true });
         // Dynamically load the Ruffle script
         function loadRuffle() {
             let script = document.createElement("script");
