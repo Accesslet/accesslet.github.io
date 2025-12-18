@@ -383,5 +383,37 @@
 }
 
     </style>
+    <script>
+        (async function() {
+  await customElements.whenDefined('ruffle-player');
+  const player = document.querySelector('#container > ruffle-player');
+  if (!player || !player.shadowRoot) return;
+
+  const shadow = player.shadowRoot;
+
+  // Inject CSS once
+  const style = document.createElement('style');
+  style.textContent = `/* paste the CSS above here */`;
+  shadow.appendChild(style);
+
+  // Disable right-click context menu on video
+  const video = shadow.querySelector('#video-holder video');
+  if (video) {
+    video.addEventListener('contextmenu', e => e.preventDefault());
+  }
+/*
+  // Observe modal re-renders and reapply CSS if needed
+  const observer = new MutationObserver(() => {
+    if (!shadow.querySelector('style[data-batman]')) {
+      const s = document.createElement('style');
+      s.setAttribute('data-batman','1');
+      s.textContent = style.textContent;
+      shadow.appendChild(s);
+    }
+  });
+  observer.observe(shadow, { childList: true, subtree: true });
+})();
+*/
+    </script>
 </body>
 </html>
