@@ -304,172 +304,84 @@
         // Load Ruffle dynamically
         window.addEventListener("DOMContentLoaded", loadRuffle);
     </script>
-     <script>
-    // Batman CSS (native-like)
-    const BATMAN_CSS = `
-      /* Modal area */
-      #video-modal .modal-area {
-        box-sizing: border-box !important;
-        height: 95% !important;
-        width: 95% !important;
-        background: radial-gradient(1200px 600px at 80% 20%, #0e1216, #0a0c0f 70%, #07080a 100%) !important;
-        border: 1px solid #1a1f27 !important;
-        border-radius: 12px !important;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.6),
-                    inset 0 0 0 1px rgba(255,255,255,0.03) !important;
-      }
+    <style>
+        /* Base video element */
+#video-holder video {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #000 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 0 20px rgba(31,111,235,0.35) !important;
+}
 
-      /* Holder */
-      #video-holder {
-        box-sizing: border-box !important;
-        height: 100% !important;
-        padding: 36px 4px 6px !important;
-      }
+/* Disable right-click context menu */
+#video-holder video {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  user-select: none !important;
+  pointer-events: auto !important;
+}
 
-      /* Video box */
-      #video-holder video {
-        width: 100% !important;
-        height: 100% !important;
-        background-color: #000 !important;
-        border-radius: 8px !important;
-        box-shadow: 0 0 20px rgba(31,111,235,0.35) !important;
-      }
+/* Chrome / Safari / Edge (WebKit/Blink) */
+#video-holder video::-webkit-media-controls {
+  background: linear-gradient(180deg, rgba(18,21,24,0.9), rgba(12,15,18,0.9)) !important;
+  backdrop-filter: blur(6px) !important;
+  border-top: 1px solid #1a1f27 !important;
+}
 
-      /* WebKit native controls (Chrome/Safari/Edge) */
-      #video-holder video::-webkit-media-controls {
-        background: linear-gradient(180deg, rgba(18,21,24,0.85), rgba(12,15,18,0.85)) !important;
-        backdrop-filter: blur(6px) !important;
-        border-top: 1px solid #1a1f27 !important;
-      }
-      #video-holder video::-webkit-media-controls-play-button,
-      #video-holder video::-webkit-media-controls-pause-button,
-      #video-holder video::-webkit-media-controls-mute-button,
-      #video-holder video::-webkit-media-controls-fullscreen-button {
-        color: #e6edf3 !important;
-        filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)) !important;
-      }
-      #video-holder video::-webkit-media-controls-play-button:hover,
-      #video-holder video::-webkit-media-controls-pause-button:hover {
-        color: #1f6feb !important;
-      }
+#video-holder video::-webkit-media-controls-play-button,
+#video-holder video::-webkit-media-controls-pause-button,
+#video-holder video::-webkit-media-controls-mute-button,
+#video-holder video::-webkit-media-controls-fullscreen-button {
+  color: #e6edf3 !important;
+  background: linear-gradient(180deg, #1a1f27, #13171c) !important;
+  border-radius: 8px !important;
+  border: 1px solid #20242c !important;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5),
+              inset 0 0 0 1px rgba(255,255,255,0.03) !important;
+  transition: transform 120ms ease, box-shadow 120ms ease !important;
+}
 
-      /* Respect system theme variables in ShadowRoot */
-      @media (prefers-color-scheme: light) {
-        :host {
-          --modal-background: #fafafa !important;
-          --modal-foreground-rgb: 0,0,0 !important;
-          --modal-foreground-filter: none !important;
-        }
-      }
-      @media (prefers-color-scheme: dark) {
-        :host {
-          --modal-background: #0b0d10 !important;
-          --modal-foreground-rgb: 221,221,221 !important;
-          --modal-foreground-filter: invert(90%) !important;
-        }
-      }
-    `;
+#video-holder video::-webkit-media-controls-play-button:hover,
+#video-holder video::-webkit-media-controls-pause-button:hover,
+#video-holder video::-webkit-media-controls-mute-button:hover,
+#video-holder video::-webkit-media-controls-fullscreen-button:hover {
+  color: #1f6feb !important;
+  transform: translateY(-1px) scale(1.05) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.55),
+              0 0 14px rgba(31,111,235,0.28) !important;
+}
 
-    // Create a CSSStyleSheet when supported, else return null
-    function createSheet(cssText) {
-      if ('adoptedStyleSheets' in Document.prototype && 'replaceSync' in CSSStyleSheet.prototype) {
-        const sheet = new CSSStyleSheet();
-        sheet.replaceSync(cssText);
-        return sheet;
-      }
-      return null;
-    }
+/* Timeline */
+#video-holder video::-webkit-media-controls-timeline {
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, #1a1f27, #252b35) !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.65) !important;
+}
 
-    // Inject CSS into a shadow root (adoptedStyleSheets preferred, <style> fallback)
-    function injectCSS(shadowRoot, cssText, sheet) {
-      try {
-        if (sheet && Array.isArray(shadowRoot.adoptedStyleSheets)) {
-          const already = shadowRoot.adoptedStyleSheets.includes(sheet);
-          if (!already) shadowRoot.adoptedStyleSheets = [...shadowRoot.adoptedStyleSheets, sheet];
-          return;
-        }
-      } catch (e) { /* fall through to <style> */ }
+/* Volume slider */
+#video-holder video::-webkit-media-controls-volume-slider {
+  background: linear-gradient(90deg, #1a1f27, #252b35) !important;
+  border-radius: 999px !important;
+}
 
-      // Fallback: ensure one <style data-batman> exists
-      let tag = shadowRoot.querySelector('style[data-batman]');
-      if (!tag) {
-        tag = document.createElement('style');
-        tag.setAttribute('data-batman', '1');
-        tag.textContent = cssText;
-        shadowRoot.appendChild(tag);
-      } else {
-        tag.textContent = cssText;
-      }
-    }
+/* Firefox fallback (only video box) */
+@-moz-document url-prefix() {
+  #video-holder video {
+    background: #0b0d10 !important;
+    border: 1px solid #1a1f27 !important;
+    box-shadow: 0 0 20px rgba(0,0,0,0.7) !important;
+  }
+}
 
-    // Observe for #video-modal creation and re-inject styles if Ruffle re-renders
-    function observeModal(shadowRoot, cssText, sheet) {
-      const apply = () => injectCSS(shadowRoot, cssText, sheet);
-      apply();
+/* Legacy Edge/IE */
+#video-holder video::-ms-media-controls {
+  background: #121518 !important;
+  color: #e6edf3 !important;
+}
 
-      const mo = new MutationObserver((mutations) => {
-        for (const m of mutations) {
-          for (const node of m.addedNodes) {
-            if (!(node instanceof Element)) continue;
-            // If modal or its subtree appears, reapply styles
-            if (node.id === 'video-modal' || node.querySelector?.('#video-modal')) {
-              apply();
-            }
-          }
-        }
-      });
-      mo.observe(shadowRoot, { childList: true, subtree: true });
-      return mo;
-    }
-
-    // Find all ruffle-player under #container; handle closed shadow roots
-    async function initRuffleStyling() {
-      await customElements.whenDefined('ruffle-player');
-
-      const players = Array.from(document.querySelectorAll('#container ruffle-player, #player'));
-      if (players.length === 0) {
-        console.warn('No <ruffle-player> found under #container or with id #player.');
-        return;
-      }
-
-      const sheet = createSheet(BATMAN_CSS);
-
-      for (const player of players) {
-        const shadow = player.shadowRoot;
-        if (!shadow) {
-          console.warn('ruffle-player has a closed shadow root; direct styling is not possible from the host page.');
-          continue;
-        }
-
-        // Immediate injection and persistent observation
-        observeModal(shadow, BATMAN_CSS, sheet);
-
-        // Optional: if you need to manipulate buttons inside the ShadowRoot
-        // after pause, guard against missing elements.
-        shadow.addEventListener('pause', (ev) => {
-          const playBtn = shadow.getElementById('play_button');
-          if (playBtn) playBtn.style.display = 'none';
-        }, { capture: true });
-      }
-    }
-
-    // Start once DOM is ready; also handle late insertion of ruffle-player
-    function boot() {
-      initRuffleStyling();
-
-      // If ruffle-player is inserted later, observe #container and init again
-      const host = document.getElementById('container');
-      if (host) {
-        const mo = new MutationObserver(() => initRuffleStyling());
-        mo.observe(host, { childList: true, subtree: true });
-      }
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', boot);
-    } else {
-      boot();
-    }
-  </script>
+    </style>
 </body>
 </html>
