@@ -7,6 +7,86 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /*Video CSS ALL START*/
+/* Base video element styling (all browsers) */
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: #0b0d10;
+  border: 1px solid #1a1f27;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6),
+              inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+/* Chrome / Safari / Edge (WebKit/Blink) */
+video::-webkit-media-controls {
+  background: linear-gradient(180deg, rgba(18,21,24,0.85), rgba(12,15,18,0.85));
+  backdrop-filter: blur(6px);
+  border-top: 1px solid #1a1f27;
+}
+
+video::-webkit-media-controls-enclosure {
+  border-radius: 0 0 12px 12px;
+}
+
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-pause-button,
+video::-webkit-media-controls-mute-button,
+video::-webkit-media-controls-fullscreen-button {
+  color: #e6edf3;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+}
+
+video::-webkit-media-controls-play-button:hover,
+video::-webkit-media-controls-pause-button:hover,
+video::-webkit-media-controls-mute-button:hover,
+video::-webkit-media-controls-fullscreen-button:hover {
+  color: #1f6feb; /* accent blue */
+}
+
+video::-webkit-media-controls-current-time-display,
+video::-webkit-media-controls-time-remaining-display {
+  color: #9aa7b2;
+}
+
+video::-webkit-media-controls-timeline {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #1a1f27, #252b35);
+}
+
+video::-webkit-media-controls-volume-slider {
+  background: linear-gradient(90deg, #1a1f27, #252b35);
+  border-radius: 999px;
+}
+
+/* Firefox (only the video element box itself is stylable) */
+@-moz-document url-prefix() {
+  video {
+    background: #0b0d10;
+    border: 1px solid #1a1f27;
+    box-shadow: 0 0 20px rgba(0,0,0,0.7);
+  }
+}
+
+/* Legacy IE/EdgeHTML (rare, but for completeness) */
+video::-ms-media-controls {
+  background: #121518;
+  color: #e6edf3;
+}
+video::-ms-media-controls-play-button,
+video::-ms-media-controls-pause-button,
+video::-ms-media-controls-volume-slider {
+  background: #1a1f27;
+  color: #e6edf3;
+}
+
+
+
+        /* Video CSS ALL END */
+        
         html, body {
             margin: 0;
             padding: 0;
