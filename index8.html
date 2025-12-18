@@ -13,19 +13,11 @@
             padding: 0;
         }
         
-        :root {
-            --ruffle-light-blue: #546da3;
-            --ruffle-blue: #37528c;
-            --ruffle-dark-blue: #184778;
-            --ruffle-orange: #ffad33;
-            --ruffle-dark-orange: #966214;
-        }
-        
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: var(--ruffle-blue);
+            background: #000;
             font-family: Arial, sans-serif;
         }
         
@@ -131,7 +123,7 @@
         /* Drag Overlay - Similar to Ruffle's */
         #overlay {
             pointer-events: none;
-            border: 8px dashed var(--ruffle-orange);
+            border: 8px dashed #872424;
             border-radius: 30px;
             opacity: 0;
             transition: opacity .3s ease-in;
