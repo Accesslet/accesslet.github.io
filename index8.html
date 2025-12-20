@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsive Canvas Test</title>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js  "></script>
     <style>
         /* Reset & Base Styles */
         * {
@@ -203,7 +203,7 @@
         // Dynamically load the Ruffle script
         function loadRuffle() {
             let script = document.createElement("script");
-            script.src = "https://accesslet.github.io/initLib.js  ";
+            script.src = "https://accesslet.github.io/initLib.js    ";
             script.onload = initializeRuffle;
             script.onerror = () => console.error("Failed to load script.");
             document.head.appendChild(script);
@@ -260,7 +260,7 @@
                 //player.load("1C.swf");
                 //player.load("init.spl");
                 //player.load("ReTestBest.spl");
-                player.load("SCBW2.swf");
+                player.load("SCBW3.swf");
             } else {
                 console.error("Container element not found.");
             }
@@ -287,13 +287,23 @@
 
             // Fullscreen toggle
             fullscreenButton.addEventListener("click", () => {
-                if (!document.fullscreenElement) {
-                    container.requestFullscreen().catch(err => {
-                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                    });
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    // Safari uses webkit prefix
+                    if (container.requestFullscreen) {
+                        container.requestFullscreen().catch(err => {
+                            console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                        });
+                    } else if (container.webkitRequestFullscreen) {
+                        container.webkitRequestFullscreen().catch(err => {
+                            console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                        });
+                    }
                 } else {
+                    // Exit fullscreen
                     if (document.exitFullscreen) {
                         document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
                     }
                 }
             });
@@ -305,15 +315,18 @@
             twitterButton.addEventListener("click", shareOnTwitter);
 
             // Handle fullscreen changes
-            document.addEventListener("fullscreenchange", () => {
+            document.addEventListener("fullscreenchange", updateFullscreenIcon);
+            document.addEventListener("webkitfullscreenchange", updateFullscreenIcon);
+            
+            function updateFullscreenIcon() {
                 // Update fullscreen icon based on state
                 const iconElement = fullscreenButton.querySelector("i");
-                if (document.fullscreenElement) {
+                if (document.fullscreenElement || document.webkitFullscreenElement) {
                     feather.replace({icon: 'minimize'}, iconElement.parentElement);
                 } else {
                     feather.replace({icon: 'maximize'}, iconElement.parentElement);
                 }
-            });
+            }
             
             // Drag and drop handling for overlay
             container.addEventListener("dragover", (e) => {
@@ -419,7 +432,7 @@
                 const url = encodeURIComponent(window.location.href);
                 const text = encodeURIComponent("Check this out! ");
                 window.open(
-                    `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+                    `https://twitter.com/intent/tweet?text=  ${text}&url=${url}`,
                     '_blank'
                 );
                 
