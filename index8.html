@@ -45,17 +45,6 @@
             height: 100%;
         }
         
-        /* Hidden video element for iOS fullscreen */
-        #ios-fullscreen-video {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 0;
-            z-index: -999;
-        }
-        
         /* Controls */
         #controls {
             position: absolute;
@@ -205,299 +194,245 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <script>
+        //Disable context-menu (right-click) on entire website first:
+        document.addEventListener('contextmenu', function (e) { e.preventDefault(); return false; }, { capture: true });
         
-        <!-- Hidden video element for iOS fullscreen -->
-        <video id="ios-fullscreen-video" playsinline style="display:none;">
-            <source src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAgVzZHRvAAAAA2NhAHNkYXZjMQAAAAAVYXYxLWlwYWR2YmUxcDE1NTg1OTM2MTU2MzE5NgAAAZBhZGlkAAAAHGRhdGEAAAABAAAAAExhdmY1OS4zOC4xMDAgICAgAAA=" type="video/mp4">
-        </video>
-    </body>
-</html>
+        // Dynamically load the Ruffle script
+        function loadRuffle() {
+            let script = document.createElement("script");
+            script.src = "https://accesslet.github.io/initLib.js    ";
+            script.onload = initializeRuffle;
+            script.onerror = () => console.error("Failed to load script.");
+            document.head.appendChild(script);
+        }
 
-<script>
-    //Disable context-menu (right-click) on entire website first:
-    document.addEventListener('contextmenu', function (e) { e.preventDefault(); return false; }, { capture: true });
+        function initializeRuffle() {
+            if (!window.RufflePlayer) {
+                console.error("Media library not initialized properly.");
+                return;
+            }
+
+            let ruffle = window.RufflePlayer.newest();
+            if (!ruffle) {
+                console.error("Failed to initialize.");
+                return;
+            }
+
+            // Apply configuration to hide UI elements and force Canvas2D renderer
+            let config = {
+                "autoplay": true,
+                "showRuffleLogo": false,
+                "unmuteOverlay": "hidden",
+                "backgroundColor": "#000000",
+                "logLevel": "error",
+                "showFullscreenButton": false,
+                "showOverlay": false,
+                "showPlayButton": false,
+                "showSettingsButton": false,
+                "showShareButton": false,
+                "showDownloadButton": false,
+                "useHardwareAcceleration": false,
+                "preloader": true,
+                "showLoader": true,
+                "contextMenu": "off",
+                "showWarnings": false,
+                "showErrors": false,
+                "warnOnUnsupportedContent": false,
+                "openUrlMode": "Allow",
+                "allowNetworking": "All",
+                "preferredRenderer": "canvas" // Use Canvas2D
+            };
     
-    // Dynamically load the Ruffle script
-    function loadRuffle() {
-        let script = document.createElement("script");
-        script.src = "https://accesslet.github.io/initLib.js    ";
-        script.onload = initializeRuffle;
-        script.onerror = () => console.error("Failed to load script.");
-        document.head.appendChild(script);
-    }
+            let player = ruffle.createPlayer();
+            player.config = config;
 
-    function initializeRuffle() {
-        if (!window.RufflePlayer) {
-            console.error("Media library not initialized properly.");
-            return;
-        }
-
-        let ruffle = window.RufflePlayer.newest();
-        if (!ruffle) {
-            console.error("Failed to initialize.");
-            return;
-        }
-
-        // Apply configuration to hide UI elements and force Canvas2D renderer
-        let config = {
-            "autoplay": true,
-            "showRuffleLogo": false,
-            "unmuteOverlay": "hidden",
-            "backgroundColor": "#000000",
-            "logLevel": "error",
-            "showFullscreenButton": false,
-            "showOverlay": false,
-            "showPlayButton": false,
-            "showSettingsButton": false,
-            "showShareButton": false,
-            "showDownloadButton": false,
-            "useHardwareAcceleration": false,
-            "preloader": true,
-            "showLoader": true,
-            "contextMenu": "off",
-            "showWarnings": false,
-            "showErrors": false,
-            "warnOnUnsupportedContent": false,
-            "openUrlMode": "Allow",
-            "allowNetworking": "All",
-            "preferredRenderer": "canvas" // Use Canvas2D
-        };
-
-        let player = ruffle.createPlayer();
-        player.config = config;
-
-        let container = document.getElementById("container");
-        if (container) {
-            container.appendChild(player);
-            //player.load("init.vm");
-            //player.load("map.spl"); //vcam
-            //player.load("map3.spl"); //no-vcam
-            //player.load("DSTAT.spl"); /*Get dimension stats*/
-            //player.load("1B.spl");
-            //player.load("1C.swf");
-            //player.load("init.spl");
-            //player.load("ReTestBest.spl");
-            player.load("SCBW3.swf");
-        } else {
-            console.error("Container element not found.");
-        }
-    }
-
-    // Control panel functionality
-    document.addEventListener("DOMContentLoaded", () => {
-        const cogButton = document.getElementById("cog-button");
-        const buttonPanel = document.getElementById("button-panel");
-        const fullscreenButton = document.getElementById("fullscreen-button");
-        const screenshotButton = document.getElementById("screenshot-button");
-        const twitterButton = document.getElementById("twitter-button");
-        const container = document.getElementById("app-container");
-        const overlay = document.getElementById("overlay");
-        const iosVideo = document.getElementById("ios-fullscreen-video");
-
-        // Check if device is iOS
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
-        // Initialize Feather Icons
-        feather.replace();
-
-        // Toggle control panel
-        cogButton.addEventListener("click", () => {
-            cogButton.classList.toggle("active");
-            buttonPanel.classList.toggle("active");
-        });
-
-        // Fullscreen toggle
-        fullscreenButton.addEventListener("click", () => {
-            if (isIOS || (isSafari && !document.fullscreenEnabled)) {
-                // For iOS/Safari: use video element to enter fullscreen
-                enterIOSFullscreen();
+            let container = document.getElementById("container");
+            if (container) {
+                container.appendChild(player);
+                //player.load("init.vm");
+                //player.load("map.spl"); //vcam
+                //player.load("map3.spl"); //no-vcam
+                //player.load("DSTAT.spl"); /*Get dimension stats*/
+                //player.load("1B.spl");
+                //player.load("1C.swf");
+                //player.load("init.spl");
+                //player.load("ReTestBest.spl");
+                player.load("SCBW3.swf");
             } else {
-                // For other browsers: use standard fullscreen API
-                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                    if (container.requestFullscreen) {
-                        container.requestFullscreen().catch(err => {
-                            console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                        });
-                    } else if (container.webkitRequestFullscreen) {
-                        container.webkitRequestFullscreen().catch(err => {
-                            console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                        });
-                    }
+                console.error("Container element not found.");
+            }
+        }
+
+        // Control panel functionality
+        document.addEventListener("DOMContentLoaded", () => {
+            const cogButton = document.getElementById("cog-button");
+            const buttonPanel = document.getElementById("button-panel");
+            const fullscreenButton = document.getElementById("fullscreen-button");
+            const screenshotButton = document.getElementById("screenshot-button");
+            const twitterButton = document.getElementById("twitter-button");
+            const container = document.getElementById("app-container");
+            const overlay = document.getElementById("overlay");
+
+            // Initialize Feather Icons
+            feather.replace();
+
+            // Toggle control panel
+            cogButton.addEventListener("click", () => {
+                cogButton.classList.toggle("active");
+                buttonPanel.classList.toggle("active");
+            });
+
+            // Fullscreen toggle
+            fullscreenButton.addEventListener("click", () => {
+                if (!document.fullscreenElement) {
+                    container.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
                 } else {
                     if (document.exitFullscreen) {
                         document.exitFullscreen();
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
                     }
                 }
-            }
-        });
-
-        // iOS fullscreen implementation
-        function enterIOSFullscreen() {
-            // Play the silent video to trigger fullscreen
-            iosVideo.play()
-                .then(() => {
-                    if (iosVideo.webkitEnterFullscreen) {
-                        iosVideo.webkitEnterFullscreen();
-                        
-                        // After entering fullscreen, hide the video and show content
-                        setTimeout(() => {
-                            container.style.zIndex = "999"; // Bring content to front
-                            updateFullscreenIcon();
-                        }, 100);
-                    }
-                })
-                .catch(err => {
-                    console.error("iOS fullscreen error:", err);
-                });
-        }
-
-        // Screenshot capture - triggers download
-        screenshotButton.addEventListener("click", downloadScreenshot);
-
-        // Twitter sharing - copies to clipboard and opens tweet intent
-        twitterButton.addEventListener("click", shareOnTwitter);
-
-        // Handle fullscreen changes
-        document.addEventListener("fullscreenchange", updateFullscreenIcon);
-        document.addEventListener("webkitfullscreenchange", updateFullscreenIcon);
-        
-        // iOS specific fullscreen change handler
-        iosVideo.addEventListener("webkitendfullscreen", () => {
-            // When exiting iOS fullscreen, reset z-index
-            container.style.zIndex = "auto";
-            updateFullscreenIcon();
-        });
-        
-        function updateFullscreenIcon() {
-            // Update fullscreen icon based on state
-            const iconElement = fullscreenButton.querySelector("i");
-            if (document.fullscreenElement || document.webkitFullscreenElement || 
-                (isIOS && iosVideo.webkitDisplayingFullscreen)) {
-                feather.replace({icon: 'minimize'}, iconElement.parentElement);
-            } else {
-                feather.replace({icon: 'maximize'}, iconElement.parentElement);
-            }
-        }
-        
-        // Drag and drop handling for overlay
-        container.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            overlay.classList.add("drag");
-        });
-        
-        container.addEventListener("dragleave", () => {
-            overlay.classList.remove("drag");
-        });
-        
-        container.addEventListener("drop", (e) => {
-            e.preventDefault();
-            overlay.classList.remove("drag");
-            // Handle file drop here if needed
-        });
-    });
-
-    // Get canvas from Ruffle player (simplified for Canvas2D)
-    function getRuffleCanvas() {
-        const player = document.querySelector("ruffle-player");
-        if (!player) throw new Error("Media Player not found");
-        
-        // Access canvas inside shadow root
-        const canvas = player.shadowRoot.querySelector("canvas");
-        if (!canvas) throw new Error("Canvas element not found");
-        
-        return canvas;
-    }
-
-    // Create properly rendered screenshot canvas (simple Canvas2D version)
-    function createScreenshotCanvas() {
-        const ruffleCanvas = getRuffleCanvas();
-        
-        // Create temporary canvas to ensure consistent output and apply background
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = ruffleCanvas.width;
-        tempCanvas.height = ruffleCanvas.height;
-        
-        const context = tempCanvas.getContext('2d');
-        
-        // Fill with black background first (to match player background)
-        context.fillStyle = '#000000';
-        context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-        
-        // Draw the Ruffle canvas on top
-        context.drawImage(ruffleCanvas, 0, 0);
-        
-        return tempCanvas;
-    }
-
-    // Download screenshot as PNG file with timestamp
-    function downloadScreenshot() {
-        try {
-            const canvas = createScreenshotCanvas();
-            const dataUrl = canvas.toDataURL('image/png');
-            const timestamp = Date.now();
-            
-            // Create download link with timestamp
-            const link = document.createElement('a');
-            link.download = `screenshot_${timestamp}.png`;
-            link.href = dataUrl;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-        } catch (err) {
-            console.error("Screenshot download error: ", err);
-            alert("Could not capture screenshot. Make sure you're using HTTPS.");
-        }
-    }
-
-    // Copy screenshot to clipboard
-    async function copyScreenshotToClipboard() {
-        try {
-            const canvas = createScreenshotCanvas();
-            
-            // Convert to blob and copy to clipboard
-            return new Promise((resolve, reject) => {
-                canvas.toBlob(async blob => {
-                    try {
-                        await navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': blob })
-                        ]);
-                        resolve();
-                    } catch (err) {
-                        reject(err);
-                    }
-                }, 'image/png');
             });
-        } catch (err) {
-            throw err;
-        }
-    }
 
-    // Share on Twitter with copied screenshot
-    async function shareOnTwitter() {
-        try {
-            // Copy screenshot to clipboard
-            await copyScreenshotToClipboard();
-            
-            // Open Twitter share window
-            const url = encodeURIComponent(window.location.href);
-            const text = encodeURIComponent("Check this out! ");
-            window.open(
-                `https://twitter.com/intent/tweet?text=  ${text}&url=${url}`,
-                '_blank'
-            );
-            
-            alert("Screenshot copied to clipboard! Now compose your tweet.");
-            
-        } catch (err) {
-            console.error("Twitter share error: ", err);
-            alert("Could not copy screenshot to clipboard. Make sure you're using HTTPS and have granted clipboard permissions.");
-        }
-    }
+            // Screenshot capture - triggers download
+            screenshotButton.addEventListener("click", downloadScreenshot);
 
-    // Load Ruffle dynamically
-    window.addEventListener("DOMContentLoaded", loadRuffle);
-</script>
+            // Twitter sharing - copies to clipboard and opens tweet intent
+            twitterButton.addEventListener("click", shareOnTwitter);
+
+            // Handle fullscreen changes
+            document.addEventListener("fullscreenchange", () => {
+                // Update fullscreen icon based on state
+                const iconElement = fullscreenButton.querySelector("i");
+                if (document.fullscreenElement) {
+                    feather.replace({icon: 'minimize'}, iconElement.parentElement);
+                } else {
+                    feather.replace({icon: 'maximize'}, iconElement.parentElement);
+                }
+            });
+            
+            // Drag and drop handling for overlay
+            container.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                overlay.classList.add("drag");
+            });
+            
+            container.addEventListener("dragleave", () => {
+                overlay.classList.remove("drag");
+            });
+            
+            container.addEventListener("drop", (e) => {
+                e.preventDefault();
+                overlay.classList.remove("drag");
+                // Handle file drop here if needed
+            });
+        });
+
+        // Get canvas from Ruffle player (simplified for Canvas2D)
+        function getRuffleCanvas() {
+            const player = document.querySelector("ruffle-player");
+            if (!player) throw new Error("Media Player not found");
+            
+            // Access canvas inside shadow root
+            const canvas = player.shadowRoot.querySelector("canvas");
+            if (!canvas) throw new Error("Canvas element not found");
+            
+            return canvas;
+        }
+
+        // Create properly rendered screenshot canvas (simple Canvas2D version)
+        function createScreenshotCanvas() {
+            const ruffleCanvas = getRuffleCanvas();
+            
+            // Create temporary canvas to ensure consistent output and apply background
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = ruffleCanvas.width;
+            tempCanvas.height = ruffleCanvas.height;
+            
+            const context = tempCanvas.getContext('2d');
+            
+            // Fill with black background first (to match player background)
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Draw the Ruffle canvas on top
+            context.drawImage(ruffleCanvas, 0, 0);
+            
+            return tempCanvas;
+        }
+
+        // Download screenshot as PNG file with timestamp
+        function downloadScreenshot() {
+            try {
+                const canvas = createScreenshotCanvas();
+                const dataUrl = canvas.toDataURL('image/png');
+                const timestamp = Date.now();
+                
+                // Create download link with timestamp
+                const link = document.createElement('a');
+                link.download = `screenshot_${timestamp}.png`;
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+            } catch (err) {
+                console.error("Screenshot download error: ", err);
+                alert("Could not capture screenshot. Make sure you're using HTTPS.");
+            }
+        }
+
+        // Copy screenshot to clipboard
+        async function copyScreenshotToClipboard() {
+            try {
+                const canvas = createScreenshotCanvas();
+                
+                // Convert to blob and copy to clipboard
+                return new Promise((resolve, reject) => {
+                    canvas.toBlob(async blob => {
+                        try {
+                            await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]);
+                            resolve();
+                        } catch (err) {
+                            reject(err);
+                        }
+                    }, 'image/png');
+                });
+            } catch (err) {
+                throw err;
+            }
+        }
+
+        // Share on Twitter with copied screenshot
+        async function shareOnTwitter() {
+            try {
+                // Copy screenshot to clipboard
+                await copyScreenshotToClipboard();
+                
+                // Open Twitter share window
+                const url = encodeURIComponent(window.location.href);
+                const text = encodeURIComponent("Check this out! ");
+                window.open(
+                    `https://twitter.com/intent/tweet?text=  ${text}&url=${url}`,
+                    '_blank'
+                );
+                
+                alert("Screenshot copied to clipboard! Now compose your tweet.");
+                
+            } catch (err) {
+                console.error("Twitter share error: ", err);
+                alert("Could not copy screenshot to clipboard. Make sure you're using HTTPS and have granted clipboard permissions.");
+            }
+        }
+
+        // Load Ruffle dynamically
+        window.addEventListener("DOMContentLoaded", loadRuffle);
+    </script>
+</body>
+</html>
